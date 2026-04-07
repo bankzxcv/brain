@@ -94,7 +94,7 @@ type Temperature = float64  // alias, IS interchangeable
 > fmt.Println(len([]rune(s))) // actual character count
 > ```
 
-**Practice:** [[Golang Practice/01 - Variables and Types]]
+**Practice:** [[Golang/Golang Practice/01 - Variables and Types]]
 
 ---
 
@@ -176,7 +176,7 @@ func init() {
 > }
 > ```
 
-**Practice:** [[Golang Practice/02 - Functions]]
+**Practice:** [[Golang/Golang Practice/02 - Functions]]
 
 ---
 
@@ -222,7 +222,7 @@ double(&x)  // x is now 10
 > [!warning] No Pointer Arithmetic in Go
 > Unlike C/C++, Go does NOT allow pointer arithmetic. You cannot do `p++` or `p + 4`. This is by design for safety. Use `unsafe.Pointer` only as a last resort.
 
-**Practice:** [[Golang Practice/03 - Pointers]]
+**Practice:** [[Golang/Golang Practice/03 - Pointers]]
 
 ---
 
@@ -299,7 +299,7 @@ func NewUser(name, email string) *User {
 > - Embedding (`User`) promotes all fields and methods - use for "is-a" or "has-a" with delegation
 > - Named field (`user User`) requires explicit access via `e.user.Name` - use when you want encapsulation
 
-**Practice:** [[Golang Practice/04 - Structs and Methods]]
+**Practice:** [[Golang/Golang Practice/04 - Structs and Methods]]
 
 ---
 
@@ -386,7 +386,7 @@ func describe(i interface{}) string {
 > - **Define interfaces where they're used**, not where they're implemented
 > - **Don't create interfaces for the sake of it** - if there's only one implementation, you probably don't need it yet
 
-**Practice:** [[Golang Practice/05 - Interfaces]]
+**Practice:** [[Golang/Golang Practice/05 - Interfaces]]
 
 ---
 
@@ -491,7 +491,7 @@ maps.Equal(m1, m2)
 > [!warning] Map Gotcha: Concurrent Access
 > Maps are NOT safe for concurrent read/write. Use `sync.Mutex` or `sync.Map`.
 
-**Practice:** [[Golang Practice/06 - Slices and Maps]]
+**Practice:** [[Golang/Golang Practice/06 - Slices and Maps]]
 
 ---
 
@@ -575,7 +575,7 @@ func mustParseURL(raw string) *url.URL {
 > - Never ignore errors. At minimum: `_ = f.Close()`
 > - Check with `errors.Is`/`errors.As`, never compare error strings
 
-**Practice:** [[Golang Practice/07 - Error Handling]]
+**Practice:** [[Golang/Golang Practice/07 - Error Handling]]
 
 ---
 
@@ -657,7 +657,7 @@ func safeOperation() (err error) {
 > }
 > ```
 
-**Practice:** [[Golang Practice/08 - Defer Panic Recover]]
+**Practice:** [[Golang/Golang Practice/08 - Defer Panic Recover]]
 
 ---
 
@@ -728,7 +728,7 @@ go worker(done)
 > | receive | blocks forever | returns zero | blocks/succeeds |
 > | close | **panic** | **panic** | succeeds |
 
-**Practice:** [[Golang Practice/09 - Goroutines and Channels]]
+**Practice:** [[Golang/Golang Practice/09 - Goroutines and Channels]]
 
 ---
 
@@ -884,7 +884,7 @@ func GetDB() *DB {
 }
 ```
 
-**Practice:** [[Golang Practice/10 - Concurrency Patterns]]
+**Practice:** [[Golang/Golang Practice/10 - Concurrency Patterns]]
 
 ---
 
@@ -976,7 +976,7 @@ func Zip[A, B any](as []A, bs []B) []struct{ First A; Second B } {
 > - **Don't** use when `interface{}` or a specific type works fine
 > - **Don't** over-abstract: if only 2 types, maybe just write 2 functions
 
-**Practice:** [[Golang Practice/11 - Generics]]
+**Practice:** [[Golang/Golang Practice/11 - Generics]]
 
 ---
 
@@ -1078,7 +1078,7 @@ go test -bench=. ./...         # benchmarks
 go test -benchmem ./...        # benchmark with memory stats
 ```
 
-**Practice:** [[Golang Practice/12 - Testing]]
+**Practice:** [[Golang/Golang Practice/12 - Testing]]
 
 ---
 
@@ -1150,18 +1150,18 @@ godoc -http=:6060           # local doc server
 
 | # | Topic | Link | Problems |
 |---|---|---|---|
-| 01 | Variables & Types | [[Golang Practice/01 - Variables and Types]] | 13 |
-| 02 | Functions | [[Golang Practice/02 - Functions]] | 14 |
-| 03 | Pointers | [[Golang Practice/03 - Pointers]] | 13 |
-| 04 | Structs & Methods | [[Golang Practice/04 - Structs and Methods]] | 14 |
-| 05 | Interfaces | [[Golang Practice/05 - Interfaces]] | 13 |
-| 06 | Slices & Maps | [[Golang Practice/06 - Slices and Maps]] | 15 |
-| 07 | Error Handling | [[Golang Practice/07 - Error Handling]] | 13 |
-| 08 | Defer, Panic, Recover | [[Golang Practice/08 - Defer Panic Recover]] | 12 |
-| 09 | Goroutines & Channels | [[Golang Practice/09 - Goroutines and Channels]] | 15 |
-| 10 | Concurrency Patterns | [[Golang Practice/10 - Concurrency Patterns]] | 14 |
-| 11 | Generics | [[Golang Practice/11 - Generics]] | 13 |
-| 12 | Testing | [[Golang Practice/12 - Testing]] | 13 |
+| 01 | Variables & Types | [[Golang/Golang Practice/01 - Variables and Types]] | 13 |
+| 02 | Functions | [[Golang/Golang Practice/02 - Functions]] | 14 |
+| 03 | Pointers | [[Golang/Golang Practice/03 - Pointers]] | 13 |
+| 04 | Structs & Methods | [[Golang/Golang Practice/04 - Structs and Methods]] | 14 |
+| 05 | Interfaces | [[Golang/Golang Practice/05 - Interfaces]] | 13 |
+| 06 | Slices & Maps | [[Golang/Golang Practice/06 - Slices and Maps]] | 15 |
+| 07 | Error Handling | [[Golang/Golang Practice/07 - Error Handling]] | 13 |
+| 08 | Defer, Panic, Recover | [[Golang/Golang Practice/08 - Defer Panic Recover]] | 12 |
+| 09 | Goroutines & Channels | [[Golang/Golang Practice/09 - Goroutines and Channels]] | 15 |
+| 10 | Concurrency Patterns | [[Golang/Golang Practice/10 - Concurrency Patterns]] | 14 |
+| 11 | Generics | [[Golang/Golang Practice/11 - Generics]] | 13 |
+| 12 | Testing | [[Golang/Golang Practice/12 - Testing]] | 13 |
 
 ---
 
@@ -1171,11 +1171,11 @@ godoc -http=:6060           # local doc server
 
 | # | Project | Link | Concepts Used |
 |---|---|---|---|
-| 01 | CLI Task Manager | [[Golang Workflows/01 - CLI Task Manager]] | structs, slices, JSON, file I/O, error handling, flags |
-| 02 | REST API Server | [[Golang Workflows/02 - REST API Server]] | net/http, JSON, structs, maps, error handling, middleware |
-| 03 | Concurrent File Processor | [[Golang Workflows/03 - Concurrent File Processor]] | goroutines, channels, WaitGroup, worker pool, file I/O |
-| 04 | Web Scraper Pipeline | [[Golang Workflows/04 - Web Scraper Pipeline]] | goroutines, channels, pipeline, context, HTTP client |
-| 05 | TCP Chat Server | [[Golang Workflows/05 - TCP Chat Server]] | net, goroutines, channels, maps, mutex, select |
+| 01 | CLI Task Manager | [[Golang/Golang Workflows/01 - CLI Task Manager]] | structs, slices, JSON, file I/O, error handling, flags |
+| 02 | REST API Server | [[Golang/Golang Workflows/02 - REST API Server]] | net/http, JSON, structs, maps, error handling, middleware |
+| 03 | Concurrent File Processor | [[Golang/Golang Workflows/03 - Concurrent File Processor]] | goroutines, channels, WaitGroup, worker pool, file I/O |
+| 04 | Web Scraper Pipeline | [[Golang/Golang Workflows/04 - Web Scraper Pipeline]] | goroutines, channels, pipeline, context, HTTP client |
+| 05 | TCP Chat Server | [[Golang/Golang Workflows/05 - TCP Chat Server]] | net, goroutines, channels, maps, mutex, select |
 
 ---
 
