@@ -11,21 +11,14 @@
             "id": "dcd12448a8251a94",
             "type": "leaf",
             "state": {
-              "type": "kanban",
+              "type": "markdown",
               "state": {
-                "file": "KanbanWorks.md",
-                "kanbanViewState": {
-                  "kanban-plugin": "board",
-                  "list-collapse": [
-                    false,
-                    false,
-                    false,
-                    false
-                  ]
-                }
+                "file": "Golang Study.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-trello",
-              "title": "KanbanWorks"
+              "icon": "lucide-file",
+              "title": "Golang Study"
             }
           }
         ]
@@ -192,12 +185,13 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "90013c075f7f4b85",
+  "active": "dcd12448a8251a94",
   "lastOpenFiles": [
+    "PI-Mono - AI Coding Agent for Software Development.md",
+    "Example.md",
     "Golang Study.md",
     "CLAUDE.md",
     "KanbanWorks.md",
-    "Example.md",
     "Kanban.md",
     "Untitled.md",
     "README.md"
