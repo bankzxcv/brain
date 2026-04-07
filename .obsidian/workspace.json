@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Kubernetes/Kubernetes Study.md",
+                "file": "AGENTS.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Kubernetes Study"
+              "title": "AGENTS"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Kubernetes/Kubernetes Study.md",
+                "file": "AGENTS.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Kubernetes Study"
+              "title": "Backlinks for AGENTS"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Kubernetes/Kubernetes Study.md",
+                "file": "AGENTS.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Kubernetes Study"
+              "title": "Outline of AGENTS"
             }
           }
         ],
@@ -185,11 +185,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "dcd12448a8251a94",
+  "active": "90013c075f7f4b85",
   "lastOpenFiles": [
+    "CLAUDE.md",
     "AGENTS.md",
-    "Golang/Golang Workflows/01 - CLI Task Manager.md",
     "Kubernetes/Kubernetes Study.md",
+    "Golang/Golang Workflows/01 - CLI Task Manager.md",
     "Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
     "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
     "Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
@@ -213,7 +214,6 @@
     "Golang/Golang Workflows",
     "Golang/Golang Practice/12 - Testing.md",
     "Golang/Golang Practice/11 - Generics.md",
-    "Golang/Golang Practice/10 - Concurrency Patterns.md",
     "Golang/Golang Practice",
     "Golang",
     "Kubernetes/Workflows",
