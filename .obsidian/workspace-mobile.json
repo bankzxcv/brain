@@ -11,14 +11,21 @@
             "id": "62565905564455f2",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "kanban",
               "state": {
-                "file": "Example.md",
-                "mode": "source",
-                "source": false
+                "file": "KanbanWorks.md",
+                "kanbanViewState": {
+                  "kanban-plugin": "board",
+                  "list-collapse": [
+                    false,
+                    false,
+                    false,
+                    false
+                  ]
+                }
               },
-              "icon": "lucide-file",
-              "title": "Example"
+              "icon": "lucide-trello",
+              "title": "KanbanWorks"
             }
           }
         ]
@@ -172,8 +179,10 @@
   },
   "active": "62565905564455f2",
   "lastOpenFiles": [
-    "Kanban.md",
     "Example.md",
+    "KanbanWorks.md",
+    "/KanbanWorks.md",
+    "Kanban.md",
     "README.md",
     "Untitled.md"
   ]
