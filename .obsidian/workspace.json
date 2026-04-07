@@ -187,6 +187,13 @@
   },
   "active": "dcd12448a8251a94",
   "lastOpenFiles": [
+    "Kubernetes/Workflows",
+    "Kubernetes/Helm",
+    "Kubernetes/GitHub Actions",
+    "Kubernetes/Docker",
+    "Kubernetes/Core",
+    "Kubernetes/ArgoCD",
+    "Kubernetes",
     "Golang Practice/11 - Generics.md",
     "Golang Workflows/05 - TCP Chat Server.md",
     "Golang Practice/08 - Defer Panic Recover.md",
