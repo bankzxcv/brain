@@ -187,6 +187,8 @@
   },
   "active": "dcd12448a8251a94",
   "lastOpenFiles": [
+    "Kubernetes/Core/Practice - Workloads and Scheduling.md",
+    "Kubernetes/Core/Practice - Services and Networking.md",
     "Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
     "Kubernetes/Workflows/03 - GitOps Pipeline.md",
     "Golang/Golang Study.md",
@@ -212,8 +214,6 @@
     "Golang/Golang Practice/07 - Error Handling.md",
     "Golang/Golang Practice/06 - Slices and Maps.md",
     "Golang/Golang Practice/05 - Interfaces.md",
-    "Golang/Golang Practice/04 - Structs and Methods.md",
-    "Golang/Golang Practice/03 - Pointers.md",
     "Golang/Golang Practice",
     "Golang",
     "Kubernetes/Workflows",
