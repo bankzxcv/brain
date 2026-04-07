@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "PI-Mono - AI Coding Agent for Software Development.md",
+                "file": "Golang Study.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "PI-Mono - AI Coding Agent for Software Development"
+              "title": "Golang Study"
             }
           }
         ]
@@ -187,10 +187,11 @@
   },
   "active": "dcd12448a8251a94",
   "lastOpenFiles": [
-    "Golang Workflows",
-    "Golang Practice",
+    "Golang Workflows/04 - Web Scraper Pipeline.md",
     "Golang Study.md",
     "PI-Mono - AI Coding Agent for Software Development.md",
+    "Golang Workflows",
+    "Golang Practice",
     "Example.md",
     "CLAUDE.md",
     "KanbanWorks.md",
