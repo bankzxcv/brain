@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Golang Practice/11 - Generics.md",
+                "file": "Golang Workflows/04 - Web Scraper Pipeline.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "11 - Generics"
+              "title": "04 - Web Scraper Pipeline"
             }
           }
         ]
@@ -187,6 +187,8 @@
   },
   "active": "dcd12448a8251a94",
   "lastOpenFiles": [
+    "Golang Practice/11 - Generics.md",
+    "Golang Workflows/05 - TCP Chat Server.md",
     "Golang Practice/08 - Defer Panic Recover.md",
     "Golang Practice/12 - Testing.md",
     "Golang Practice/07 - Error Handling.md",
@@ -195,7 +197,6 @@
     "Golang Practice/10 - Concurrency Patterns.md",
     "Golang Workflows/03 - Concurrent File Processor.md",
     "Golang Workflows/01 - CLI Task Manager.md",
-    "Golang Practice/11 - Generics.md",
     "Golang Practice/04 - Structs and Methods.md",
     "Golang Study.md",
     "Golang Practice/06 - Slices and Maps.md",
