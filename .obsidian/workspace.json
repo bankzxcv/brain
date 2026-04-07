@@ -187,6 +187,10 @@
   },
   "active": "dcd12448a8251a94",
   "lastOpenFiles": [
+    "KanbanWorks.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "PI-Mono - AI Coding Agent for Software Development.md",
     "Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
     "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
     "Kubernetes/Workflows/03 - GitOps Pipeline.md",
@@ -216,10 +220,6 @@
     "Golang/Golang Practice/12 - Testing.md",
     "Golang/Golang Practice/10 - Concurrency Patterns.md",
     "Golang/Golang Practice/11 - Generics.md",
-    "Golang/Golang Practice/09 - Goroutines and Channels.md",
-    "Golang/Golang Practice/08 - Defer Panic Recover.md",
-    "Golang/Golang Practice/07 - Error Handling.md",
-    "Golang/Golang Practice/06 - Slices and Maps.md",
     "Golang/Golang Workflows",
     "Golang/Golang Practice",
     "Golang"
