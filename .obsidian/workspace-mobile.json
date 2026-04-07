@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
-                "mode": "preview",
+                "file": "Golang Study.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Practice - CI CD Pipelines"
+              "title": "Golang Study"
             }
           }
         ]
@@ -112,8 +112,8 @@
         "state": {
           "type": "backlink",
           "state": {
-            "file": "PI-Mono - AI Coding Agent for Software Development.md",
-            "collapseAll": true,
+            "file": "Example.md",
+            "collapseAll": false,
             "extraContext": false,
             "sortOrder": "alphabetical",
             "showSearch": false,
@@ -145,7 +145,7 @@
         "state": {
           "type": "outline",
           "state": {
-            "file": "Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
+            "file": "Example.md",
             "followCursor": false,
             "showSearch": false,
             "searchQuery": ""
@@ -155,7 +155,7 @@
         }
       }
     ],
-    "currentTab": 2
+    "currentTab": 0
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -172,41 +172,17 @@
   },
   "active": "62565905564455f2",
   "lastOpenFiles": [
-    "Kubernetes/Core/Practice - Configuration and Storage.md",
-    "Kubernetes/Kubernetes Study.md",
-    "Kubernetes/Core/Practice - Services and Networking.md",
-    "Kubernetes Study.md",
-    "/Kubernetes/Kubernetes Study.md",
-    "/Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
-    "Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
-    "/Kubernetes/Workflows",
-    "/Kubernetes",
+    "KanbanWorks.md",
     "PI-Mono - AI Coding Agent for Software Development.md",
-    "Kubernetes/Core/Practice - Workloads and Scheduling.md",
-    "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
-    "Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
-    "Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
-    "Kubernetes/GitHub Actions",
-    "/Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
-    "/Kubernetes/Workflows/03 - GitOps Pipeline.md",
-    "Kubernetes/Workflows/03 - GitOps Pipeline.md",
-    "/Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
-    "/Kubernetes/Core/Practice - Workloads and Scheduling.md",
-    "/Kubernetes/Core/Practice - Services and Networking.md",
-    "/Kubernetes/Core",
-    "/Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
-    "/Kubernetes/GitHub Actions",
-    "/Kubernetes/ArgoCD",
-    "Kubernetes/ArgoCD",
-    "Kubernetes/Workflows/02 - Helm Multi-Tier App.md",
-    "Kubernetes/Helm/Practice - Helm Charts.md",
-    "Kubernetes/Helm",
-    "Kubernetes/Core/Practice - Pods and Deployments.md",
-    "Kubernetes/Core",
-    "Kubernetes/Docker/Practice - Docker Fundamentals.md",
-    "Kubernetes/Docker",
-    "/Kubernetes/Workflows/02 - Helm Multi-Tier App.md",
-    "/Kubernetes/Helm/Practice - Helm Charts.md",
-    "/Kubernetes/Docker/Practice - Docker Fundamentals.md"
+    "Golang Study.md",
+    "/PI-Mono - AI Coding Agent for Software Development.md",
+    "CLAUDE.md",
+    "/Golang Study.md",
+    "/CLAUDE.md",
+    "Example.md",
+    "/KanbanWorks.md",
+    "Kanban.md",
+    "README.md",
+    "Untitled.md"
   ]
 }
