@@ -172,6 +172,7 @@
   },
   "active": "62565905564455f2",
   "lastOpenFiles": [
+    "Kubernetes/Workflows/02 - Helm Multi-Tier App.md",
     "Kubernetes/Helm/Practice - Helm Charts.md",
     "Kubernetes/Helm",
     "Kubernetes/Core/Practice - Pods and Deployments.md",
@@ -205,7 +206,6 @@
     "Golang/Golang Practice/09 - Goroutines and Channels.md",
     "Golang/Golang Workflows/02 - REST API Server.md",
     "Golang/Golang Workflows/05 - TCP Chat Server.md",
-    "Golang/Golang Workflows/04 - Web Scraper Pipeline.md",
     "Golang/Golang Practice",
     "Golang/Golang Workflows"
   ]
