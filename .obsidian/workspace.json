@@ -187,6 +187,8 @@
   },
   "active": "dcd12448a8251a94",
   "lastOpenFiles": [
+    "Golang Practice/08 - Defer Panic Recover.md",
+    "Golang Practice/12 - Testing.md",
     "Golang Practice/07 - Error Handling.md",
     "Golang Practice/03 - Pointers.md",
     "Golang Practice/09 - Goroutines and Channels.md",
