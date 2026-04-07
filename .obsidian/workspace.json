@@ -183,6 +183,7 @@
   },
   "active": "90013c075f7f4b85",
   "lastOpenFiles": [
+    "Kubernetes/Workflows/01 - Microservice Deployment.md",
     "Kubernetes Study.md",
     "Golang/Golang Workflows/05 - TCP Chat Server.md",
     "Golang/Golang Workflows/04 - Web Scraper Pipeline.md",
@@ -217,7 +218,6 @@
     "Golang Practice/08 - Defer Panic Recover.md",
     "Golang Practice/12 - Testing.md",
     "Golang Practice/07 - Error Handling.md",
-    "Golang Practice/03 - Pointers.md",
-    "Golang Practice/09 - Goroutines and Channels.md"
+    "Golang Practice/03 - Pointers.md"
   ]
 }
