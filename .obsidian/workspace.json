@@ -13,15 +13,28 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Reverse Engineering/Reverse Engineering Study.md",
+                "file": "Reverse Engineering/Reverse Engineering Practice/11 - Protocol Reverse Engineering.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Reverse Engineering Study"
+              "title": "11 - Protocol Reverse Engineering"
+            }
+          },
+          {
+            "id": "c37c1f1707b59194",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Drawing 2026-04-07 21.14.14.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-04-07 21.14.14.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -156,13 +169,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Reverse Engineering/Reverse Engineering Study.md",
+                "file": "Drawing 2026-04-07 21.14.14.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Reverse Engineering Study"
+              "title": "Outline of Drawing 2026-04-07 21.14.14.excalidraw"
             }
           }
         ],
@@ -182,11 +195,22 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-git:Open Git source control": false
+      "obsidian-git:Open Git source control": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "dcd12448a8251a94",
+  "active": "c37c1f1707b59194",
   "lastOpenFiles": [
+    "Reverse Engineering/Reverse Engineering Practice/11 - Protocol Reverse Engineering.md",
+    "Drawing 2026-04-07 21.14.14.excalidraw.md",
+    "Reverse Engineering/Reverse Engineering Practice/13 - AI-Assisted Reverse Engineering.md",
+    "Reverse Engineering/Reverse Engineering Practice/07 - Ghidra Deep Dive.md",
+    "Reverse Engineering/Reverse Engineering Workflows/01 - Reverse a CLI Utility.md",
+    "Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
+    "Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
+    "Reverse Engineering/Reverse Engineering Study.md",
+    "Golang/Golang Study.md",
+    "Reverse Engineering/Reverse Engineering Practice/10 - Anti-Reverse Engineering.md",
     "AGENTS.md",
     "Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
     "CLAUDE.md",
@@ -203,23 +227,13 @@
     "Kubernetes/Core/Practice - Workloads and Scheduling.md",
     "Kubernetes/Core/Practice - Services and Networking.md",
     "Kubernetes/Core/Practice - Pods and Deployments.md",
-    "Kubernetes/Core/Practice - Configuration and Storage.md",
-    "Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
     "Kubernetes/Workflows",
-    "Kubernetes/Kubernetes Study.md",
     "Kubernetes/Helm",
     "Kubernetes/GitHub Actions",
     "Kubernetes/Docker",
     "Kubernetes/Core",
     "Kubernetes/ArgoCD",
     "Kubernetes",
-    "Golang/Golang Workflows/05 - TCP Chat Server.md",
-    "Golang/Golang Workflows/04 - Web Scraper Pipeline.md",
-    "Golang/Golang Workflows/03 - Concurrent File Processor.md",
-    "Golang/Golang Workflows/02 - REST API Server.md",
-    "Golang/Golang Workflows/01 - CLI Task Manager.md",
-    "Golang/Golang Practice/12 - Testing.md",
-    "Golang/Golang Practice/10 - Concurrency Patterns.md",
     "Golang/Golang Workflows",
     "Golang/Golang Practice",
     "Golang"
