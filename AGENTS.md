@@ -30,6 +30,10 @@ brain/
     ArgoCD/                    ← ArgoCD GitOps practice
     GitHub Actions/            ← CI/CD practice
     Workflows/                 ← 5 real-world project files
+  Reverse Engineering/         ← Reverse Engineering study course
+    Reverse Engineering Study.md ← main reference note
+    Reverse Engineering Practice/ ← 13 topic drill files
+    Reverse Engineering Workflows/ ← 5 real-world project files
   .obsidian/                   ← Obsidian config (do not edit manually)
 ```
 
@@ -171,6 +175,7 @@ When the owner asks to create new study content:
 |---|---|---|---|
 | **Golang** | [[Golang/Golang Study]] | Variables, Functions, Pointers, Structs, Interfaces, Slices/Maps, Errors, Defer/Panic, Goroutines, Concurrency, Generics, Testing | in-progress |
 | **Kubernetes** | [[Kubernetes/Kubernetes Study]] | Docker, Pods, Deployments, Services, Networking, Config/Storage, Workloads, Helm, ArgoCD, GitHub Actions | in-progress |
+| **Reverse Engineering** | [[Reverse Engineering/Reverse Engineering Study]] | Binary Fundamentals, x86/ARM Assembly, ELF/PE Formats, Disassembly, GDB Debugging, Stack/Calling Conventions, Ghidra, Dynamic Analysis, Patching, Anti-RE, Protocol RE, Obfuscation, AI-Assisted RE | in-progress |
 
 ---
 
