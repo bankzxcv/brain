@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AGENTS.md",
+                "file": "Kubernetes/Kubernetes Study.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AGENTS"
+              "title": "Kubernetes Study"
             }
           }
         ]
@@ -145,7 +145,7 @@
         "state": {
           "type": "outline",
           "state": {
-            "file": "AGENTS.md",
+            "file": "Kubernetes/Kubernetes Study.md",
             "followCursor": false,
             "showSearch": false,
             "searchQuery": ""
@@ -172,41 +172,41 @@
   },
   "active": "79fb716cdf164a39",
   "lastOpenFiles": [
-    "PI-Mono - AI Coding Agent for Software Development.md",
-    "KanbanWorks.md",
-    "Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
-    "Untitled.md",
-    "AGENTS.md",
-    "/Untitled.md",
-    "/CLAUDE.md",
-    "/AGENTS.md",
-    "Kubernetes/Core/Practice - Configuration and Storage.md",
-    "Kubernetes/Kubernetes Study.md",
-    "Kubernetes/Core/Practice - Services and Networking.md",
-    "Kubernetes Study.md",
-    "/Kubernetes/Kubernetes Study.md",
-    "/Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
-    "Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
+    "Drawing 2026-04-07 21.14.14.excalidraw.md",
+    "Reverse Engineering/Reverse Engineering Practice/12 - Obfuscation and Deobfuscation.md",
+    "Reverse Engineering/Reverse Engineering Practice/01 - Binary Fundamentals.md",
+    "Reverse Engineering/Reverse Engineering Practice/04 - Disassembly and Static Analysis.md",
+    "Reverse Engineering/Reverse Engineering Practice/11 - Protocol Reverse Engineering.md",
+    "Reverse Engineering/Reverse Engineering Practice/06 - Stack and Calling Conventions.md",
+    "Reverse Engineering/Reverse Engineering Practice/07 - Ghidra Deep Dive.md",
+    "Reverse Engineering/Reverse Engineering Practice/13 - AI-Assisted Reverse Engineering.md",
+    "Reverse Engineering/Reverse Engineering Practice/09 - Patching and Binary Modification.md",
+    "Reverse Engineering/Reverse Engineering Practice/02 - x86 and ARM Assembly.md",
+    "Reverse Engineering/Reverse Engineering Practice/10 - Anti-Reverse Engineering.md",
+    "Reverse Engineering/Reverse Engineering Practice/08 - Dynamic Analysis.md",
+    "Reverse Engineering/Reverse Engineering Practice/03 - ELF and PE Formats.md",
+    "Reverse Engineering/Reverse Engineering Practice/05 - Debugging with GDB.md",
+    "Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
+    "Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
+    "Reverse Engineering/Reverse Engineering Workflows/04 - Deobfuscate a Malware Sample.md",
+    "Reverse Engineering/Reverse Engineering Workflows/01 - Reverse a CLI Utility.md",
+    "Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
+    "Reverse Engineering/Reverse Engineering Study.md",
+    "Reverse Engineering/Reverse Engineering Practice",
+    "Reverse Engineering/Reverse Engineering Workflows",
+    "Reverse Engineering",
+    "/Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
+    "/Reverse Engineering/Reverse Engineering Workflows/04 - Deobfuscate a Malware Sample.md",
+    "/Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
+    "/Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
+    "/Reverse Engineering/Reverse Engineering Workflows/01 - Reverse a CLI Utility.md",
+    "/Reverse Engineering/Reverse Engineering Study.md",
+    "/Reverse Engineering/Reverse Engineering Workflows",
+    "/Reverse Engineering/Reverse Engineering Practice",
+    "/Reverse Engineering",
     "/Kubernetes/Workflows",
     "/Kubernetes",
-    "Kubernetes/Core/Practice - Workloads and Scheduling.md",
-    "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
-    "Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
     "Kubernetes/GitHub Actions",
-    "/Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
-    "/Kubernetes/Workflows/03 - GitOps Pipeline.md",
-    "Kubernetes/Workflows/03 - GitOps Pipeline.md",
-    "/Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
-    "/Kubernetes/Core/Practice - Workloads and Scheduling.md",
-    "/Kubernetes/Core/Practice - Services and Networking.md",
-    "/Kubernetes/Core",
-    "/Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
-    "/Kubernetes/GitHub Actions",
-    "/Kubernetes/ArgoCD",
-    "Kubernetes/ArgoCD",
-    "Kubernetes/Workflows/02 - Helm Multi-Tier App.md",
-    "Kubernetes/Helm",
-    "Kubernetes/Core",
-    "Kubernetes/Docker"
+    "/Kubernetes/Core"
   ]
 }
