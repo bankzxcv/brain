@@ -172,6 +172,8 @@
   },
   "active": "79fb716cdf164a39",
   "lastOpenFiles": [
+    "Golang/Golang Study.md",
+    "Kubernetes/Kubernetes Study.md",
     "Drawing 2026-04-07 21.14.14.excalidraw.md",
     "Reverse Engineering/Reverse Engineering Practice/12 - Obfuscation and Deobfuscation.md",
     "Reverse Engineering/Reverse Engineering Practice/01 - Binary Fundamentals.md",
@@ -199,8 +201,6 @@
     "/Reverse Engineering/Reverse Engineering Workflows/04 - Deobfuscate a Malware Sample.md",
     "/Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
     "/Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
-    "/Reverse Engineering/Reverse Engineering Workflows/01 - Reverse a CLI Utility.md",
-    "/Reverse Engineering/Reverse Engineering Study.md",
     "/Reverse Engineering/Reverse Engineering Workflows",
     "/Reverse Engineering/Reverse Engineering Practice",
     "/Reverse Engineering",
