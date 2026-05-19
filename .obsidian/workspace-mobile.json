@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "918afec4bbcd592b",
+        "id": "cf2d61185ad11ce0",
         "type": "tabs",
         "children": [
           {
-            "id": "79fb716cdf164a39",
+            "id": "55d5b48a88f59c7b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Golang/Golang Practice/09 - Goroutines and Channels.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "09 - Goroutines and Channels"
+              "title": "New tab"
             }
           }
         ]
@@ -170,43 +166,43 @@
       "obsidian-kanban:Create new board": false
     }
   },
-  "active": "79fb716cdf164a39",
+  "active": "55d5b48a88f59c7b",
   "lastOpenFiles": [
-    "Kubernetes/Kubernetes Study.md",
-    "Golang/Golang Study.md",
-    "Drawing 2026-04-07 21.14.14.excalidraw.md",
-    "Reverse Engineering/Reverse Engineering Practice/12 - Obfuscation and Deobfuscation.md",
-    "Reverse Engineering/Reverse Engineering Practice/01 - Binary Fundamentals.md",
-    "Reverse Engineering/Reverse Engineering Practice/04 - Disassembly and Static Analysis.md",
-    "Reverse Engineering/Reverse Engineering Practice/11 - Protocol Reverse Engineering.md",
-    "Reverse Engineering/Reverse Engineering Practice/06 - Stack and Calling Conventions.md",
-    "Reverse Engineering/Reverse Engineering Practice/07 - Ghidra Deep Dive.md",
-    "Reverse Engineering/Reverse Engineering Practice/13 - AI-Assisted Reverse Engineering.md",
-    "Reverse Engineering/Reverse Engineering Practice/09 - Patching and Binary Modification.md",
-    "Reverse Engineering/Reverse Engineering Practice/02 - x86 and ARM Assembly.md",
-    "Reverse Engineering/Reverse Engineering Practice/10 - Anti-Reverse Engineering.md",
-    "Reverse Engineering/Reverse Engineering Practice/08 - Dynamic Analysis.md",
-    "Reverse Engineering/Reverse Engineering Practice/03 - ELF and PE Formats.md",
-    "Reverse Engineering/Reverse Engineering Practice/05 - Debugging with GDB.md",
-    "Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
-    "Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
-    "Reverse Engineering/Reverse Engineering Workflows/04 - Deobfuscate a Malware Sample.md",
-    "Reverse Engineering/Reverse Engineering Workflows/01 - Reverse a CLI Utility.md",
-    "Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
-    "Reverse Engineering/Reverse Engineering Study.md",
+    "LeetCode/LeetCode Practice/12 - Graphs.md",
+    "LeetCode/LeetCode Practice/16 - Greedy.md",
+    "LeetCode/LeetCode Practice/11 - Backtracking.md",
+    "LeetCode/LeetCode Practice/13 - Advanced Graphs.md",
+    "LeetCode/LeetCode Practice/03 - Sliding Window.md",
+    "LeetCode/LeetCode Practice/07 - Linked List.md",
+    "LeetCode/LeetCode Practice/08 - Trees.md",
+    "LeetCode/LeetCode Practice/10 - Heap and Priority Queue.md",
+    "LeetCode/LeetCode Practice/04 - Stack.md",
+    "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
+    "LeetCode/LeetCode Practice/18 - Math and Geometry.md",
+    "LeetCode/LeetCode Practice/19 - Bit Manipulation.md",
+    "LeetCode/LeetCode Practice/14 - 1D Dynamic Programming.md",
+    "LeetCode/LeetCode Practice/05 - Monotonic Stack.md",
+    "LeetCode/LeetCode Practice/06 - Binary Search.md",
+    "LeetCode/LeetCode Practice/09 - Tries.md",
+    "LeetCode/LeetCode Practice/17 - Intervals.md",
+    "LeetCode/LeetCode Practice/15 - 2D Dynamic Programming.md",
+    "LeetCode/LeetCode Practice/02 - Two Pointers.md",
+    "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
+    "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
+    "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
+    "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
+    "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
+    "LeetCode/LeetCode Study.md",
+    "LeetCode/LeetCode Practice",
+    "LeetCode/LeetCode Workflows",
+    "LeetCode",
+    "/LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
+    "/LeetCode/LeetCode Workflows",
+    "/LeetCode/LeetCode Practice",
+    "/LeetCode",
     "Reverse Engineering/Reverse Engineering Practice",
     "Reverse Engineering/Reverse Engineering Workflows",
     "Reverse Engineering",
-    "/Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
-    "/Reverse Engineering/Reverse Engineering Workflows/04 - Deobfuscate a Malware Sample.md",
-    "/Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
-    "/Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
-    "/Reverse Engineering/Reverse Engineering Workflows",
-    "/Reverse Engineering/Reverse Engineering Practice",
-    "/Reverse Engineering",
-    "/Kubernetes/Workflows",
-    "/Kubernetes",
-    "Kubernetes/GitHub Actions",
-    "/Kubernetes/Core"
+    "/Reverse Engineering/Reverse Engineering Workflows"
   ]
 }
