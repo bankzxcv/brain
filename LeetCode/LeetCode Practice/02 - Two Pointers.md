@@ -28,7 +28,7 @@ status: in-progress
 | P4 | 3Sum | 15 | Med | Fix one + opposite |
 | P5 | 3Sum Closest | 16 | Med | Fix one + opposite |
 | P6 | Container With Most Water | 11 | Med | Opposite (move shorter) |
-| P7 | Trapping Rain Water | 42 | Hard | Opposite + max-so-far |
+| P7 | Trapping Rain Water | 42 | **Hard** | Opposite + max-so-far |
 | P8 | Remove Duplicates from Sorted Array | 26 | Easy | Same direction |
 | P9 | Move Zeroes | 283 | Easy | Same direction (write-pointer) |
 | P10 | Sort Colors | 75 | Med | 3 pointers (Dutch flag) |
@@ -54,16 +54,35 @@ Ignore non-alphanumerics and case; is it a palindrome?
 1. **Clean string + reverse compare** · O(n)/O(n). Easy but allocates.
 2. **Two pointers in place — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-"A man, a plan, a canal: Panama"
-l=0 'A'  r=29 'a' → equal (lowercase)
-l=1 ' '  skip → l=2
-l=2 'm'  r=28 'm' → equal
-... (continue)
-return true
-```
+> [!info]- 🔍 Dry Run: s="A man, a plan, a canal: Panama"
+> ```text
+> Setup:
+>   l = 0, r = 29   (length 30)
+> 
+> ─────────────────────────────────────────
+> Step 1: l=0 'A', r=29 'a'
+>   both alphanumeric, lowercase comparison
+>   'a' == 'a'  → match
+>   l=1, r=28
+> 
+> Step 2: l=1 ' ', r=28 'm'
+>   s[l]=' ' is NOT alphanumeric → skip, l++
+>   l=2 'm', r=28 'm'
+>   match. l=3, r=27
+> 
+> Step 3: l=3 'a', r=27 'a'  (compressing the trace — same idea)
+>   match. l=4, r=26
+> 
+> Step 4: l=4 'n', r=26 'n'
+>   match. l=5, r=25
+> 
+> ... continue through ',', ' ', 'a', 'p', 'l', 'a', 'n', ...
+> Each non-alphanumeric is skipped; each pair of letters matches.
+> 
+> Eventually l >= r → loop exits with no mismatch.
+> 
+> ✅ Answer: true
+> ```
 
 > [!success]- JS
 > ```js
@@ -115,14 +134,33 @@ Palindrome if you may **delete at most one** char.
 1. **Try every deletion** · O(n²). TLE.
 2. **One mismatch → two slice checks — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-"abca"
-l=0 'a' r=3 'a' ✓  l=1 r=2
-l=1 'b' r=2 'c' ✗ → try check(l+1..r) "ca"? no. check(l..r-1) "ab"? no.
-                  Actually we need check(2,2)="c" palindrome ✓ → true
-```
+> [!info]- 🔍 Dry Run: s="abca"
+> ```text
+> Setup:
+>   l=0, r=3
+> 
+> ─────────────────────────────────────────
+> Step 1: l=0 'a', r=3 'a'
+>   match. l=1, r=2
+> 
+> Step 2: l=1 'b', r=2 'c'
+>   MISMATCH! Try two options:
+> 
+>   Option A: skip s[l] → check is_pal("ca") = is_pal(s[2..2])
+>     l'=2, r'=2 → loop exits immediately (l>=r) → palindrome
+>     return true via Option A
+> 
+>   (We don't even need Option B in this case.)
+> 
+> ✅ Answer: true
+> 
+> ─────────────────────────────────────────
+> Counter-example: s="abc"
+>   l=0 'a', r=2 'c' MISMATCH
+>     Option A: is_pal(s[1..2]) = "bc"  → false
+>     Option B: is_pal(s[0..1]) = "ab"  → false
+>   Return false.
+> ```
 
 > [!success]- JS
 > ```js
@@ -183,14 +221,29 @@ Return 1-indexed positions of two numbers summing to target.
 2. **Binary search for complement** · O(n log n)/O(1) — overkill.
 3. **Opposite pointers — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-nums=[2,7,11,15] target=9
-l=0 r=3  2+15=17 > 9   r--
-l=0 r=2  2+11=13 > 9   r--
-l=0 r=1  2+7=9         return [1,2]
-```
+> [!info]- 🔍 Dry Run: nums=[2,7,11,15], target=9
+> ```text
+> Setup:
+>   l = 0, r = 3
+> 
+> ─────────────────────────────────────────
+> Step 1: l=0 (nums[0]=2), r=3 (nums[3]=15)
+>   sum = 2 + 15 = 17
+>   17 > target=9? YES → too big, decrement r
+>   l=0, r=2
+> 
+> Step 2: l=0 (2), r=2 (nums[2]=11)
+>   sum = 2 + 11 = 13
+>   13 > 9? YES → r--
+>   l=0, r=1
+> 
+> Step 3: l=0 (2), r=1 (nums[1]=7)
+>   sum = 2 + 7 = 9
+>   sum == target → MATCH
+>   return [l+1, r+1] = [1, 2]      ← 1-indexed!
+> 
+> ✅ Answer: [1, 2]
+> ```
 
 > [!success]- JS
 > ```js
@@ -239,19 +292,48 @@ Find all unique triplets summing to 0.
 2. **For each pair, hash for 3rd** · O(n²)/O(n). Works.
 3. **Sort + two pointers — FINAL** · O(n²)/O(1).
 
-### Trace
-
-```
-nums=[-1,0,1,2,-1,-4] → sort → [-4,-1,-1,0,1,2]
-i=0 -4   l=1 r=5  -4+(-1)+2=-3<0 l++
-       l=2 r=5  -4+(-1)+2=-3<0 l++
-       ... no match
-i=1 -1   l=2 r=5  -1+(-1)+2=0 ✓ → [-1,-1,2]  l++ r-- (skip dup)
-       l=3 r=4  -1+0+1=0 ✓ → [-1,0,1]  done
-i=2 -1   skip (duplicate)
-i=3 0    l=4 r=5  0+1+2=3>0 r--  done
-return [[-1,-1,2],[-1,0,1]]
-```
+> [!info]- 🔍 Dry Run: nums=[-1,0,1,2,-1,-4]
+> ```text
+> Phase 1 — Sort:
+>   nums sorted = [-4, -1, -1, 0, 1, 2]
+> 
+> ─────────────────────────────────────────
+> i=0, nums[i]=-4
+>   target for inner pair = -nums[i] = 4
+>   l=1, r=5
+>   sum = -1 + 2 = 1 < 4 → l++
+>   l=2 r=5: -1+2 = 1 < 4 → l++
+>   l=3 r=5:  0+2 = 2 < 4 → l++
+>   l=4 r=5:  1+2 = 3 < 4 → l++
+>   l=5 r=5: stop
+>   No triplet here.
+> 
+> ─────────────────────────────────────────
+> i=1, nums[i]=-1
+>   target = 1
+>   l=2, r=5: -1+2 = 1 ✓ MATCH
+>     append [-1, -1, 2]
+>     skip dups: nums[l]=-1, nums[l+1]=0 → no dup; l++. nums[r]=2, nums[r-1]=1 → no dup; r--
+>     l=3, r=4: 0+1 = 1 ✓ MATCH
+>       append [-1, 0, 1]
+>       l++, r-- → l=4, r=3 → exit
+> 
+> ─────────────────────────────────────────
+> i=2, nums[i]=-1
+>   SKIP: nums[i] == nums[i-1]  (same outer value → would produce dup triplets)
+> 
+> ─────────────────────────────────────────
+> i=3, nums[i]=0
+>   target = 0
+>   l=4, r=5: 1+2 = 3 > 0 → r--
+>   l=4, r=4: stop
+>   No triplet.
+> 
+> ─────────────────────────────────────────
+> i=4: only 1 element after — stop outer loop (need ≥ 2)
+> 
+> ✅ Answer: [[-1, -1, 2], [-1, 0, 1]]
+> ```
 
 > [!success]- JS
 > ```js
@@ -316,6 +398,44 @@ Return sum of triplet closest to `target`.
 
 Sort. For each `i`, two-pointer on rest. Update `best` if `|target - s| < |target - best|`. Move pointer based on `s < target`.
 
+> [!info]- 🔍 Dry Run: nums=[-1,2,1,-4], target=1
+> ```text
+> Phase 1 — Sort:
+>   nums = [-4, -1, 1, 2]
+>   best = -4 + -1 + 1 = -4 (any initial triplet sum)
+> 
+> ─────────────────────────────────────────
+> i=0, nums[i]=-4
+>   l=1, r=3
+>   s = -4 + -1 + 2 = -3
+>   |1 - (-3)| = 4 vs |1 - (-4)| = 5  → -3 is closer
+>   best = -3
+>   s=-3 < 1 → l++
+> 
+>   l=2, r=3
+>   s = -4 + 1 + 2 = -1
+>   |1 - (-1)| = 2 vs |1 - (-3)| = 4 → -1 closer
+>   best = -1
+>   s=-1 < 1 → l++
+> 
+>   l=3, r=3 → stop
+> 
+> ─────────────────────────────────────────
+> i=1, nums[i]=-1
+>   l=2, r=3
+>   s = -1 + 1 + 2 = 2
+>   |1 - 2| = 1 vs |1 - (-1)| = 2  → 2 closer
+>   best = 2
+>   s=2 > 1 → r--
+> 
+>   l=2, r=2 → stop
+> 
+> ─────────────────────────────────────────
+> i=2: only 1 element after — stop
+> 
+> ✅ Answer: 2
+> ```
+
 > [!success]- JS
 > ```js
 > const threeSumClosest = (nums, target) => {
@@ -372,18 +492,61 @@ Heights array; pick two lines, max water = `min(h_l, h_r) * (r - l)`.
 1. **Brute force pairs** · O(n²). TLE at n=10⁵.
 2. **Two pointers (move shorter) — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-h=[1,8,6,2,5,4,8,3,7]
-l=0 r=8  min(1,7)*8 = 8                move l (shorter)
-l=1 r=8  min(8,7)*7 = 49 ✓             move r
-l=1 r=7  min(8,3)*6 = 18               move r
-l=1 r=6  min(8,8)*5 = 40               move l OR r (pick l)
-l=2 r=6  min(6,8)*4 = 24               move l
-...
-return 49
-```
+> [!info]- 🔍 Dry Run: h=[1,8,6,2,5,4,8,3,7]
+> ```text
+> Setup:
+>   l=0, r=8, best=0
+> 
+> ─────────────────────────────────────────
+> Step 1: l=0 (h=1), r=8 (h=7)
+>   area = min(1,7) * (8-0) = 1 * 8 = 8
+>   best = max(0, 8) = 8
+>   move SHORTER side: h[l]=1 < h[r]=7 → l++
+>   l=1, r=8
+> 
+> Step 2: l=1 (h=8), r=8 (h=7)
+>   area = min(8,7) * 7 = 7 * 7 = 49
+>   best = max(8, 49) = 49 ✓
+>   move SHORTER side: h[r]=7 < h[l]=8 → r--
+>   l=1, r=7
+> 
+> Step 3: l=1 (8), r=7 (h=3)
+>   area = min(8,3) * 6 = 3 * 6 = 18
+>   best = 49 (unchanged)
+>   h[r]=3 shorter → r--
+>   l=1, r=6
+> 
+> Step 4: l=1 (8), r=6 (h=8)
+>   area = min(8,8) * 5 = 8 * 5 = 40
+>   best = 49 (unchanged)
+>   tie → move either; say l++
+>   l=2, r=6
+> 
+> Step 5: l=2 (h=6), r=6 (h=8)
+>   area = min(6,8) * 4 = 6 * 4 = 24
+>   best = 49
+>   h[l]=6 shorter → l++
+>   l=3, r=6
+> 
+> Step 6: l=3 (h=2), r=6 (h=8)
+>   area = 2 * 3 = 6
+>   best = 49
+>   l++
+>   l=4, r=6
+> 
+> Step 7: l=4 (h=5), r=6 (h=8)
+>   area = 5 * 2 = 10
+>   best = 49
+>   l++
+>   l=5, r=6
+> 
+> Step 8: l=5 (h=4), r=6 (h=8)
+>   area = 4 * 1 = 4
+>   best = 49
+>   l++ → l=r → exit
+> 
+> ✅ Answer: 49   (lines at index 1 and 8: width 7 × min(8,7))
+> ```
 
 > [!success]- JS
 > ```js
@@ -416,7 +579,7 @@ return 49
 
 ## P7: Trapping Rain Water
 
-**LC #42** · Hard
+**LC #42** · **Hard**
 
 Total water trapped between bars of varying heights.
 
@@ -433,17 +596,82 @@ Total water trapped between bars of varying heights.
 3. **Monotonic stack** · O(n)/O(n). Also works (see Monotonic Stack topic).
 4. **Two pointers — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-h=[0,1,0,2,1,0,1,3,2,1,2,1]
-l=0 r=11  leftMax=0 rightMax=1
-  h[l]=0 < h[r]=1 → leftMax becomes max(0,0)=0; water += 0-0=0; l++
-l=1 r=11  h[l]=1, leftMax=max(0,1)=1; h[l]≥h[r]? swap focus to right side
-  h[r]=1, rightMax=max(1,1)=1; water += rightMax-h[r]=0; r--
-... (continue)
-total = 6
-```
+> [!info]- 🔍 Dry Run: h=[0,1,0,2,1,0,1,3,2,1,2,1]
+> ```text
+> Setup:
+>   l=0, r=11
+>   l_max=0, r_max=0
+>   water=0
+> 
+> ─────────────────────────────────────────
+> Step 1: h[l]=0, h[r]=1
+>   h[l] < h[r] → process LEFT side
+>     l_max = max(0, 0) = 0
+>     water += l_max - h[l] = 0 - 0 = 0
+>     l++ → l=1
+> 
+> Step 2: h[l]=1, h[r]=1
+>   h[l] < h[r]? NO (equal) → process RIGHT side (any tie-breaker works)
+>     r_max = max(0, 1) = 1
+>     water += r_max - h[r] = 1 - 1 = 0
+>     r-- → r=10
+> 
+> Step 3: h[1]=1, h[10]=2
+>   h[l] < h[r] → LEFT
+>     l_max = max(0, 1) = 1
+>     water += 1 - 1 = 0
+>     l++ → l=2
+> 
+> Step 4: h[2]=0, h[10]=2
+>   LEFT
+>     l_max = max(1, 0) = 1
+>     water += 1 - 0 = 1                        ← TRAP at index 2: 1 unit
+>     l++ → l=3
+> 
+> Step 5: h[3]=2, h[10]=2
+>   tie → RIGHT
+>     r_max = max(1, 2) = 2
+>     water += 2 - 2 = 0
+>     r-- → r=9
+> 
+> Step 6: h[3]=2, h[9]=1
+>   h[l] >= h[r] → RIGHT
+>     r_max = max(2, 1) = 2
+>     water += 2 - 1 = 1                        ← TRAP at index 9: 1 unit
+>     r-- → r=8
+> 
+> Step 7: h[3]=2, h[8]=2
+>   tie → RIGHT
+>     r_max = 2; water += 0
+>     r-- → r=7
+> 
+> Step 8: h[3]=2, h[7]=3
+>   LEFT
+>     l_max = 2; water += 2 - 2 = 0
+>     l++ → l=4
+> 
+> Step 9: h[4]=1, h[7]=3
+>   LEFT
+>     l_max = max(2, 1) = 2
+>     water += 2 - 1 = 1                         ← TRAP at index 4
+>     l++ → l=5
+> 
+> Step 10: h[5]=0, h[7]=3
+>   LEFT
+>     l_max = 2; water += 2 - 0 = 2              ← TRAP at index 5
+>     l++ → l=6
+> 
+> Step 11: h[6]=1, h[7]=3
+>   LEFT
+>     l_max = 2; water += 2 - 1 = 1              ← TRAP at index 6
+>     l++ → l=7
+> 
+> l=r → exit
+> 
+> Total water: 0+0+0+1+0+1+0+0+1+2+1 = 6
+> 
+> ✅ Answer: 6
+> ```
 
 > [!success]- JS
 > ```js
@@ -504,17 +732,35 @@ Mutate sorted `nums` so first k positions hold unique values.
 1. **Build new array** · O(n)/O(n). Violates in-place.
 2. **Write pointer — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-nums=[1,1,2,3,3]
-slow=1 (next write position)
-fast=1 nums[1]=1 == nums[slow-1]=1 → skip
-fast=2 nums[2]=2 != 1 → nums[1]=2; slow=2
-fast=3 nums[3]=3 != 2 → nums[2]=3; slow=3
-fast=4 nums[4]=3 == 3 → skip
-return 3, nums starts [1,2,3,...]
-```
+> [!info]- 🔍 Dry Run: nums=[1,1,2,3,3]
+> ```text
+> Setup:
+>   slow = 1   (slot to write next unique)
+>   (treat nums[0] as already-placed; we compare against nums[slow-1])
+> 
+> ─────────────────────────────────────────
+> fast=1: nums[fast]=1
+>   nums[fast]=1 == nums[fast-1]=1?  → YES, duplicate
+>   skip
+>   State: nums=[1,1,2,3,3], slow=1
+> 
+> fast=2: nums[fast]=2
+>   nums[fast]=2 != nums[fast-1]=1?  → YES, new
+>   Action: nums[slow]=2; slow++
+>   State: nums=[1,2,2,3,3], slow=2
+> 
+> fast=3: nums[fast]=3
+>   nums[fast]=3 != nums[fast-1]=2?  → YES, new
+>   Action: nums[slow]=3; slow++
+>   State: nums=[1,2,3,3,3], slow=3
+> 
+> fast=4: nums[fast]=3
+>   nums[fast]=3 == nums[fast-1]=3?  → YES, dup
+>   skip
+> 
+> ✅ Answer: slow = 3
+>   nums[0..2] = [1, 2, 3]  (positions 3..4 don't matter per problem)
+> ```
 
 > [!success]- JS
 > ```js
@@ -560,17 +806,31 @@ Move all zeroes to end; keep relative order of non-zeroes.
 
 Two-pass: walk `fast`, copy non-zero to `slow`, increment slow. After loop, fill `slow..end` with zeros. (Or one-pass with swap.)
 
-### Trace
-
-```
-nums=[0,1,0,3,12]
-fast=0 nums[0]=0 skip
-fast=1 nums[1]=1 → nums[0]=1; slow=1
-fast=2 nums[2]=0 skip
-fast=3 nums[3]=3 → nums[1]=3; slow=2
-fast=4 nums[4]=12 → nums[2]=12; slow=3
-Fill nums[3..]=0 → [1,3,12,0,0]
-```
+> [!info]- 🔍 Dry Run: nums=[0,1,0,3,12]
+> ```text
+> Setup:
+>   slow = 0   (write position)
+> 
+> ─────────────────────────────────────────
+> Phase 1 — Copy non-zeros to front:
+> 
+>   fast=0  nums[0]=0  → skip
+>   fast=1  nums[1]=1  → nums[slow=0] = 1, slow=1
+>           State: nums=[1,1,0,3,12], slow=1
+>   fast=2  nums[2]=0  → skip
+>   fast=3  nums[3]=3  → nums[slow=1] = 3, slow=2
+>           State: nums=[1,3,0,3,12], slow=2
+>   fast=4  nums[4]=12 → nums[slow=2] = 12, slow=3
+>           State: nums=[1,3,12,3,12], slow=3
+> 
+> ─────────────────────────────────────────
+> Phase 2 — Fill trailing positions with zeros:
+> 
+>   nums[3] = 0  →  nums=[1,3,12,0,12]
+>   nums[4] = 0  →  nums=[1,3,12,0,0]
+> 
+> ✅ Answer: nums = [1, 3, 12, 0, 0]
+> ```
 
 > [!success]- JS
 > ```js
@@ -618,18 +878,44 @@ Sort an array of 0s/1s/2s in place.
 1. **Counting sort (2 passes)** · O(n)/O(1). Works.
 2. **Dutch flag (one pass) — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-nums=[2,0,2,1,1,0]
-low=0 mid=0 high=5
-nums[mid]=2 → swap mid↔high: [0,0,2,1,1,2] high=4 (mid stays!)
-nums[mid]=0 → swap low↔mid: [0,0,2,1,1,2] low=1 mid=1
-nums[mid]=0 → swap low↔mid (same): [0,0,2,1,1,2] low=2 mid=2
-nums[mid]=2 → swap mid↔high: [0,0,1,1,2,2] high=3
-nums[mid]=1 → mid++: [0,0,1,1,2,2] mid=3
-nums[mid]=1 → mid++: mid=4 > high stop
-```
+> [!info]- 🔍 Dry Run: nums=[2,0,2,1,1,0]
+> ```text
+> Setup:
+>   low=0, mid=0, high=5
+> 
+> ─────────────────────────────────────────
+> Step 1: nums[mid=0]=2
+>   Value 2 → swap(mid, high), high--
+>     swap(0, 5): nums=[0,0,2,1,1,2]
+>     high=4
+>   Do NOT advance mid! New value at mid is unprocessed.
+>   State: nums=[0,0,2,1,1,2], low=0, mid=0, high=4
+> 
+> Step 2: nums[mid=0]=0
+>   Value 0 → swap(low, mid), low++, mid++
+>     swap(0, 0): no-op
+>     low=1, mid=1
+>   State: nums=[0,0,2,1,1,2], low=1, mid=1, high=4
+> 
+> Step 3: nums[mid=1]=0
+>   Value 0 → swap(1, 1) no-op; low=2, mid=2
+> 
+> Step 4: nums[mid=2]=2
+>   Value 2 → swap(mid, high), high--
+>     swap(2, 4): nums=[0,0,1,1,2,2]
+>     high=3
+>   mid stays at 2.
+> 
+> Step 5: nums[mid=2]=1
+>   Value 1 → just advance: mid=3
+> 
+> Step 6: nums[mid=3]=1
+>   Value 1 → mid=4
+> 
+> mid=4 > high=3 → exit
+> 
+> ✅ Answer: nums=[0,0,1,1,2,2]
+> ```
 
 > [!success]- JS
 > ```js
@@ -689,16 +975,35 @@ Detect if a linked list has a cycle.
 1. **Hash set of visited nodes** · O(n)/O(n).
 2. **Floyd — FINAL** · O(n)/O(1).
 
-### Trace
-
-```
-1 → 2 → 3 → 4 → 5 → 2  (cycle back to 2)
-slow=1 fast=1
-step1: slow=2 fast=3
-step2: slow=3 fast=5
-step3: slow=4 fast=3
-step4: slow=5 fast=5 ← MET → cycle
-```
+> [!info]- 🔍 Dry Run: 1 → 2 → 3 → 4 → 5 → (back to 2)
+> ```text
+> Setup:
+>   slow = head = node(1)
+>   fast = head = node(1)
+> 
+> ─────────────────────────────────────────
+> Step 1:
+>   slow = slow.next       → node(2)
+>   fast = fast.next.next  → node(3)
+>   slow == fast?  → 2 vs 3, NO
+> 
+> Step 2:
+>   slow = node(3)
+>   fast = node(5)
+>   slow == fast?  → 3 vs 5, NO
+> 
+> Step 3:
+>   slow = node(4)
+>   fast = fast.next.next = (5).next.next = (2).next = node(3)
+>   slow == fast?  → 4 vs 3, NO
+> 
+> Step 4:
+>   slow = node(5)
+>   fast = (3).next.next = (4).next = node(5)
+>   slow == fast?  → 5 == 5  → YES!
+> 
+> ✅ Answer: true (cycle detected)
+> ```
 
 > [!success]- JS
 > ```js
@@ -743,7 +1048,38 @@ Return middle node. If two middles, return the second.
 
 > Fast moves 2x. When fast hits end, slow is at the middle.
 
-### Approach
+> [!info]- 🔍 Dry Run: 1 → 2 → 3 → 4 → 5
+> ```text
+> Setup:
+>   slow = fast = node(1)
+> 
+> ─────────────────────────────────────────
+> Step 1:
+>   fast && fast.next? fast=1, fast.next=2 → YES, continue
+>   slow = node(2)
+>   fast = fast.next.next = node(3)
+> 
+> Step 2:
+>   fast=3, fast.next=4 → continue
+>   slow = node(3)
+>   fast = node(5)
+> 
+> Step 3:
+>   fast=5, fast.next=null → STOP loop
+> 
+> ✅ Answer: slow = node(3)        (the middle of 1,2,3,4,5)
+> 
+> ─────────────────────────────────────────
+> Even-length example: 1 → 2 → 3 → 4
+>   slow=1, fast=1
+>   slow=2, fast=3
+>   slow=3, fast=null (3.next is 4, 4.next is null, but check fast && fast.next at top of loop)
+>   
+>   Actually: after first iter slow=2,fast=3. Check: fast=3, fast.next=4 → continue.
+>             after second iter slow=3, fast=3.next.next=null.
+>   Loop top: fast=null → STOP.
+>   Return slow=3 (the SECOND middle, as required).
+> ```
 
 > [!success]- JS
 > ```js
