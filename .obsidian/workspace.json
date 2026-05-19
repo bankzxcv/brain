@@ -203,6 +203,7 @@
   },
   "active": "90013c075f7f4b85",
   "lastOpenFiles": [
+    "LeetCode/LeetCode Study.md",
     "LeetCode/LeetCode Workflows",
     "LeetCode/LeetCode Practice",
     "LeetCode",
@@ -237,7 +238,6 @@
     "Kubernetes/Docker",
     "Kubernetes/Core",
     "Kubernetes/ArgoCD",
-    "Kubernetes",
-    "Golang/Golang Workflows"
+    "Kubernetes"
   ]
 }
