@@ -36,9 +36,9 @@ status: in-progress
 | P1 | Next Greater Element I | 496 | Easy | NGE map |
 | P2 | Next Greater Element II | 503 | Med | NGE + circular |
 | P3 | Daily Temperatures | 739 | Med | NGE → days-until |
-| P4 | Largest Rectangle in Histogram | 84 | Hard | NS-prev + NS-next |
-| P5 | Maximal Rectangle | 85 | Hard | LRH per row |
-| P6 | Trapping Rain Water | 42 | Hard | Stack of decreasing bars |
+| P4 | Largest Rectangle in Histogram | 84 | **Hard** | NS-prev + NS-next |
+| P5 | Maximal Rectangle | 85 | **Hard** | LRH per row |
+| P6 | Trapping Rain Water | 42 | **Hard** | Stack of decreasing bars |
 | P7 | Sum of Subarray Minimums | 907 | Med | Contribution counting |
 | P8 | Remove K Digits | 402 | Med | Greedy via inc. stack |
 | P9 | Online Stock Span | 901 | Med | NGE-left online |
@@ -58,19 +58,38 @@ For each `x` in `nums1` (subset of `nums2`), find next greater element in `nums2
 
 > Walk `nums2`. While stack top < current → pop, record current as its NGE. Push current. Look up answers from a map.
 
-### Trace
-
-```
-nums2=[1,3,4,2]
-i=0 x=1  st=[]; push → st=[1]
-i=1 x=3  pop 1 (1<3) → nge[1]=3; push → st=[3]
-i=2 x=4  pop 3 → nge[3]=4; push → st=[4]
-i=3 x=2  2<4, push → st=[4,2]
-end: nge[4]=-1, nge[2]=-1
-
-nums1=[4,1,2] → [-1,3,2]   (wait nge[1]=3, nge[2]=-1)
-Actually: [-1, 3, -1]
-```
+> [!info]- 🔍 Dry Run: nums1=[4,1,2], nums2=[1,3,4,2]
+> ```text
+> Phase 1 — Build NGE map by scanning nums2 with a decreasing stack:
+>   nge = {}
+>   st = []  (decreasing, holds values)
+> 
+>   x=1: st empty → push
+>     st = [1]
+> 
+>   x=3: st.top=1 < 3 → pop, nge[1]=3
+>     st = [] → push 3
+>     st = [3]
+> 
+>   x=4: st.top=3 < 4 → pop, nge[3]=4
+>     st = [] → push 4
+>     st = [4]
+> 
+>   x=2: st.top=4 < 2? NO → just push
+>     st = [4, 2]
+> 
+>   Remaining in st: 4 and 2 have no greater to the right → nge[4]=-1, nge[2]=-1
+>   nge = {1:3, 3:4, 4:-1, 2:-1}
+> 
+> ─────────────────────────────────────────
+> Phase 2 — Look up answers for nums1:
+>   nums1=[4,1,2]
+>     nge[4] = -1
+>     nge[1] = 3
+>     nge[2] = -1
+> 
+> ✅ Answer: [-1, 3, -1]
+> ```
 
 > [!success]- JS
 > ```js
@@ -110,6 +129,45 @@ Same as P1 but the array wraps.
 ### 🧠 Pattern: Double the Array (Virtually)
 
 > Iterate `2n` indices, using `i % n`. Stack holds indices. Only set answer the first time (when index in `0..n-1`).
+
+> [!info]- 🔍 Dry Run: nums=[1,2,1]
+> ```text
+> Setup:
+>   n = 3, out = [-1, -1, -1]
+>   st = []   (indices)
+> 
+> Iterate i=0..2n-1=5, using nums[i % n]:
+> 
+> ─────────────────────────────────────────
+> i=0  x=nums[0]=1
+>   st empty → push 0 (within first n, so we track it)
+>   st = [0]
+> 
+> i=1  x=nums[1]=2
+>   nums[st.top=0]=1 < 2 → pop 0, out[0]=2
+>   st = [] → push 1
+>   st = [1]
+> 
+> i=2  x=nums[2]=1
+>   nums[1]=2 < 1? NO → just push (i<n so push)
+>   st = [1, 2]
+> 
+> i=3  x=nums[3%3=0]=1
+>   nums[2]=1 < 1? NO → don't push (i >= n)
+>   st = [1, 2]
+> 
+> i=4  x=nums[4%3=1]=2
+>   nums[2]=1 < 2 → pop 2, out[2]=2
+>   nums[1]=2 < 2? NO → don't push (i >= n)
+>   st = [1]
+> 
+> i=5  x=nums[5%3=2]=1
+>   nums[1]=2 < 1? NO → don't push
+> 
+> Remaining: index 1 with no greater to its "right" → out[1]=-1 (already)
+> 
+> ✅ Answer: [2, -1, 2]
+> ```
 
 > [!success]- JS
 > ```js
@@ -155,20 +213,51 @@ For each day, how many days until a warmer temperature?
 
 NGE on values, return **index differences** instead of values. Push indices.
 
-### Trace
-
-```
-T=[73,74,75,71,69,72,76,73]
-i=0  st=[0]
-i=1  74>73 pop 0 → out[0]=1-0=1.  st=[1]
-i=2  75>74 pop 1 → out[1]=1.       st=[2]
-i=3  71<75 push.                   st=[2,3]
-i=4  69<71 push.                   st=[2,3,4]
-i=5  72>69 pop 4 → out[4]=1.  72>71 pop 3 → out[3]=2. 72<75 push. st=[2,5]
-i=6  76>72 pop 5 → out[5]=1. 76>75 pop 2 → out[2]=4. push.  st=[6]
-i=7  73<76 push.                   st=[6,7]
-return [1,1,4,2,1,1,0,0]
-```
+> [!info]- 🔍 Dry Run: T=[73,74,75,71,69,72,76,73]
+> ```text
+> Setup:
+>   out = [0,0,0,0,0,0,0,0]
+>   st = []  (indices, decreasing temperature top→bottom)
+> 
+> ─────────────────────────────────────────
+> i=0 T=73:  st empty → push 0
+>   st = [0]
+> 
+> i=1 T=74:  T[st.top=0]=73 < 74 → pop 0, out[0] = 1-0 = 1
+>   st = [] → push 1
+>   out = [1,0,0,0,0,0,0,0]
+> 
+> i=2 T=75:  T[1]=74 < 75 → pop 1, out[1] = 2-1 = 1
+>   push 2
+>   out = [1,1,0,0,0,0,0,0]
+> 
+> i=3 T=71:  T[2]=75 < 71? NO → push
+>   st = [2, 3]
+> 
+> i=4 T=69:  T[3]=71 < 69? NO → push
+>   st = [2, 3, 4]
+> 
+> i=5 T=72:
+>   T[4]=69 < 72 → pop 4, out[4] = 5-4 = 1
+>   T[3]=71 < 72 → pop 3, out[3] = 5-3 = 2
+>   T[2]=75 < 72? NO → push 5
+>   st = [2, 5]
+>   out = [1,1,0,2,1,0,0,0]
+> 
+> i=6 T=76:
+>   T[5]=72 < 76 → pop 5, out[5] = 6-5 = 1
+>   T[2]=75 < 76 → pop 2, out[2] = 6-2 = 4
+>   push 6
+>   st = [6]
+>   out = [1,1,4,2,1,1,0,0]
+> 
+> i=7 T=73:  T[6]=76 < 73? NO → push
+>   st = [6, 7]
+> 
+> End. Remaining indices in st (6, 7) never found a hotter day → out stays 0 there.
+> 
+> ✅ Answer: [1, 1, 4, 2, 1, 1, 0, 0]
+> ```
 
 > [!success]- JS
 > ```js
@@ -205,7 +294,7 @@ return [1,1,4,2,1,1,0,0]
 
 ## P4: Largest Rectangle in Histogram
 
-**LC #84** · Hard · **The canonical mono-stack problem**
+**LC #84** · **Hard** · **The canonical mono-stack problem**
 
 Find largest rectangle in histogram of bar heights.
 
@@ -219,23 +308,62 @@ Find largest rectangle in histogram of bar heights.
 2. **For each bar, scan left/right for first lower** · O(n²).
 3. **One increasing stack — FINAL** · O(n)/O(n). On pop, current `i` is right boundary, new top is left boundary.
 
-### Trace
-
-```
-heights=[2,1,5,6,2,3]   (sentinel 0 appended)
-i=0 push 0       st=[0]   (h=2)
-i=1 1<2 → pop 0, h=2, width=1-(-1)-1=1, area=2.  push 1.  st=[1]
-i=2 5>1 push     st=[1,2]
-i=3 6>5 push     st=[1,2,3]
-i=4 2<6 → pop 3, h=6, w=4-2-1=1, area=6.
-       2<5 → pop 2, h=5, w=4-1-1=2, area=10 ✓
-       push 4.  st=[1,4]
-i=5 3>2 push     st=[1,4,5]
-i=6 0 (sentinel) → pop 5, h=3, w=6-4-1=1, area=3.
-                  → pop 4, h=2, w=6-1-1=4, area=8.
-                  → pop 1, h=1, w=6-(-1)-1=6, area=6.
-best=10
-```
+> [!info]- 🔍 Dry Run: heights=[2,1,5,6,2,3]
+> ```text
+> Setup:
+>   Append sentinel 0 at end → h = [2,1,5,6,2,3,0]
+>   st = []         (indices with increasing heights)
+>   best = 0
+> 
+> ─────────────────────────────────────────
+> i=0 h=2: st empty → push
+>   st = [0]
+> 
+> i=1 h=1: h[st.top=0]=2 > 1 → pop 0
+>   popped bar height=2; right boundary i=1; left boundary: st empty → effective left = -1
+>   width = i - (-1) - 1 = 1   (or use formula: i if st empty else i - st[-1] - 1)
+>   area = 2 * 1 = 2
+>   best = max(0, 2) = 2
+>   Continue: st empty, push 1
+>   st = [1]
+> 
+> i=2 h=5: 1 < 5 → push
+>   st = [1, 2]
+> 
+> i=3 h=6: 5 < 6 → push
+>   st = [1, 2, 3]
+> 
+> i=4 h=2:
+>   h[3]=6 > 2 → pop 3
+>     popped height 6; right=4; left = st.top=2 (h=5)
+>     width = 4 - 2 - 1 = 1
+>     area = 6 * 1 = 6
+>     best = 6
+>   h[2]=5 > 2 → pop 2
+>     popped height 5; right=4; left = st.top=1 (h=1)
+>     width = 4 - 1 - 1 = 2
+>     area = 5 * 2 = 10  ✓
+>     best = 10
+>   h[1]=1 > 2? NO → push 4
+>   st = [1, 4]
+> 
+> i=5 h=3: h[4]=2 < 3 → push
+>   st = [1, 4, 5]
+> 
+> i=6 h=0 (sentinel):
+>   h[5]=3 > 0 → pop 5
+>     height 3; right=6; left=4 (h=2)
+>     width = 6 - 4 - 1 = 1; area = 3
+>   h[4]=2 > 0 → pop 4
+>     height 2; right=6; left=1 (h=1)
+>     width = 6 - 1 - 1 = 4; area = 8
+>   h[1]=1 > 0 → pop 1
+>     height 1; right=6; left = st empty → effective -1
+>     width = 6 - (-1) - 1 = 6; area = 6
+>   push 6
+> 
+> ✅ Answer: 10   (the 5,6 pair forms 5*2=10)
+> ```
 
 > [!success]- JS
 > ```js
@@ -280,13 +408,34 @@ best=10
 
 ## P5: Maximal Rectangle
 
-**LC #85** · Hard
+**LC #85** · **Hard**
 
 In a binary matrix, find the largest rectangle of all 1s.
 
 ### 🧠 Pattern: LRH Applied Row by Row
 
 > Treat each row as the base of a histogram: `heights[c] += 1` if `matrix[r][c]=1` else `0`. Run LRH on the heights each row. Max across rows wins.
+
+> [!info]- 🔍 Dry Run: matrix=[["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+> ```text
+> Per-row heights (cumulative '1's column-wise, reset on '0'):
+> 
+> Row 0: ["1","0","1","0","0"]  → heights = [1, 0, 1, 0, 0]
+>   LRH([1,0,1,0,0]) → best so far = 1
+> 
+> Row 1: ["1","0","1","1","1"]  → heights = [2, 0, 2, 1, 1]
+>   LRH([2,0,2,1,1]) → best so far = 3   (the rectangle of width 3 height 1 in row 1 starting at col 2)
+> 
+> Row 2: ["1","1","1","1","1"]  → heights = [3, 1, 3, 2, 2]
+>   LRH([3,1,3,2,2]) → 6   (height=2 across cols 2..4: 2*3=6)
+>   best = 6 ✓
+> 
+> Row 3: ["1","0","0","1","0"]  → heights = [4, 0, 0, 3, 0]
+>   LRH → 4 (just the lone tall column 0)
+>   best = 6 (unchanged)
+> 
+> ✅ Answer: 6
+> ```
 
 > [!success]- JS
 > ```js
@@ -324,13 +473,87 @@ In a binary matrix, find the largest rectangle of all 1s.
 
 ## P6: Trapping Rain Water — via Monotonic Stack
 
-**LC #42** · Hard
+**LC #42** · **Hard**
 
 (Two-pointer version in [[02 - Two Pointers]] P7. Here, mono-stack approach.)
 
 ### 🧠 Pattern: Decreasing Stack, Compute Water on Pop
 
 > Maintain decreasing stack of bar indices. When current `h[i]` > h[top], that bar is **right boundary** for the popped bar. New top is **left boundary**. Water above popped = `(min(h[left], h[i]) - h[popped]) * (i - left - 1)`.
+
+> [!info]- 🔍 Dry Run: h=[0,1,0,2,1,0,1,3,2,1,2,1]
+> ```text
+> Setup:
+>   st = []  (decreasing bar heights top→bottom; holds indices)
+>   water = 0
+> 
+> ─────────────────────────────────────────
+> i=0 h=0: st empty → push
+>   st=[0]
+> 
+> i=1 h=1: h[0]=0 < 1 → pop 0
+>   After pop, st empty → no left bound → skip (can't trap)
+>   push 1
+>   st=[1]
+> 
+> i=2 h=0: h[1]=1 < 0? NO → push 2
+>   st=[1, 2]
+> 
+> i=3 h=2:
+>   h[2]=0 < 2 → pop 2
+>     left bound = st.top=1, right=3
+>     bounded = min(h[1]=1, h[3]=2) - h[2]=0 = 1
+>     dist = 3 - 1 - 1 = 1
+>     water += 1 * 1 = 1
+>   h[1]=1 < 2 → pop 1
+>     After pop, st empty → no left → skip
+>   push 3
+>   st=[3], water=1
+> 
+> i=4 h=1: h[3]=2 < 1? NO → push 4
+>   st=[3, 4]
+> 
+> i=5 h=0: h[4]=1 < 0? NO → push 5
+>   st=[3, 4, 5]
+> 
+> i=6 h=1:
+>   h[5]=0 < 1 → pop 5
+>     left=4 (h=1), right=6 (h=1)
+>     bounded = min(1, 1) - 0 = 1
+>     dist = 6 - 4 - 1 = 1
+>     water += 1 * 1 = 1; water=2
+>   h[4]=1 < 1? NO → push 6
+>   st=[3, 4, 6]
+> 
+> i=7 h=3:
+>   h[6]=1 < 3 → pop 6
+>     left=4 (h=1), right=7 (h=3)
+>     bounded = min(1, 3) - 1 = 0; skip (no water)
+>   h[4]=1 < 3 → pop 4
+>     left=3 (h=2), right=7
+>     bounded = min(2, 3) - 1 = 1
+>     dist = 7 - 3 - 1 = 3
+>     water += 1 * 3 = 3; water=5
+>   h[3]=2 < 3 → pop 3
+>     st empty → skip
+>   push 7
+>   st=[7], water=5
+> 
+> i=8 h=2: 3<2? NO → push 8
+> i=9 h=1: 2<1? NO → push 9
+> i=10 h=2:
+>   h[9]=1 < 2 → pop 9
+>     left=8 (h=2), right=10 (h=2)
+>     bounded = min(2,2)-1=1; dist=10-8-1=1; water += 1; water=6
+>   h[8]=2 < 2? NO → push 10
+>   st=[7, 8, 10]
+> 
+> i=11 h=1: 2<1? NO → push 11
+> 
+> End. Remaining stack: bars with no closing greater on the right → no more water.
+> 
+> ✅ Answer: 6
+> ```
 
 > [!success]- JS
 > ```js
@@ -381,6 +604,39 @@ Sum of `min` over all subarrays.
 ### 🧠 Pattern: Contribution Counting
 
 > For each `nums[i]`, count subarrays where `nums[i]` is the min. Contribution = `nums[i] * left_count * right_count`. Use mono stacks for previous-less and next-less indices.
+
+> [!info]- 🔍 Dry Run: nums=[3,1,2,4]
+> ```text
+> For each i, want:
+>   left[i]  = #consecutive positions to the LEFT (including i) where nums[i] is the min strictly
+>   right[i] = #consecutive positions to the RIGHT (including i) where nums[i] is the min (with tie-break)
+>   contribution = nums[i] * left[i] * right[i]
+> 
+> ─────────────────────────────────────────
+> Compute prev-less indices (strict <):
+>   i=0 (3): no prev-less → left[0] = 0 - (-1) = 1
+>   i=1 (1): no prev strictly less than 1 in {3} → left[1] = 1 - (-1) = 2
+>   i=2 (2): prev less is index 1 (val 1) → left[2] = 2 - 1 = 1
+>   i=3 (4): prev less is index 2 (val 2) → left[3] = 3 - 2 = 1
+> 
+> Compute next-less-or-equal indices:
+>   i=0 (3): next ≤ is index 1 (val 1) → right[0] = 1 - 0 = 1
+>   i=1 (1): no next ≤ → right[1] = n - 1 = 4 - 1 = 3
+>   i=2 (2): no next ≤ → right[2] = 4 - 2 = 2
+>   i=3 (4): no next ≤ → right[3] = 4 - 3 = 1
+> 
+> Contributions:
+>   i=0: 3 * 1 * 1 = 3
+>   i=1: 1 * 2 * 3 = 6
+>   i=2: 2 * 1 * 2 = 4
+>   i=3: 4 * 1 * 1 = 4
+>   Sum = 3+6+4+4 = 17
+> 
+> ✅ Answer: 17
+>   Verify by enumeration:
+>     [3]=3, [3,1]=1, [3,1,2]=1, [3,1,2,4]=1, [1]=1, [1,2]=1, [1,2,4]=1, [2]=2, [2,4]=2, [4]=4
+>     Sum = 3+1+1+1+1+1+1+2+2+4 = 17 ✓
+> ```
 
 > [!tip] Tie-breaking
 > Use **strict** `<` on one side and **non-strict** `≤` on the other to avoid double-counting equal values.
@@ -444,19 +700,48 @@ Remove exactly k digits from `num` to form smallest possible number.
 
 > To stay smallest, when next digit is **less than** top, the top digit was a poor choice. Pop while possible (decrement k). At end, trim leading zeros.
 
-### Trace
-
-```
-num="1432219" k=3
-'1' st=[1]
-'4' 4>1 push → [1,4]
-'3' 3<4 pop 4 (k=2), 3>1 push → [1,3]
-'2' 2<3 pop 3 (k=1), 2>1 push → [1,2]
-'2' 2>=2 push → [1,2,2]
-'1' 1<2 pop 2 (k=0), stop popping. push → [1,2,2,1]
-'9' push → [1,2,2,1,9]
-trim leading zeros → "1219"
-```
+> [!info]- 🔍 Dry Run: num="1432219", k=3
+> ```text
+> Setup:
+>   st = []   (increasing stack)
+>   k = 3
+> 
+> ─────────────────────────────────────────
+> '1':  st empty → push
+>   st = ['1']
+> 
+> '4':  4 > top=1 → push (st stays increasing)
+>   st = ['1','4']
+> 
+> '3':  3 < top=4 AND k>0 → pop '4', k=2
+>     st = ['1']
+>     3 < top=1? NO → stop popping
+>     push '3'
+>   st = ['1','3']
+> 
+> '2':  2 < 3 AND k>0 → pop '3', k=1
+>     2 < 1? NO → stop
+>     push '2'
+>   st = ['1','2']
+> 
+> '2':  2 < 2? NO (not strictly less) → push
+>   st = ['1','2','2']
+> 
+> '1':  1 < 2 AND k>0 → pop '2', k=0
+>     k=0, stop popping
+>     push '1'
+>   st = ['1','2','1']
+> 
+> '9':  9 > 1 → push
+>   st = ['1','2','1','9']
+> 
+> k remaining = 0, nothing to trim from end.
+> 
+> Join: "1219"
+> Strip leading zeros: still "1219"
+> 
+> ✅ Answer: "1219"
+> ```
 
 > [!success]- JS
 > ```js
@@ -500,6 +785,60 @@ trim leading zeros → "1219"
 
 > When popping, **absorb** the popped span into the current. Stack stays decreasing.
 
+> [!info]- 🔍 Dry Run: calls next(100), next(80), next(60), next(70), next(60), next(75), next(85)
+> ```text
+> Setup: st = []
+> 
+> ─────────────────────────────────────────
+> next(100):
+>   span = 1 (today)
+>   no smaller-or-equal prices on top
+>   push (100, 1) → st = [(100, 1)]
+>   return 1
+> 
+> next(80):
+>   span = 1
+>   top.price=100 ≤ 80? NO → don't absorb
+>   push (80, 1) → st = [(100,1), (80,1)]
+>   return 1
+> 
+> next(60):
+>   span = 1
+>   top=80 ≤ 60? NO → push
+>   st = [(100,1), (80,1), (60,1)]
+>   return 1
+> 
+> next(70):
+>   span = 1
+>   top=60 ≤ 70? YES → pop, absorb: span += 1 = 2
+>   top=80 ≤ 70? NO → stop
+>   push (70, 2)
+>   st = [(100,1), (80,1), (70,2)]
+>   return 2
+> 
+> next(60):
+>   top=70 ≤ 60? NO → push
+>   st = [(100,1), (80,1), (70,2), (60,1)]
+>   return 1
+> 
+> next(75):
+>   top=60 ≤ 75? YES → pop, span+=1 → span=2
+>   top=70 ≤ 75? YES → pop, span+=2 → span=4
+>   top=80 ≤ 75? NO → stop
+>   push (75, 4)
+>   st = [(100,1), (80,1), (75,4)]
+>   return 4
+> 
+> next(85):
+>   top=75 ≤ 85 → pop, span+=4 → 5
+>   top=80 ≤ 85 → pop, span+=1 → 6
+>   top=100 ≤ 85? NO → stop
+>   push (85, 6)
+>   return 6
+> 
+> ✅ Returns: [1, 1, 1, 2, 1, 4, 6]
+> ```
+
 > [!success]- JS
 > ```js
 > class StockSpanner {
@@ -539,25 +878,43 @@ Cars at positions heading to `target`. A faster car catching a slower one **flee
 
 > Sort cars by position **descending** (closer to target first). Compute each car's arrival time. Walk through and maintain a stack of arrival times: a slower (later) car ahead means current car joins that fleet (skip). Stack size = number of fleets.
 
-### Trace
-
-```
-target=12  pos=[10,8,0,5,3]  speed=[2,4,1,1,3]
-sort by pos desc → 
-  (10, time=(12-10)/2=1)
-  (8, time=(12-8)/4=1)
-  (5, time=(12-5)/1=7)
-  (3, time=(12-3)/3=3)
-  (0, time=(12-0)/1=12)
-
-times in order: [1,1,7,3,12]
-st=[]; push 1
-1 ≤ 1 → 8 catches 10, joins fleet (don't push)
-push 7
-3 < 7 → 3 catches 7's fleet, skip
-push 12
-return 3 (fleets: {10,8}, {5,3}, {0})
-```
+> [!info]- 🔍 Dry Run: target=12, position=[10,8,0,5,3], speed=[2,4,1,1,3]
+> ```text
+> Compute arrival times for each car (descending by position):
+>   pos=10 speed=2: time=(12-10)/2 = 1.0
+>   pos=8  speed=4: time=(12-8)/4 = 1.0
+>   pos=5  speed=1: time=(12-5)/1 = 7.0
+>   pos=3  speed=3: time=(12-3)/3 = 3.0
+>   pos=0  speed=1: time=(12-0)/1 = 12.0
+> 
+> Sorted by position desc → walking in this order:
+> 
+> ─────────────────────────────────────────
+> Car (pos=10, t=1.0):
+>   st empty → push 1.0
+>   st = [1.0]
+> 
+> Car (pos=8, t=1.0):
+>   st.top = 1.0; t=1.0 > 1.0? NO (not strictly greater)
+>   This car catches up to the leader → joins same fleet, don't push.
+>   st = [1.0]
+> 
+> Car (pos=5, t=7.0):
+>   st.top = 1.0; 7.0 > 1.0? YES → new fleet (this car is slower)
+>   push 7.0
+>   st = [1.0, 7.0]
+> 
+> Car (pos=3, t=3.0):
+>   st.top = 7.0; 3.0 > 7.0? NO → catches up to fleet ahead, join
+>   st = [1.0, 7.0]
+> 
+> Car (pos=0, t=12.0):
+>   st.top = 7.0; 12.0 > 7.0? YES → new fleet
+>   push 12.0
+>   st = [1.0, 7.0, 12.0]
+> 
+> ✅ Answer: len(st) = 3 fleets
+> ```
 
 > [!success]- JS
 > ```js
