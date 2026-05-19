@@ -203,6 +203,7 @@
   },
   "active": "90013c075f7f4b85",
   "lastOpenFiles": [
+    "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
     "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
     "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
     "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
@@ -231,7 +232,6 @@
     "LeetCode/LeetCode Practice",
     "LeetCode",
     "Golang/Golang Study.md",
-    "Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
     "Kubernetes/Workflows",
     "Kubernetes/Helm",
     "Kubernetes/GitHub Actions",
