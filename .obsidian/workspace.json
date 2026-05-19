@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Kubernetes/Kubernetes Study.md",
+                "file": "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Kubernetes Study"
+              "title": "01 - Google Phone Screen Set"
             }
           }
         ],
@@ -171,13 +171,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Kubernetes/Kubernetes Study.md",
+                "file": "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Kubernetes Study"
+              "title": "Outline of 01 - Google Phone Screen Set"
             }
           }
         ],
@@ -201,12 +201,14 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "90013c075f7f4b85",
+  "active": "c37c1f1707b59194",
   "lastOpenFiles": [
-    "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
-    "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
-    "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
     "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
+    "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
+    "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
+    "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
+    "LeetCode/LeetCode Study.md",
+    "Kubernetes/Kubernetes Study.md",
     "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
     "LeetCode/LeetCode Practice/19 - Bit Manipulation.md",
     "LeetCode/LeetCode Practice/18 - Math and Geometry.md",
@@ -227,11 +229,9 @@
     "LeetCode/LeetCode Practice/03 - Sliding Window.md",
     "LeetCode/LeetCode Practice/02 - Two Pointers.md",
     "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
-    "LeetCode/LeetCode Study.md",
     "LeetCode/LeetCode Workflows",
     "LeetCode/LeetCode Practice",
     "LeetCode",
-    "Golang/Golang Study.md",
     "Kubernetes/Workflows",
     "Kubernetes/Helm",
     "Kubernetes/GitHub Actions",
