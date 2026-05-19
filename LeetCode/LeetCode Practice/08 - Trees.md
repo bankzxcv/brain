@@ -50,8 +50,8 @@ status: in-progress
 | P14 | Validate BST | 98 | Med | DFS with range |
 | P15 | Kth Smallest in BST | 230 | Med | In-order traversal |
 | P16 | Build Tree from Preorder + Inorder | 105 | Med | Recursive construction |
-| P17 | Binary Tree Max Path Sum | 124 | Hard | DFS w/ global + gain |
-| P18 | Serialize and Deserialize | 297 | Hard | Preorder + null markers |
+| P17 | Binary Tree Max Path Sum | 124 | **Hard** | DFS w/ global + gain |
+| P18 | Serialize and Deserialize | 297 | **Hard** | Preorder + null markers |
 
 ---
 
@@ -62,6 +62,36 @@ status: in-progress
 Mirror the tree (swap left/right at every node).
 
 ### 🧠 Pattern: DFS Swap (Post-order or Pre-order both work)
+
+> [!info]- 🔍 Dry Run
+> ```text
+> Input:
+>         4
+>        / \
+>       2   7
+>      /|   |\
+>     1 3   6 9
+> 
+> invertTree(4):
+>   left  = invertTree(2)
+>     left  = invertTree(1) → returns node(1) with both children null (after recursive swaps that do nothing)
+>     right = invertTree(3) → returns node(3)
+>     swap: node(2).left, node(2).right = invertTree(right), invertTree(left)
+>          = node(3), node(1)
+>     return node(2)  (now has children 3 on left, 1 on right)
+>   right = invertTree(7)
+>     similar: swap 6 ↔ 9
+>     return node(7) with children 9, 6
+>   swap: node(4).left, node(4).right = node(7), node(2)
+>   return node(4)
+> 
+> ✅ Output:
+>         4
+>        / \
+>       7   2
+>      /|   |\
+>     9 6   3 1
+> ```
 
 > [!success]- JS
 > ```js
@@ -92,6 +122,33 @@ Mirror the tree (swap left/right at every node).
 
 `depth(node) = 1 + max(depth(left), depth(right))`. Base `null → 0`.
 
+> [!info]- 🔍 Dry Run
+> ```text
+> Tree:
+>         3
+>        / \
+>       9   20
+>           |\
+>          15 7
+> 
+> depth(3):
+>   depth(9):
+>     depth(null) = 0
+>     depth(null) = 0
+>     return 1 + max(0, 0) = 1
+>   depth(20):
+>     depth(15):
+>       depth(null) = 0
+>       depth(null) = 0
+>       return 1
+>     depth(7):
+>       return 1 (same)
+>     return 1 + max(1, 1) = 2
+>   return 1 + max(1, 2) = 3
+> 
+> ✅ Answer: 3
+> ```
+
 > [!success]- JS
 > ```js
 > const maxDepth = (r) => r ? 1 + Math.max(maxDepth(r.left), maxDepth(r.right)) : 0;
@@ -111,15 +168,32 @@ Mirror the tree (swap left/right at every node).
 
 **LC #100** · Easy
 
-### Approach
-
-```
-sameTree(a, b):
-  if both null: true
-  if one null: false
-  if vals differ: false
-  return sameTree(a.l, b.l) AND sameTree(a.r, b.r)
-```
+> [!info]- 🔍 Dry Run: p=[1,2,3], q=[1,2,3]
+> ```text
+> Trees:
+>     1       1
+>    / \     / \
+>   2   3   2   3
+> 
+> sameTree(p=1, q=1):
+>   both not null, p.val==q.val (1==1) ✓
+>   sameTree(p.left=2, q.left=2):
+>     1==1 wait, vals are 2==2 ✓
+>     sameTree(null, null) → true
+>     sameTree(null, null) → true
+>     return true
+>   sameTree(p.right=3, q.right=3):
+>     similar → true
+>   return true && true = true
+> 
+> ✅ Answer: true
+> 
+> ─────────────────────────────────────────
+> Counter-example: p=[1,2,1] vs q=[1,1,2]
+>   p.val==q.val (1==1) ✓
+>   sameTree(p.left=2, q.left=1): vals 2!=1 → false
+>   short-circuit → false
+> ```
 
 > [!success]- JS
 > ```js
@@ -152,6 +226,29 @@ Is `subRoot` a subtree of `root`?
 
 DFS over root: at each node, check `isSameTree(node, subRoot)`. Recurse children.
 
+> [!info]- 🔍 Dry Run: root=[3,4,5,1,2], sub=[4,1,2]
+> ```text
+> root:           sub:
+>     3            4
+>    / \          / \
+>   4   5        1   2
+>  / \
+> 1   2
+> 
+> isSubtree(3, sub):
+>   isSameTree(3, sub=4)? 3!=4 → false
+>   isSubtree(3.left=4, sub):
+>     isSameTree(4, 4)?
+>       4==4 ✓
+>       isSameTree(1, 1) → true
+>       isSameTree(2, 2) → true
+>       → true!
+>     return true
+>   short-circuit → return true
+> 
+> ✅ Answer: true
+> ```
+
 > [!success]- JS
 > ```js
 > const isSubtree = (root, sub) => {
@@ -182,6 +279,39 @@ Longest path **(in edges)** between any two nodes.
 ### 🧠 Pattern: DFS Returns Depth, Global Tracks Best
 
 > A path through node `n` has length `leftDepth + rightDepth`. Update global; return `1 + max(leftDepth, rightDepth)` to the parent.
+
+> [!info]- 🔍 Dry Run: [1,2,3,4,5]
+> ```text
+> Tree:
+>     1
+>    / \
+>   2   3
+>  / \
+> 4   5
+> 
+> best = 0  (global)
+> 
+> dfs(1):
+>   dfs(2):
+>     dfs(4):
+>       l = dfs(null) = 0
+>       r = dfs(null) = 0
+>       best = max(0, 0+0) = 0
+>       return 1 + max(0,0) = 1
+>     dfs(5): similarly returns 1; best stays 0 (path through 5 = 0+0 = 0)
+>     l=1, r=1
+>     best = max(0, 1+1) = 2     ← path 4→2→5 = 2 edges
+>     return 1 + max(1,1) = 2
+>   dfs(3):
+>     l=0, r=0
+>     best stays 2
+>     return 1
+>   l=2, r=1
+>   best = max(2, 2+1) = 3        ← path 4→2→1→3 (or 5→2→1→3) = 3 edges
+>   return 1 + max(2,1) = 3
+> 
+> ✅ Answer: 3
+> ```
 
 > [!success]- JS
 > ```js
@@ -226,6 +356,36 @@ Every node: `|leftDepth - rightDepth| ≤ 1`.
 
 > Avoid recomputing depth at each level. Return `-1` to short-circuit.
 
+> [!info]- 🔍 Dry Run: [3,9,20,null,null,15,7] (balanced)
+> ```text
+> Tree:
+>     3
+>    / \
+>   9   20
+>       |\
+>      15 7
+> 
+> dfs(3):
+>   l = dfs(9):
+>     dfs(null)=0, dfs(null)=0
+>     |0-0|=0 ≤ 1 OK
+>     return 1 + max(0,0) = 1
+>   r = dfs(20):
+>     dfs(15)=1, dfs(7)=1
+>     |1-1|=0 OK
+>     return 2
+>   l=1, r=2
+>   |1-2|=1 ≤ 1 OK
+>   return 3
+> 
+> ✅ Answer: true (dfs didn't return -1)
+> 
+> ─────────────────────────────────────────
+> Counter-example: [1,2,2,3,3,null,null,4,4] (left-heavy, unbalanced)
+>   At some point, l=3 r=1, diff=2 > 1 → return -1
+>   Short-circuits up → final -1 → false
+> ```
+
 > [!success]- JS
 > ```js
 > const isBalanced = (root) => {
@@ -268,6 +428,26 @@ Is the tree a mirror of itself?
 
 Two-pointer DFS: `mirror(a, b) = (a.val == b.val) && mirror(a.l, b.r) && mirror(a.r, b.l)`.
 
+> [!info]- 🔍 Dry Run: [1,2,2,3,4,4,3]
+> ```text
+> Tree:
+>        1
+>       / \
+>      2   2
+>     /|   |\
+>    3 4   4 3
+> 
+> mirror(left=2, right=2):
+>   2==2 ✓
+>   mirror(L.left=3, R.right=3):
+>     3==3 ✓; both children null → return true
+>   mirror(L.right=4, R.left=4):
+>     4==4 ✓; → true
+>   return true
+> 
+> ✅ Answer: true (symmetric)
+> ```
+
 > [!success]- JS
 > ```js
 > const isSymmetric = (root) => {
@@ -304,20 +484,42 @@ Return values grouped by level.
 
 > Queue. Each outer iteration, snapshot `len(queue)` and process exactly that many — that's one level.
 
-### Trace
-
-```
-        3
-       / \
-      9  20
-         / \
-        15  7
-
-queue=[3]  level=[3]   queue=[9,20]
-queue=[9,20]  level=[9,20]   queue=[15,7]
-queue=[15,7]  level=[15,7]   queue=[]
-return [[3],[9,20],[15,7]]
-```
+> [!info]- 🔍 Dry Run: [3,9,20,null,null,15,7]
+> ```text
+> Tree:
+>     3
+>    / \
+>   9   20
+>       |\
+>      15 7
+> 
+> queue = [node(3)], out = []
+> 
+> ─────────────────────────────────────────
+> Outer iter 1: n = len(queue) = 1
+>   level = []
+>   pop node(3): level = [3]; enqueue 9, 20
+>   queue = [9, 20]
+>   out.append([3]) → out=[[3]]
+> 
+> Outer iter 2: n = 2
+>   level = []
+>   pop 9: level = [9]; no children to enqueue (both null)
+>   pop 20: level = [9, 20]; enqueue 15, 7
+>   queue = [15, 7]
+>   out.append([9, 20]) → out=[[3],[9,20]]
+> 
+> Outer iter 3: n = 2
+>   level = []
+>   pop 15: level = [15]; no children
+>   pop 7:  level = [15, 7]; no children
+>   queue = []
+>   out.append([15, 7]) → out=[[3],[9,20],[15,7]]
+> 
+> Queue empty → exit.
+> 
+> ✅ Answer: [[3], [9, 20], [15, 7]]
+> ```
 
 > [!success]- JS
 > ```js
@@ -367,7 +569,38 @@ Values visible from the right at each level.
 
 ### Approach
 
-BFS by level; last node of each level. (Or DFS: visit right first; on first visit at a depth, record.)
+BFS by level; last node of each level.
+
+> [!info]- 🔍 Dry Run: [1,2,3,null,5,null,4]
+> ```text
+> Tree:
+>     1
+>    / \
+>   2   3
+>    \   \
+>     5   4
+> 
+> queue=[1]
+> Iter 1: n=1
+>   i=0: node=1; this is i==n-1 → out.append(1)
+>        enqueue 2 (left), 3 (right)
+>   queue = [2, 3]
+> 
+> Iter 2: n=2
+>   i=0: node=2; not last; enqueue null... wait, only enqueue non-null
+>        node(2).left=null, .right=node(5) → enqueue 5
+>   i=1: node=3; last (i==n-1) → out.append(3)
+>        enqueue null, node(4)
+>   queue = [5, 4]
+> 
+> Iter 3: n=2
+>   i=0: node=5; not last; no children
+>   i=1: node=4; last → out.append(4); no children
+>   queue = []
+> 
+> ✅ Answer: [1, 3, 4]
+>   (rightmost visible nodes per level)
+> ```
 
 > [!success]- JS
 > ```js
@@ -417,6 +650,27 @@ Root-to-leaf path summing to `target`?
 
 Top-down DFS: subtract `node.val` from target. Leaf with `target == 0` → true.
 
+> [!info]- 🔍 Dry Run: tree=[5,4,8,11,null,13,4,7,2,null,null,null,1], target=22
+> ```text
+> Path 5→4→11→2 sums to 22.
+> 
+> hasPathSum(5, 22):
+>   not leaf
+>   hasPathSum(4, 22-5=17):
+>     not leaf
+>     hasPathSum(11, 17-4=13):
+>       not leaf
+>       hasPathSum(7, 13-11=2):
+>         leaf; 7 == 2? NO → false
+>       hasPathSum(2, 2):
+>         leaf; 2 == 2 ✓ → true
+>       return true
+>     return true (short-circuit)
+>   return true
+> 
+> ✅ Answer: true
+> ```
+
 > [!success]- JS
 > ```js
 > const hasPathSum = (root, target) => {
@@ -450,6 +704,30 @@ All root-to-leaf paths summing to target.
 ### 🧠 Pattern: DFS + Backtracking
 
 > Push node onto path; recurse; pop on return.
+
+> [!info]- 🔍 Dry Run: tree=[5,4,8,11,null,13,4,7,2,null,null,5,1], target=22
+> ```text
+> Same tree as P10 but with two valid paths now.
+> 
+> dfs(5, 22): path=[5]
+>   dfs(4, 17): path=[5,4]
+>     dfs(11, 13): path=[5,4,11]
+>       dfs(7, 2): leaf; 7!=2 → skip. pop 7. path=[5,4,11]
+>       dfs(2, 2): leaf; 2==2 ✓ → out.append([5,4,11,2]). pop 2.
+>     pop 11
+>   pop 4
+>   dfs(8, 17): path=[5,8]
+>     dfs(13, 9): path=[5,8,13]
+>       leaf? (let's assume yes per modified test). 13!=9 → skip.
+>     pop 13
+>     dfs(4, 9): path=[5,8,4]
+>       dfs(5, 5): leaf; 5==5 ✓ → out.append([5,8,4,5]). pop.
+>       dfs(1, 5): leaf; 1!=5 → skip
+>     pop 4
+>   pop 8
+> 
+> ✅ Answer: [[5,4,11,2], [5,8,4,5]]
+> ```
 
 > [!success]- JS
 > ```js
@@ -496,6 +774,30 @@ All root-to-leaf paths summing to target.
 
 > If both p, q < root → LCA in left. If both > root → LCA in right. Else, root is the split point = LCA.
 
+> [!info]- 🔍 Dry Run: root=[6,2,8,0,4,7,9,null,null,3,5], p=2, q=8
+> ```text
+> Tree:
+>          6
+>         / \
+>        2   8
+>       /|   |\
+>      0 4   7 9
+>       /|
+>      3 5
+> 
+> lca(6, p=2, q=8):
+>   p.val=2 < 6, q.val=8 > 6 → split point → return 6
+> 
+> ✅ Answer: 6
+> 
+> ─────────────────────────────────────────
+> p=2, q=4:
+>   lca(6): both 2,4 < 6 → go left
+>   lca(2): p.val=2 (not <), q.val=4 (not >) → split! return 2
+> 
+> ✅ Answer: 2
+> ```
+
 > [!success]- JS
 > ```js
 > const lowestCommonAncestorBST = (root, p, q) => {
@@ -526,6 +828,35 @@ Not a BST — general binary tree.
 ### 🧠 Pattern: DFS Returns "Found Either"
 
 > If current node is p or q → return self. Else, recurse children. If both sides return non-null → current is LCA. Else, return the non-null side.
+
+> [!info]- 🔍 Dry Run: root=[3,5,1,6,2,0,8,null,null,7,4], p=5, q=1
+> ```text
+> Tree:
+>         3
+>        / \
+>       5   1
+>      /|   |\
+>     6 2   0 8
+>      /|
+>     7 4
+> 
+> lca(3, p=5, q=1):
+>   root != p, root != q
+>   L = lca(5, 5, 1) = 5    (node 5 itself is p, returns 5)
+>   R = lca(1, 5, 1) = 1    (node 1 is q)
+>   both L and R non-null → root=3 is LCA → return 3
+> 
+> ✅ Answer: 3
+> 
+> ─────────────────────────────────────────
+> p=5, q=4 (q is descendant of p):
+>   lca(3,5,4):
+>     L=lca(5,5,4): 5 is p → return 5    (doesn't look further; q is below)
+>     R=lca(1,5,4): both descendants not p/q → both null → return null
+>     L non-null only → return 5
+> 
+> ✅ Answer: 5
+> ```
 
 > [!success]- JS
 > ```js
@@ -563,6 +894,35 @@ Not a BST — general binary tree.
 
 > Recurse with `(lo, hi)`. At node, must have `lo < node.val < hi`. Left child gets `(lo, node.val)`; right gets `(node.val, hi)`.
 
+> [!info]- 🔍 Dry Run: [5,1,4,null,null,3,6]
+> ```text
+> Tree:        5
+>             / \
+>            1   4
+>               / \
+>              3   6
+> 
+> NOTE: 3 is in right subtree of 5; should be > 5 but is 3 — invalid BST.
+> 
+> isValidBST(5, lo=-INF, hi=INF):
+>   -INF < 5 < INF ✓
+>   isValidBST(1, lo=-INF, hi=5):
+>     -INF < 1 < 5 ✓
+>     null children OK → true
+>   isValidBST(4, lo=5, hi=INF):
+>     5 < 4? NO → return false
+>   short-circuit → return false
+> 
+> ✅ Answer: false
+> 
+> ─────────────────────────────────────────
+> Valid example: [2,1,3]
+>   isValidBST(2, -INF, INF): ✓
+>     isValidBST(1, -INF, 2): -INF<1<2 ✓ → true
+>     isValidBST(3, 2, INF): 2<3<INF ✓ → true
+>   → true
+> ```
+
 > [!success]- JS
 > ```js
 > const isValidBST = (root, lo = -Infinity, hi = Infinity) => {
@@ -593,6 +953,39 @@ Not a BST — general binary tree.
 ### 🧠 Pattern: In-Order Traversal (yields sorted)
 
 > Iterative in-order with stack. Count nodes visited; return on k.
+
+> [!info]- 🔍 Dry Run: root=[3,1,4,null,2], k=1
+> ```text
+> Tree:
+>     3
+>    / \
+>   1   4
+>    \
+>     2
+> 
+> Iterative in-order:
+>   st = [], cur = 3
+> 
+>   Outer loop: cur or st
+>     while cur: push, go left
+>       push 3, cur=1
+>       push 1, cur=null
+>     cur = st.pop() = 1
+>     k -= 1 → k=0. k==0 → return cur.val = 1
+> 
+> ✅ Answer: 1
+> 
+> ─────────────────────────────────────────
+> Same tree, k=3:
+>   push 3, push 1 (going left)
+>   pop 1, k=2 not 0; cur = 1.right = 2
+>     push 2, push nothing (2 has no left)
+>     pop 2, k=1; cur = 2.right = null
+>   cur null, st has [3]
+>   pop 3, k=0 → return 3
+> 
+> ✅ Answer: 3
+> ```
 
 > [!success]- JS
 > ```js
@@ -633,8 +1026,47 @@ Not a BST — general binary tree.
 ### 🧠 Pattern: Preorder Root + Inorder Split
 
 > Preorder gives the **root** (first elem). Inorder lets you split into left/right subtrees by finding root's index. Recurse.
+
+> [!info]- 🔍 Dry Run: preorder=[3,9,20,15,7], inorder=[9,3,15,20,7]
+> ```text
+> idx map (value → inorder index):
+>   {9:0, 3:1, 15:2, 20:3, 7:4}
 > 
-> Use a hash map of value → inorder index for O(1) lookup → O(n) total.
+> p (preorder cursor) = 0
+> 
+> build(l=0, r=4):    inorder range covering all
+>   val = preorder[p=0] = 3; p=1
+>   m = idx[3] = 1
+>   left = build(0, 0):
+>     val = preorder[1] = 9; p=2
+>     m = 0
+>     left = build(0, -1) → null (l > r)
+>     right = build(1, 0) → null
+>     return node(9, null, null)
+>   right = build(2, 4):
+>     val = preorder[2] = 20; p=3
+>     m = idx[20] = 3
+>     left = build(2, 2):
+>       val = preorder[3] = 15; p=4
+>       m = 2
+>       left = build(2, 1) → null
+>       right = build(3, 2) → null
+>       return node(15)
+>     right = build(4, 4):
+>       val = preorder[4] = 7; p=5
+>       m = 4
+>       null, null
+>       return node(7)
+>     return node(20, 15, 7)
+>   return node(3, 9, node(20, 15, 7))
+> 
+> ✅ Answer:
+>         3
+>        / \
+>       9   20
+>           |\
+>          15 7
+> ```
 
 > [!success]- JS
 > ```js
@@ -676,13 +1108,49 @@ Not a BST — general binary tree.
 
 ## P17: Binary Tree Maximum Path Sum
 
-**LC #124** · Hard
+**LC #124** · **Hard**
 
 Max sum of any path (any node to any node, edges may go up-and-down at one apex).
 
 ### 🧠 Pattern: DFS Returns "Best Downward Gain", Global Tracks "Through-Me"
 
 > Each node: best path going down = `node.val + max(0, leftGain, rightGain)` returned upward (clamp negatives to 0 — don't take them). Update global with `node.val + max(0,L) + max(0,R)` (through-me path).
+
+> [!info]- 🔍 Dry Run: [-10,9,20,null,null,15,7]
+> ```text
+> Tree:
+>     -10
+>     / \
+>    9   20
+>        |\
+>       15 7
+> 
+> best = -INF (global)
+> 
+> gain(-10):
+>   L = max(0, gain(9))
+>     gain(9):
+>       L = max(0, gain(null)) = 0
+>       R = max(0, gain(null)) = 0
+>       through-me: 9+0+0 = 9; best = max(-INF, 9) = 9
+>       return 9 + max(0,0) = 9
+>     → L_outer = 9
+>   R = max(0, gain(20))
+>     gain(20):
+>       L = max(0, gain(15)):
+>         gain(15): both children 0; through=15; best=max(9, 15)=15; return 15
+>         → 15
+>       R = max(0, gain(7)):
+>         gain(7): through=7; best=max(15, 7)=15 (unchanged); return 7
+>         → 7
+>       through-me: 20 + 15 + 7 = 42; best = max(15, 42) = 42
+>       return 20 + max(15, 7) = 35
+>     → R_outer = 35
+>   through-me: -10 + 9 + 35 = 34; best = max(42, 34) = 42
+>   return -10 + max(9, 35) = 25
+> 
+> ✅ Answer: 42 (path 15 → 20 → 7)
+> ```
 
 > [!success]- JS
 > ```js
@@ -721,11 +1189,55 @@ Max sum of any path (any node to any node, edges may go up-and-down at one apex)
 
 ## P18: Serialize and Deserialize Binary Tree
 
-**LC #297** · Hard
+**LC #297** · **Hard**
 
 ### 🧠 Pattern: Preorder + Null Markers
 
 > Serialize: preorder DFS, output `val,` for nodes, `#,` for null. Deserialize: split, consume tokens with a generator.
+
+> [!info]- 🔍 Dry Run
+> ```text
+> Tree:        1
+>             / \
+>            2   3
+>               / \
+>              4   5
+> 
+> Serialize (preorder with nulls):
+>   visit 1 → "1"
+>   visit 2 → "1,2"
+>   2.left=null → "1,2,#"
+>   2.right=null → "1,2,#,#"
+>   visit 3 → "1,2,#,#,3"
+>   visit 4 → "1,2,#,#,3,4"
+>   4.left null → "1,2,#,#,3,4,#"
+>   4.right null → "1,2,#,#,3,4,#,#"
+>   visit 5 → "1,2,#,#,3,4,#,#,5"
+>   5.left null → "...,#"
+>   5.right null → "...,#"
+> 
+> Output: "1,2,#,#,3,4,#,#,5,#,#"
+> 
+> ─────────────────────────────────────────
+> Deserialize "1,2,#,#,3,4,#,#,5,#,#":
+>   iter tokens, build recursive:
+>     build(): v="1" → node(1)
+>       node.left = build(): v="2" → node(2)
+>         node(2).left = build(): v="#" → null
+>         node(2).right = build(): v="#" → null
+>         return node(2)
+>       node.right = build(): v="3" → node(3)
+>         node(3).left = build(): v="4" → node(4)
+>           node(4).left = null
+>           node(4).right = null
+>           return node(4)
+>         node(3).right = build(): v="5" → node(5)
+>           null, null → return node(5)
+>         return node(3)
+>       return node(1) with kids
+> 
+> ✅ Round-trip successful.
+> ```
 
 > [!success]- JS
 > ```js
