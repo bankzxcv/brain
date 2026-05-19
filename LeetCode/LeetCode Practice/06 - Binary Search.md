@@ -36,10 +36,10 @@ status: in-progress
 | P8 | Search a 2D Matrix II | 240 | Med | Staircase (not BS) |
 | P9 | Time Based Key-Value Store | 981 | Med | Floor lookup |
 | P10 | Find Peak Element | 162 | Med | Direction of slope |
-| P11 | Median of Two Sorted Arrays | 4 | Hard | Partition |
+| P11 | Median of Two Sorted Arrays | 4 | **Hard** | Partition |
 | P12 | Koko Eating Bananas | 875 | Med | Search on answer |
 | P13 | Capacity to Ship Packages | 1011 | Med | Search on answer |
-| P14 | Split Array Largest Sum | 410 | Hard | Search on answer |
+| P14 | Split Array Largest Sum | 410 | **Hard** | Search on answer |
 
 ---
 
@@ -63,14 +63,41 @@ while l ≤ r:
 return -1
 ```
 
-### Trace
-
-```
-nums=[1,3,5,7,9,11]  target=7
-l=0 r=5 mid=2 nums[2]=5 <7 → l=3
-l=3 r=5 mid=4 nums[4]=9 >7 → r=3
-l=3 r=3 mid=3 nums[3]=7 = ✓ return 3
-```
+> [!info]- 🔍 Dry Run: nums=[1,3,5,7,9,11], target=7
+> ```text
+> Setup:
+>   l=0, r=5
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid = (0+5)/2 = 2
+>   nums[2] = 5
+>   5 vs target=7:  5 < 7 → answer is on the right
+>   l = mid + 1 = 3
+>   State: l=3, r=5
+> 
+> Iter 2:
+>   mid = (3+5)/2 = 4
+>   nums[4] = 9
+>   9 > 7 → answer on the left
+>   r = mid - 1 = 3
+>   State: l=3, r=3
+> 
+> Iter 3:
+>   mid = 3
+>   nums[3] = 7
+>   7 == target → MATCH
+>   return 3
+> 
+> ✅ Answer: 3
+> 
+> ─────────────────────────────────────────
+> Counter-example: target=4 (not present)
+>   l=0 r=5 mid=2 nums[2]=5 > 4 → r=1
+>   l=0 r=1 mid=0 nums[0]=1 < 4 → l=1
+>   l=1 r=1 mid=1 nums[1]=3 < 4 → l=2
+>   l=2 > r=1 → exit → return -1
+> ```
 
 > [!success]- JS
 > ```js
@@ -112,6 +139,38 @@ Return index where `target` should be inserted to keep array sorted.
 
 > Find smallest index `i` with `nums[i] ≥ target`. Same skeleton, return `l` when loop exits.
 
+> [!info]- 🔍 Dry Run: nums=[1,3,5,6], target=5
+> ```text
+> Setup:
+>   l=0, r=4 (note: r=len, not len-1, in half-open)
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid = (0+4)/2 = 2
+>   nums[2] = 5
+>   5 < target=5? NO → answer ≤ mid
+>   r = mid = 2
+>   State: l=0, r=2
+> 
+> Iter 2:
+>   mid = 1
+>   nums[1] = 3
+>   3 < 5? YES → answer > mid
+>   l = mid + 1 = 2
+>   State: l=2, r=2
+> 
+> Loop exits (l == r).
+> 
+> ✅ Answer: l = 2   (position where 5 already is — first index ≥ 5)
+> 
+> ─────────────────────────────────────────
+> Example target=2:
+>   l=0 r=4 mid=2 nums[2]=5 >=2 → r=2
+>   l=0 r=2 mid=1 nums[1]=3 >=2 → r=1
+>   l=0 r=1 mid=0 nums[0]=1 < 2 → l=1
+>   l=1 r=1 exit → return 1 (insert position: between nums[0]=1 and nums[1]=3)
+> ```
+
 > [!success]- JS
 > ```js
 > const searchInsert = (nums, target) => {
@@ -149,6 +208,29 @@ Find first bad version. Sequence is `[good, good, ..., bad, bad, ...]` — monot
 ### 🧠 Pattern: Boolean Monotone
 
 > Reframe: find smallest `v` with `isBadVersion(v) = true`. Half-open template.
+
+> [!info]- 🔍 Dry Run: n=5, first bad = 4 (versions 1,2,3 good; 4,5 bad)
+> ```text
+> Setup:
+>   l=1, r=5
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid = (1+5)/2 = 3
+>   isBadVersion(3) → false  (good)
+>   l = mid + 1 = 4
+>   State: l=4, r=5
+> 
+> Iter 2:
+>   mid = (4+5)/2 = 4
+>   isBadVersion(4) → true  (bad)
+>   r = mid = 4
+>   State: l=4, r=4
+> 
+> Loop exits.
+> 
+> ✅ Answer: 4
+> ```
 
 > [!success]- JS
 > ```js
@@ -189,6 +271,29 @@ Return `[first, last]` indices of target.
 ### 🧠 Pattern: Two Bounds (Lower + Upper)
 
 > first = lower_bound(target). last = lower_bound(target+1) - 1.
+
+> [!info]- 🔍 Dry Run: nums=[5,7,7,8,8,10], target=8
+> ```text
+> First call lower(8) — smallest index with nums[i] ≥ 8:
+>   l=0 r=6 mid=3 nums[3]=8 ≥ 8 → r=3
+>   l=0 r=3 mid=1 nums[1]=7 < 8 → l=2
+>   l=2 r=3 mid=2 nums[2]=7 < 8 → l=3
+>   l=3 r=3 exit → lo = 3
+> 
+> Check: nums[3]=8 == 8?  YES → first = 3
+> 
+> ─────────────────────────────────────────
+> Second call lower(9) — smallest index with nums[i] ≥ 9:
+>   l=0 r=6 mid=3 nums[3]=8 < 9 → l=4
+>   l=4 r=6 mid=5 nums[5]=10 ≥ 9 → r=5
+>   l=4 r=5 mid=4 nums[4]=8 < 9 → l=5
+>   l=5 r=5 exit → 5
+> 
+> last = lower(9) - 1 = 4
+> 
+> ✅ Answer: [3, 4]
+>   Verify: nums[3..4] = [8, 8] ✓
+> ```
 
 > [!success]- JS
 > ```js
@@ -237,16 +342,35 @@ Sorted array rotated at some pivot. Find target.
 
 > At each step, `[l..mid]` or `[mid..r]` is sorted. Check which; if target in sorted half, narrow there; else go the other way.
 
-### Trace
-
-```
-nums=[4,5,6,7,0,1,2]  target=0
-l=0 r=6 mid=3 nums[3]=7
-  left [4..7] sorted. Is 0 in [4,7]? no → go right. l=4
-l=4 r=6 mid=5 nums[5]=1
-  right [1,2] sorted. Is 0 in [1,2]? no → go left. r=4
-l=4 r=4 mid=4 nums[4]=0 ✓ return 4
-```
+> [!info]- 🔍 Dry Run: nums=[4,5,6,7,0,1,2], target=0
+> ```text
+> Setup:
+>   l=0, r=6
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid = 3, nums[3] = 7
+>   7 == 0? NO
+>   Is LEFT [l..mid] sorted? nums[l=0]=4 ≤ nums[mid]=7 → YES, left is sorted
+>     Is target=0 in [4, 7)? NO (0 < 4)
+>     → search RIGHT: l = mid + 1 = 4
+>   State: l=4, r=6
+> 
+> Iter 2:
+>   mid = 5, nums[5] = 1
+>   1 == 0? NO
+>   Is LEFT [4..5] sorted? nums[4]=0 ≤ nums[5]=1 → YES
+>     Is target=0 in [0, 1)? YES (0 ≤ 0 < 1)
+>     → search LEFT: r = mid - 1 = 4
+>   State: l=4, r=4
+> 
+> Iter 3:
+>   mid = 4, nums[4] = 0
+>   0 == 0 → MATCH
+>   return 4
+> 
+> ✅ Answer: 4
+> ```
 
 > [!success]- JS
 > ```js
@@ -297,6 +421,34 @@ l=4 r=4 mid=4 nums[4]=0 ✓ return 4
 
 > If `nums[mid] > nums[r]`, min is in right half. Else, in left half (including mid).
 
+> [!info]- 🔍 Dry Run: nums=[4,5,6,7,0,1,2]
+> ```text
+> Setup:
+>   l=0, r=6
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid = 3, nums[3] = 7, nums[r=6] = 2
+>   7 > 2 → min in RIGHT half (strictly after mid)
+>   l = mid + 1 = 4
+>   State: l=4, r=6
+> 
+> Iter 2:
+>   mid = 5, nums[5] = 1, nums[r=6] = 2
+>   1 > 2? NO → min in LEFT half (including mid)
+>   r = mid = 5
+>   State: l=4, r=5
+> 
+> Iter 3:
+>   mid = 4, nums[4] = 0, nums[r=5] = 1
+>   0 > 1? NO → r = mid = 4
+>   State: l=4, r=4
+> 
+> Loop exits.
+> 
+> ✅ Answer: nums[l] = nums[4] = 0
+> ```
+
 > [!success]- JS
 > ```js
 > const findMin = (nums) => {
@@ -332,6 +484,43 @@ l=4 r=4 mid=4 nums[4]=0 ✓ return 4
 ### 🧠 Pattern: Flatten Index
 
 > Treat matrix as 1D of length `m*n`. `mid` index `k` maps to `(k / cols, k % cols)`.
+
+> [!info]- 🔍 Dry Run: matrix=[[1,3,5,7],[10,11,16,20],[23,30,34,60]], target=3
+> ```text
+> rows=3, cols=4 → total 12 cells, flat indices 0..11
+>   flat[0..3]  = [1, 3, 5, 7]      (row 0)
+>   flat[4..7]  = [10, 11, 16, 20]  (row 1)
+>   flat[8..11] = [23, 30, 34, 60]  (row 2)
+> 
+> ─────────────────────────────────────────
+> l=0, r=11
+> 
+> Iter 1:
+>   mid = 5
+>   r=mid/cols=1, c=mid%cols=1 → matrix[1][1] = 11
+>   11 == 3? NO
+>   11 > 3 → r = 4
+>   State: l=0, r=4
+> 
+> Iter 2:
+>   mid = 2
+>   r=0, c=2 → matrix[0][2] = 5
+>   5 > 3 → r = 1
+>   State: l=0, r=1
+> 
+> Iter 3:
+>   mid = 0
+>   matrix[0][0] = 1
+>   1 < 3 → l = 1
+>   State: l=1, r=1
+> 
+> Iter 4:
+>   mid = 1
+>   matrix[0][1] = 3
+>   3 == 3 → MATCH return true
+> 
+> ✅ Answer: true
+> ```
 
 > [!success]- JS
 > ```js
@@ -374,15 +563,29 @@ l=4 r=4 mid=4 nums[4]=0 ✓ return 4
 
 > Start at top-right corner. If value > target → go left. If value < target → go down. Each step eliminates a row or column → O(m+n).
 
-### Trace
-
-```
-m=[[1,4,7,11],[2,5,8,12],[3,6,9,16],[10,13,14,17]]  target=5
-r=0 c=3 v=11>5 → c--
-r=0 c=2 v=7>5  → c--
-r=0 c=1 v=4<5  → r++
-r=1 c=1 v=5 ✓ return true
-```
+> [!info]- 🔍 Dry Run: matrix=[[1,4,7,11],[2,5,8,12],[3,6,9,16],[10,13,14,17]], target=5
+> ```text
+> Setup:
+>   r = 0 (top), c = 3 (rightmost)
+> 
+> ─────────────────────────────────────────
+> Step 1: r=0, c=3, m[0][3] = 11
+>   11 > 5? YES → go LEFT → c--
+>   State: r=0, c=2
+> 
+> Step 2: m[0][2] = 7
+>   7 > 5? YES → c--
+>   State: r=0, c=1
+> 
+> Step 3: m[0][1] = 4
+>   4 > 5? NO; 4 < 5? YES → go DOWN → r++
+>   State: r=1, c=1
+> 
+> Step 4: m[1][1] = 5
+>   5 == 5 → MATCH return true
+> 
+> ✅ Answer: true
+> ```
 
 > [!success]- JS
 > ```js
@@ -421,6 +624,30 @@ r=1 c=1 v=5 ✓ return true
 ### 🧠 Pattern: Floor Lookup via Binary Search
 
 > Per key, store sorted list of `(timestamp, value)`. `get` = upper_bound(ts) - 1.
+
+> [!info]- 🔍 Dry Run: set("foo","bar",1), set("foo","bar2",4), get("foo",3), get("foo",5)
+> ```text
+> After sets:
+>   data["foo"] = [(1,"bar"), (4,"bar2")]  (sorted by ts)
+> 
+> ─────────────────────────────────────────
+> get("foo", 3):
+>   binary-search upper bound of 3 in timestamps [1, 4]:
+>     l=0 r=2 mid=1: ts[1]=4 ≤ 3? NO → r=1
+>     l=0 r=1 mid=0: ts[0]=1 ≤ 3? YES → l=1
+>     exit: i=1
+>   return data["foo"][i-1=0].value = "bar"
+> 
+> ─────────────────────────────────────────
+> get("foo", 5):
+>   upper bound of 5: [1,4] both ≤ 5 → i=2
+>   return data["foo"][1].value = "bar2"
+> 
+> ─────────────────────────────────────────
+> get("foo", 0):
+>   upper bound: 0 < 1 → i=0
+>   i==0 → no value at/before this ts → return ""
+> ```
 
 > [!success]- JS
 > ```js
@@ -471,6 +698,31 @@ Find any peak (`nums[i] > nums[i-1] && nums[i] > nums[i+1]`). Edges treated as -
 
 > If `nums[mid] < nums[mid+1]`, a peak exists on the **right** (slope is climbing). Else, on the left. Half-open BS converges to a peak.
 
+> [!info]- 🔍 Dry Run: nums=[1,2,3,1]
+> ```text
+> Setup:
+>   l=0, r=3
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid = 1
+>   nums[1]=2, nums[mid+1=2]=3
+>   2 < 3? YES → slope going UP → peak is to the right
+>   l = mid + 1 = 2
+>   State: l=2, r=3
+> 
+> Iter 2:
+>   mid = 2
+>   nums[2]=3, nums[3]=1
+>   3 < 1? NO → slope going DOWN → peak is here or to the left
+>   r = mid = 2
+>   State: l=2, r=2
+> 
+> Loop exits.
+> 
+> ✅ Answer: index 2 (value 3)
+> ```
+
 > [!success]- JS
 > ```js
 > const findPeakElement = (nums) => {
@@ -501,11 +753,41 @@ Find any peak (`nums[i] > nums[i-1] && nums[i] > nums[i+1]`). Edges treated as -
 
 ## P11: Median of Two Sorted Arrays
 
-**LC #4** · Hard · O(log(min(m,n)))
+**LC #4** · **Hard** · O(log(min(m,n)))
 
 ### 🧠 Pattern: Binary Search the Partition Point
 
 > Pick `i` in A. Then `j = (m+n+1)/2 - i` in B. The split `[A[0..i-1] | A[i..]]` and `[B[0..j-1] | B[j..]]` is correct iff `A[i-1] ≤ B[j]` and `B[j-1] ≤ A[i]`. BS on `i` until both hold.
+
+> [!info]- 🔍 Dry Run: A=[1,3], B=[2,4,5,6]
+> ```text
+> Ensure A is the smaller: A=[1,3] (m=2), B=[2,4,5,6] (n=4). A is smaller ✓
+> half = (m+n+1)/2 = 3
+> 
+> ─────────────────────────────────────────
+> Iter 1: BS on i in [0..2]
+>   mid i=1, j = 3-1 = 2
+>   Partition:
+>     A_left = [1], A_right = [3]
+>     B_left = [2,4], B_right = [5,6]
+>     aL=1, aR=3; bL=4, bR=5
+>   Check: aL ≤ bR (1 ≤ 5 ✓) AND bL ≤ aR (4 ≤ 3? NO)
+>   bL > aR → A_left is too small; need more from A
+>   l = i + 1 = 2
+> 
+> Iter 2: l=2, r=2 → i=2
+>   j = 3 - 2 = 1
+>   aL = A[1]=3, aR = INF (i==m)
+>   bL = B[0]=2, bR = B[1]=4
+>   Check: aL ≤ bR (3 ≤ 4 ✓) AND bL ≤ aR (2 ≤ INF ✓)
+>   Partition valid!
+>   Total length m+n=6 even → median = (max(aL, bL) + min(aR, bR)) / 2
+>                            = (max(3,2) + min(INF,4)) / 2
+>                            = (3 + 4) / 2 = 3.5
+> 
+> ✅ Answer: 3.5
+>   Sanity: merged sorted = [1,2,3,4,5,6], median = (3+4)/2 = 3.5 ✓
+> ```
 
 > [!success]- JS
 > ```js
@@ -568,17 +850,44 @@ Min eating speed `k` so Koko finishes all piles within `h` hours. `time(k) = sum
 
 > Range: `1` to `max(piles)`.
 
-### Trace
-
-```
-piles=[3,6,7,11]  h=8
-range [1, 11]
-k=6 → ceil(3/6)+ceil(6/6)+ceil(7/6)+ceil(11/6) = 1+1+2+2=6 ≤8 → r=6
-k=3 → 1+2+3+4=10 >8 → l=4
-k=5 → 1+2+2+3=8 ≤8 → r=5
-k=4 → 1+2+2+3=8 ≤8 → r=4
-l=r=4 return 4
-```
+> [!info]- 🔍 Dry Run: piles=[3,6,7,11], h=8
+> ```text
+> Setup:
+>   l=1, r=max(piles)=11
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid k=6
+>   time(6) = ceil(3/6)+ceil(6/6)+ceil(7/6)+ceil(11/6)
+>           = 1 + 1 + 2 + 2 = 6
+>   6 ≤ 8? YES → can do with k=6, try smaller
+>   r = 6
+>   State: l=1, r=6
+> 
+> Iter 2:
+>   mid k=3
+>   time(3) = ceil(3/3)+ceil(6/3)+ceil(7/3)+ceil(11/3)
+>           = 1 + 2 + 3 + 4 = 10
+>   10 ≤ 8? NO → can't do with k=3, try larger
+>   l = 4
+>   State: l=4, r=6
+> 
+> Iter 3:
+>   mid k=5
+>   time(5) = 1+2+2+3 = 8
+>   8 ≤ 8? YES → r=5
+>   State: l=4, r=5
+> 
+> Iter 4:
+>   mid k=4
+>   time(4) = 1+2+2+3 = 8
+>   8 ≤ 8 → r=4
+>   State: l=4, r=4
+> 
+> Loop exits.
+> 
+> ✅ Answer: k = 4
+> ```
 
 > [!success]- JS
 > ```js
@@ -623,6 +932,67 @@ Min ship capacity so all packages ship in ≤ D days, in given order.
 ### Approach
 
 `can(cap) = days_needed(cap) ≤ D`. Range `[max(weights), sum(weights)]`. Same template as P12.
+
+> [!info]- 🔍 Dry Run: weights=[1,2,3,4,5,6,7,8,9,10], days=5
+> ```text
+> Setup:
+>   l = max(w) = 10  (must fit the biggest single package)
+>   r = sum(w) = 55  (ship everything in one day)
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid cap = 32
+>   Simulate: d=1, cur=0
+>     w=1: cur=1
+>     w=2: cur=3
+>     ... all fit in one load? 1+2+...+10=55 > 32
+>     Going through: load 1+2+3+4+5+6+7=28 (next 8 would overflow), d=2, cur=8
+>     8+9=17, 17+10=27, OK. Total d=2.
+>   2 ≤ 5? YES → r=32
+> 
+> Iter 2:
+>   mid = (10+32)/2 = 21
+>   Simulate: 1+2+...+6=21 fits, then need d=2 for 7,8 (15), d=3 for 9 (9), d=4 for 10 (10). d=4.
+>   4 ≤ 5? YES → r=21
+> 
+> Iter 3:
+>   mid = (10+21)/2 = 15
+>   Simulate: 1+2+3+4+5=15 d=1. 6+7=13 then +8=21>15 → 6 alone? 6+7+? 6+7=13, +8=21>15. So 6+7=13 d=2. Then 8 alone (d=3). 9+? 9+10=19>15. 9 alone d=4. 10 alone d=5. Total d=5.
+>   Actually let me redo: simulate(15):
+>     cur=0, d=1
+>     +1=1, +2=3, +3=6, +4=10, +5=15, +6=21>15 → d=2,cur=6
+>     +7=13, +8=21>15 → d=3,cur=8
+>     +9=17>15 → d=4,cur=9
+>     +10=19>15 → d=5,cur=10
+>     end: d=5
+>   5 ≤ 5? YES → r=15
+> 
+> Iter 4:
+>   mid = (10+15)/2 = 12
+>   simulate(12):
+>     +1=1, +2=3, +3=6, +4=10, +5=15>12 → d=2,cur=5
+>     +6=11, +7=18>12 → d=3,cur=7
+>     +8=15>12 → d=4, cur=8
+>     +9=17>12 → d=5, cur=9
+>     +10=19>12 → d=6, cur=10
+>     d=6
+>   6 ≤ 5? NO → l=13
+> 
+> Iter 5:
+>   mid = 14
+>   simulate(14):
+>     1+2+3+4=10, +5=15>14 → d=2,cur=5
+>     5+6=11, +7=18>14 → d=3,cur=7
+>     7+8=15>14 → d=4,cur=8
+>     8+9=17>14 → d=5,cur=9
+>     9+10=19>14 → d=6,cur=10
+>     d=6
+>   6 ≤ 5? NO → l=15
+> 
+> l=15, r=15 exit.
+> 
+> ✅ Answer: 15
+> ```
 
 > [!success]- JS
 > ```js
@@ -669,13 +1039,59 @@ Min ship capacity so all packages ship in ≤ D days, in given order.
 
 ## P14: Split Array Largest Sum
 
-**LC #410** · Hard
+**LC #410** · **Hard**
 
 Split `nums` into `m` non-empty subarrays. Minimize the **maximum subarray sum**.
 
 ### Approach
 
 Same as P13. `can(maxSum) = "can we split into ≤ m parts each ≤ maxSum"`.
+
+> [!info]- 🔍 Dry Run: nums=[7,2,5,10,8], m=2
+> ```text
+> Setup:
+>   l = max(nums) = 10
+>   r = sum(nums) = 32
+> 
+> ─────────────────────────────────────────
+> Iter 1:
+>   mid cap = 21
+>   Simulate: parts=1, cur=0
+>     +7=7, +2=9, +5=14, +10=24>21 → parts=2, cur=10
+>     +8=18 ✓
+>     parts = 2
+>   2 ≤ m=2? YES → r=21
+> 
+> Iter 2:
+>   mid = 15
+>   Simulate:
+>     +7=7, +2=9, +5=14, +10=24>15 → parts=2, cur=10
+>     +8=18>15 → parts=3, cur=8
+>     parts=3
+>   3 ≤ 2? NO → l=16
+> 
+> Iter 3:
+>   mid = 18
+>   Simulate:
+>     +7=7, +2=9, +5=14, +10=24>18 → parts=2, cur=10
+>     +8=18 ✓
+>     parts=2
+>   2 ≤ 2? YES → r=18
+> 
+> Iter 4:
+>   mid = 17
+>   Simulate:
+>     7+2+5=14, +10=24>17 → parts=2, cur=10
+>     10+8=18>17 → parts=3, cur=8
+>     parts=3
+>   3 ≤ 2? NO → l=18
+> 
+> l=18, r=18 exit.
+> 
+> ✅ Answer: 18
+>   (Split: [7,2,5,...] and [10,8] giving sums 14 and 18 → max 18)
+>   Actually let's verify: cap=18 simulation said parts=[7+2+5+? no... 7+2+5=14, +10=24 > 18 → first part = [7,2,5] sum=14; second part starts with 10, +8=18 sum=18.] ✓
+> ```
 
 > [!success]- JS
 > ```js
