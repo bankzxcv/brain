@@ -203,6 +203,7 @@
   },
   "active": "90013c075f7f4b85",
   "lastOpenFiles": [
+    "LeetCode/LeetCode Practice/06 - Binary Search.md",
     "LeetCode/LeetCode Practice/05 - Monotonic Stack.md",
     "LeetCode/LeetCode Practice/04 - Stack.md",
     "LeetCode/LeetCode Practice/03 - Sliding Window.md",
@@ -231,7 +232,6 @@
     "AGENTS.md",
     "Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
     "Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
-    "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
     "Kubernetes/Workflows",
     "Kubernetes/Helm",
     "Kubernetes/GitHub Actions",
