@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Kubernetes/Kubernetes Study.md",
+                "file": "Golang/Golang Practice/09 - Goroutines and Channels.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Kubernetes Study"
+              "title": "09 - Goroutines and Channels"
             }
           }
         ]
@@ -172,8 +172,8 @@
   },
   "active": "79fb716cdf164a39",
   "lastOpenFiles": [
-    "Golang/Golang Study.md",
     "Kubernetes/Kubernetes Study.md",
+    "Golang/Golang Study.md",
     "Drawing 2026-04-07 21.14.14.excalidraw.md",
     "Reverse Engineering/Reverse Engineering Practice/12 - Obfuscation and Deobfuscation.md",
     "Reverse Engineering/Reverse Engineering Practice/01 - Binary Fundamentals.md",
