@@ -29,7 +29,6 @@ status: in-progress
 > Negative weights or hop-limited → Bellman-Ford.
 > Dynamic connectivity / # components → Union-Find.
 > Ordering with prereqs → Topo sort.
-> All-pairs shortest → Floyd-Warshall (rare in interviews).
 
 ## Index
 
@@ -37,11 +36,11 @@ status: in-progress
 |---|---|---|---|---|
 | P1 | Course Schedule | 207 | Med | Topo sort (cycle check) |
 | P2 | Course Schedule II | 210 | Med | Topo sort (order) |
-| P3 | Alien Dictionary | 269 | Hard | Topo from constraints |
+| P3 | Alien Dictionary | 269 | **Hard** | Topo from constraints |
 | P4 | Minimum Height Trees | 310 | Med | Peeling leaves |
 | P5 | Network Delay Time | 743 | Med | Dijkstra |
 | P6 | Path with Min Effort | 1631 | Med | Dijkstra on grid |
-| P7 | Swim in Rising Water | 778 | Hard | Dijkstra (min-max) |
+| P7 | Swim in Rising Water | 778 | **Hard** | Dijkstra (min-max) |
 | P8 | Cheapest Flights Within K Stops | 787 | Med | Bellman-Ford (k+1 rounds) |
 | P9 | Number of Connected Components | 323 | Med | Union-Find |
 | P10 | Graph Valid Tree | 261 | Med | Union-Find (no cycle + connected) |
@@ -54,24 +53,56 @@ status: in-progress
 
 **LC #207** · Medium
 
-Can you finish all courses given prerequisites? = Is the prereq graph a DAG?
+Can you finish all courses given prerequisites?
 
 ### 🧠 Pattern: Topological Sort via Kahn's Algorithm
 
 > Build adjacency + in-degree. Queue all nodes with `indeg == 0`. Pop one, decrement neighbors' indeg, enqueue when they hit 0. If all nodes popped → no cycle. Else → cycle.
 
-### Trace
-
-```
-n=4, prereqs=[[1,0],[2,1],[3,2]]
-graph: 0→1, 1→2, 2→3
-indeg: 0:0, 1:1, 2:1, 3:1
-
-queue=[0]   pop 0, indeg[1]=0 → queue=[1]
-            pop 1, indeg[2]=0 → queue=[2]
-            pop 2, indeg[3]=0 → queue=[3]
-            pop 3 → done. all 4 popped → no cycle → true
-```
+> [!info]- 🔍 Dry Run: numCourses=4, prerequisites=[[1,0],[2,1],[3,2]]
+> ```text
+> Edge meaning: [a, b] means must take b before a → edge b → a
+> 
+> Build graph:
+>   0 → 1
+>   1 → 2
+>   2 → 3
+>   indeg = [0, 1, 1, 1]
+> 
+> ─────────────────────────────────────────
+> Init queue with indeg==0: q = [0]
+> done = 0
+> 
+> Pop 0: done=1
+>   for v in graph[0]=[1]:
+>     indeg[1] -= 1 → 0
+>     0 == 0 → q.append(1)
+>   q = [1]
+> 
+> Pop 1: done=2
+>   for v in graph[1]=[2]:
+>     indeg[2] -= 1 → 0
+>     q.append(2)
+>   q = [2]
+> 
+> Pop 2: done=3
+>   for v in graph[2]=[3]:
+>     indeg[3] -= 1 → 0
+>     q.append(3)
+>   q = [3]
+> 
+> Pop 3: done=4. No outgoing edges.
+> 
+> done==4==numCourses → no cycle → return true
+> 
+> ✅ Answer: true
+> 
+> ─────────────────────────────────────────
+> Counter-example: prerequisites=[[1,0],[0,1]] → cycle 0↔1
+>   graph: 0→1, 1→0; indeg = [1, 1]
+>   q = []  (no indeg==0 nodes)
+>   loop doesn't execute; done=0 ≠ 2 → return false
+> ```
 
 > [!success]- Python
 > ```python
@@ -94,8 +125,6 @@ queue=[0]   pop 0, indeg[1]=0 → queue=[1]
 >     return done == num_courses
 > ```
 
-**Variants:** DFS coloring approach (same as [[12 - Graphs]] P16).
-
 **Key takeaway:** "Can we order with prereqs?" = "Is graph a DAG?" → topo sort. Kahn's is BFS + in-degree.
 
 ---
@@ -106,9 +135,38 @@ queue=[0]   pop 0, indeg[1]=0 → queue=[1]
 
 Return one valid order (empty if impossible).
 
-### Approach
-
-Same as P1 but record the popped order.
+> [!info]- 🔍 Dry Run: numCourses=4, prerequisites=[[1,0],[2,0],[3,1],[3,2]]
+> ```text
+> Edges:
+>   0 → 1
+>   0 → 2
+>   1 → 3
+>   2 → 3
+>   indeg = [0, 1, 1, 2]
+> 
+> q = [0], out = []
+> 
+> Pop 0: out=[0]
+>   indeg[1]-=1 → 0; enq 1
+>   indeg[2]-=1 → 0; enq 2
+>   q = [1, 2]
+> 
+> Pop 1: out=[0,1]
+>   indeg[3]-=1 → 1 (not 0, don't enq)
+>   q = [2]
+> 
+> Pop 2: out=[0,1,2]
+>   indeg[3]-=1 → 0; enq 3
+>   q = [3]
+> 
+> Pop 3: out=[0,1,2,3]
+>   no outgoing
+> 
+> len(out)=4 == numCourses → return out
+> 
+> ✅ Answer: [0, 1, 2, 3]
+>   (Other valid orders exist; queue order determines which we get.)
+> ```
 
 > [!success]- Python
 > ```python
@@ -137,13 +195,42 @@ Same as P1 but record the popped order.
 
 ## P3: Alien Dictionary
 
-**LC #269** · Hard
+**LC #269** · **Hard**
 
-Given a sorted list of words in an unknown alphabet, return the character order (or "" if invalid).
-
-### Approach
-
-For each adjacent pair, find first differing chars → edge `a → b`. Topo sort. Validate "prefix anomaly" (e.g., `["abc", "ab"]` is invalid).
+> [!info]- 🔍 Dry Run: words=["wrt","wrf","er","ett","rftt"]
+> ```text
+> Find first differing char between adjacent pairs:
+>   wrt vs wrf: first diff at index 2: t vs f → edge t → f
+>   wrf vs er:  index 0: w vs e → edge w → e
+>   er vs ett:  index 1: r vs t → edge r → t
+>   ett vs rftt: index 0: e vs r → edge e → r
+> 
+> Collect all chars: {w, r, t, f, e}
+> 
+> Build graph + indeg:
+>   t → f       indeg[f]=1
+>   w → e       indeg[e]=1
+>   r → t       indeg[t]=1
+>   e → r       indeg[r]=1
+>   indeg[w]=0
+> 
+> Init q = [w]   (only w has indeg 0)
+> out = []
+> 
+> Pop w: out=[w]. graph[w]=[e]. indeg[e]-=1 → 0. enq e.
+> Pop e: out=[w,e]. graph[e]=[r]. indeg[r]-=1 → 0. enq r.
+> Pop r: out=[w,e,r]. graph[r]=[t]. indeg[t]-=1 → 0. enq t.
+> Pop t: out=[w,e,r,t]. graph[t]=[f]. indeg[f]-=1 → 0. enq f.
+> Pop f: out=[w,e,r,t,f].
+> 
+> All 5 chars processed → return "wertf"
+> 
+> ✅ Answer: "wertf"
+> 
+> ─────────────────────────────────────────
+> Edge case prefix anomaly: words=["abc","ab"]
+>   minlen=2, a[:2]="ab"==b[:2]="ab" AND len(a) > len(b) → return ""
+> ```
 
 > [!success]- Python
 > ```python
@@ -154,7 +241,7 @@ For each adjacent pair, find first differing chars → edge `a → b`. Topo sort
 >     for a, b in zip(words, words[1:]):
 >         minlen = min(len(a), len(b))
 >         if a[:minlen] == b[:minlen] and len(a) > len(b):
->             return ""  # invalid: prefix anomaly
+>             return ""
 >         for i in range(minlen):
 >             if a[i] != b[i]:
 >                 if b[i] not in graph[a[i]]:
@@ -173,9 +260,6 @@ For each adjacent pair, find first differing chars → edge `a → b`. Topo sort
 >     return ''.join(out) if len(out) == len(indeg) else ""
 > ```
 
-> [!warning] Don't forget single-letter constraints
-> Every distinct character should appear in `indeg` even if it has no inbound/outbound edges.
-
 **Key takeaway:** Extract constraints from data → topo sort. Watch for "prefix anomaly" edge case.
 
 ---
@@ -184,11 +268,41 @@ For each adjacent pair, find first differing chars → edge `a → b`. Topo sort
 
 **LC #310** · Medium
 
-Find roots that minimize tree height.
-
-### 🧠 Pattern: Peel Leaves Layer by Layer
-
-> Trees have ≤ 2 centroids. Repeatedly trim degree-1 nodes; the last 1 or 2 remaining are the answer.
+> [!info]- 🔍 Dry Run: n=6, edges=[[0,3],[1,3],[2,3],[4,3],[5,4]]
+> ```text
+> Graph (undirected):
+>   3: {0,1,2,4}
+>   0: {3}
+>   1: {3}
+>   2: {3}
+>   4: {3,5}
+>   5: {4}
+> 
+> Leaves (degree 1): 0, 1, 2, 5
+> 
+> remaining = 6
+> leaves queue = [0, 1, 2, 5]
+> 
+> ─────────────────────────────────────────
+> Round 1: size=4, remaining=6-4=2 (≤2, exit before processing this round)
+>   Wait, condition is "while remaining > 2", so we process this round only if remaining was > 2 BEFORE decrement.
+> 
+> Let me re-read: while remaining > 2.
+>   Initial remaining=6 > 2, enter loop:
+>     size=4 (current leaves count)
+>     remaining -= 4 → 2
+>     for each leaf, remove from graph; if neighbor becomes degree 1, push:
+>       leaf 0: graph[3] removes 0 → 3 still has {1,2,4} (deg 3)
+>       leaf 1: graph[3] removes 1 → deg 2
+>       leaf 2: graph[3] removes 2 → deg 1 → push 3
+>       leaf 5: graph[4] removes 5 → 4 has deg 1 → push 4
+>     leaves new queue = [3, 4]
+>   remaining=2 == 2, exit loop.
+> 
+> Return list(leaves) = [3, 4]
+> 
+> ✅ Answer: [3, 4]
+> ```
 
 > [!success]- Python
 > ```python
@@ -221,11 +335,33 @@ Find roots that minimize tree height.
 
 **LC #743** · Medium · Dijkstra
 
-Min time for signal from `k` to reach all nodes.
-
-### 🧠 Pattern: Dijkstra's Algorithm
-
-> Min-heap of `(dist, node)`. Pop smallest, relax neighbors. Skip if already finalized.
+> [!info]- 🔍 Dry Run: times=[[2,1,1],[2,3,1],[3,4,1]], n=4, k=2
+> ```text
+> Graph: 2 → 1 (w=1), 2 → 3 (w=1), 3 → 4 (w=1)
+> 
+> dist = {}
+> h = [(0, 2)]
+> 
+> ─────────────────────────────────────────
+> Pop (0, 2): dist[2] = 0
+>   for (1, 1): not in dist → push (0+1, 1)
+>   for (3, 1): not in dist → push (0+1, 3)
+>   h = [(1,1), (1,3)]
+> 
+> Pop (1, 1): dist[1] = 1
+>   no outgoing
+> 
+> Pop (1, 3): dist[3] = 1
+>   for (4, 1): push (2, 4)
+>   h = [(2,4)]
+> 
+> Pop (2, 4): dist[4] = 2
+> 
+> All 4 nodes reached.
+> Result = max(dist.values()) = 2
+> 
+> ✅ Answer: 2
+> ```
 
 > [!success]- Python
 > ```python
@@ -247,9 +383,6 @@ Min time for signal from `k` to reach all nodes.
 >     return max(dist.values()) if len(dist) == n else -1
 > ```
 
-> [!tip] Dijkstra ≠ BFS
-> BFS implicitly assumes weight=1. Dijkstra generalizes to non-negative weights by always popping the smallest distance.
-
 **Key takeaway:** Non-negative weighted shortest path → Dijkstra (PQ-based BFS).
 
 ---
@@ -258,11 +391,42 @@ Min time for signal from `k` to reach all nodes.
 
 **LC #1631** · Medium
 
-Grid; cost of a path = max abs diff between adjacent cells. Min cost from top-left to bottom-right.
-
 ### 🧠 Pattern: Dijkstra Where "Distance" = Path's Maximum Edge
 
-> Replace `+` with `max` in relaxation: new_dist = `max(dist[u], |h[u] - h[v]|)`. Same PQ skeleton.
+> [!info]- 🔍 Dry Run: heights=[[1,2,2],[3,8,2],[5,3,5]]
+> ```text
+> dist[][] init INF; dist[0][0]=0
+> h = [(0, 0, 0)]
+> 
+> Pop (0, 0, 0):
+>   neighbors:
+>     (1,0): |3-1|=2 → nd = max(0, 2) = 2; push (2, 1, 0). dist[1][0]=2
+>     (0,1): |2-1|=1 → nd = max(0, 1) = 1; push (1, 0, 1). dist[0][1]=1
+> 
+> Pop (1, 0, 1):
+>   (0,0) seen-equivalent (dist 0, smaller); skip
+>   (0,2): |2-2|=0 → max(1, 0) = 1; dist[0][2]=1; push (1, 0, 2)
+>   (1,1): |8-2|=6 → max(1, 6) = 6; dist[1][1]=6; push (6, 1, 1)
+> 
+> Pop (1, 0, 2):
+>   (1,2): |2-2|=0 → max(1, 0) = 1; dist[1][2]=1; push
+> 
+> Pop (1, 1, 2):  same effort 1
+>   (2,2): |5-2|=3 → max(1, 3) = 3; dist[2][2]=3; push (3, 2, 2)
+> 
+> Pop (2, 1, 0):
+>   (2,0): |5-3|=2 → max(2, 2) = 2; dist[2][0]=2; push
+> 
+> Pop (2, 2, 0):
+>   (2,1): |3-5|=2 → max(2, 2) = 2; dist[2][1]=2; push
+> 
+> Pop (2, 2, 1): updated dist[2][2] possibly? dist[2][2] was 3.
+>   (2,2): |5-3|=2 → max(2, 2) = 2 < 3 → update dist[2][2]=2; push (2, 2, 2)
+> 
+> Pop (2, 2, 2): target! return 2.
+> 
+> ✅ Answer: 2
+> ```
 
 > [!success]- Python
 > ```python
@@ -293,13 +457,34 @@ Grid; cost of a path = max abs diff between adjacent cells. Min cost from top-le
 
 ## P7: Swim in Rising Water
 
-**LC #778** · Hard
-
-Grid; cost = max cell-height along path. Min cost from top-left to bottom-right.
+**LC #778** · **Hard**
 
 ### Approach
 
-Same as P6 — Dijkstra with `max` as the combiner. Or binary-search on answer (cleaner).
+Same as P6 — Dijkstra with `max` as the combiner.
+
+> [!info]- 🔍 Dry Run: grid=[[0,2],[1,3]]
+> ```text
+> Start at (0,0) elevation 0. Target (1,1).
+> 
+> h = [(0, 0, 0)]
+> seen = {(0,0)}
+> 
+> Pop (0, 0, 0): not target
+>   neighbors:
+>     (1,0): elev=1; cost = max(0, 1) = 1; push (1, 1, 0); seen add
+>     (0,1): elev=2; cost = max(0, 2) = 2; push (2, 0, 1); seen add
+> 
+> Pop (1, 1, 0): not target
+>   (1,1): elev=3; cost = max(1, 3) = 3; push (3, 1, 1); seen add
+> 
+> Pop (2, 0, 1): not target
+>   (1,1): in seen
+> 
+> Pop (3, 1, 1): target → return 3
+> 
+> ✅ Answer: 3
+> ```
 
 > [!success]- Python
 > ```python
@@ -328,9 +513,29 @@ Same as P6 — Dijkstra with `max` as the combiner. Or binary-search on answer (
 
 ### 🧠 Pattern: Bellman-Ford with K+1 Relaxation Rounds
 
-> Each Bellman-Ford round captures one additional hop. Run K+1 rounds.
+> [!info]- 🔍 Dry Run: n=3, flights=[[0,1,100],[1,2,100],[0,2,500]], src=0, dst=2, k=1
+> ```text
+> prices = [INF, INF, INF]
+> prices[0] = 0
 > 
-> **Why not Dijkstra?** Dijkstra finalizes nodes; can miss the right answer when the cheapest path uses more hops than the local optimum.
+> Round 1 (allow 1 hop): snapshot prices=[0, INF, INF]
+>   edge (0,1,100): snapshot[0]+100=100 < prices[1] → prices[1]=100
+>   edge (1,2,100): snapshot[1]=INF, can't use
+>   edge (0,2,500): snapshot[0]+500=500 < prices[2] → prices[2]=500
+>   prices = [0, 100, 500]
+> 
+> Round 2 (allow 2 hops): snapshot prices=[0, 100, 500]
+>   edge (0,1,100): 0+100=100, not < prices[1]=100; no update
+>   edge (1,2,100): 100+100=200 < prices[2]=500 → prices[2]=200
+>   edge (0,2,500): no improvement
+>   prices = [0, 100, 200]
+> 
+> Note: k=1 stops means at most 2 edges. We ran k+1=2 rounds.
+> 
+> Return prices[dst=2] = 200
+> 
+> ✅ Answer: 200
+> ```
 
 > [!success]- Python
 > ```python
@@ -359,7 +564,32 @@ Same as P6 — Dijkstra with `max` as the combiner. Or binary-search on answer (
 
 ### 🧠 Pattern: Union-Find (DSU)
 
-> Start with n separate components. Each edge → union. Final count = remaining distinct roots.
+> [!info]- 🔍 Dry Run: n=5, edges=[[0,1],[1,2],[3,4]]
+> ```text
+> parent = [0,1,2,3,4]   (each its own root)
+> count = 5
+> 
+> ─────────────────────────────────────────
+> edge (0,1):
+>   find(0)=0, find(1)=1; different → union
+>   parent[0] = 1 (or parent[1]=0; either way)
+>   count = 4
+> 
+> edge (1,2):
+>   find(1)=1 (parent[1]=1)
+>   find(2)=2; different → union
+>   parent[1] = 2
+>   count = 3
+> 
+> edge (3,4):
+>   find(3)=3, find(4)=4; different → union
+>   parent[3] = 4
+>   count = 2
+> 
+> Final: components {0,1,2} and {3,4}. count = 2.
+> 
+> ✅ Answer: 2
+> ```
 
 > [!success]- Python
 > ```python
@@ -390,11 +620,25 @@ Same as P6 — Dijkstra with `max` as the combiner. Or binary-search on answer (
 
 **LC #261** · Medium
 
-Tree iff: connected AND no cycle. With n nodes, exactly n-1 edges + no cycle ⇒ tree.
-
-### Approach
-
-DSU: every union should connect two different components. Cycle = unioning already-connected nodes.
+> [!info]- 🔍 Dry Run: n=5, edges=[[0,1],[0,2],[0,3],[1,4]]
+> ```text
+> Check: len(edges)=4 == n-1=4 ✓
+> 
+> parent = [0,1,2,3,4]
+> 
+> (0,1): find=0,1 diff → parent[0]=1; ok
+> (0,2): find(0): parent[0]=1, parent[1]=1, so find(0)=1. find(2)=2; union; parent[1]=2.
+> (0,3): find(0)=2; find(3)=3; union; parent[2]=3
+> (1,4): find(1)=3; find(4)=4; union; parent[3]=4
+> 
+> All edges processed without cycle → return true
+> 
+> ✅ Answer: true
+> 
+> ─────────────────────────────────────────
+> Cycle example: n=5, edges=[[0,1],[1,2],[2,3],[1,3],[1,4]]
+>   len(edges)=5, n-1=4 → 5 != 4 → return false immediately
+> ```
 
 > [!success]- Python
 > ```python
@@ -421,11 +665,16 @@ DSU: every union should connect two different components. Cycle = unioning alrea
 
 **LC #684** · Medium
 
-Find the extra edge that creates a cycle. Return the one that appears **last** in the input.
-
-### Approach
-
-DSU: process edges in order. The first edge that connects two already-connected nodes is the answer.
+> [!info]- 🔍 Dry Run: edges=[[1,2],[1,3],[2,3]]
+> ```text
+> n = 3, parent = [0,1,2,3]   (1-indexed for convenience)
+> 
+> edge (1,2): find=1,2 diff → union; parent[1]=2
+> edge (1,3): find(1)=2; find(3)=3; diff → union; parent[2]=3
+> edge (2,3): find(2)=3; find(3)=3; SAME → cycle detected → return [2,3]
+> 
+> ✅ Answer: [2, 3]   (the edge that closes the cycle)
+> ```
 
 > [!success]- Python
 > ```python
@@ -451,12 +700,42 @@ DSU: process edges in order. The first edge that connects two already-connected 
 
 **LC #1584** · Medium · MST
 
-Connect all points; cost = Manhattan distance. Min total cost.
-
-### 🧠 Pattern: Minimum Spanning Tree (Prim or Kruskal)
-
-> Prim's: grow MST one node at a time using min-heap.
-> Kruskal's: sort all edges, union-find to add if doesn't cycle.
+> [!info]- 🔍 Dry Run: points=[[0,0],[2,2],[3,10],[5,2],[7,0]]
+> ```text
+> Use Prim's algorithm:
+>   in_mst = [F,F,F,F,F]
+>   h = [(0, 0)]   (start at node 0 with cost 0)
+>   total = 0, count = 0
+> 
+> ─────────────────────────────────────────
+> Pop (0, 0): not in_mst → in_mst[0]=T; total=0; count=1
+>   Add edges from 0 to all others:
+>     d(0,1)=|0-2|+|0-2|=4 → push (4, 1)
+>     d(0,2)=|0-3|+|0-10|=13 → push (13, 2)
+>     d(0,3)=|0-5|+|0-2|=7 → push (7, 3)
+>     d(0,4)=|0-7|+|0-0|=7 → push (7, 4)
+> 
+> Pop (4, 1): not in_mst → add. total=4, count=2
+>   Add edges from 1:
+>     d(1,2)=|2-3|+|2-10|=9 → push
+>     d(1,3)=|2-5|+|2-2|=3 → push
+>     d(1,4)=|2-7|+|2-0|=7 → push
+> 
+> Pop (3, 3): not in_mst → add. total=7, count=3
+>   Add edges from 3:
+>     d(3,2)=|5-3|+|2-10|=10
+>     d(3,4)=|5-7|+|2-0|=4
+> 
+> Pop (4, 4): not in_mst → add. total=11, count=4
+>   Add edges from 4:
+>     d(4,2)=|7-3|+|0-10|=14
+> 
+> Pop (7, 3): in_mst → skip
+> Pop (7, 4): in_mst → skip
+> Pop (9, 2): not in_mst → add. total=20, count=5
+> 
+> ✅ Answer: 20
+> ```
 
 > [!success]- Python (Prim)
 > ```python
@@ -481,34 +760,7 @@ Connect all points; cost = Manhattan distance. Min total cost.
 >     return total
 > ```
 
-> [!success]- Python (Kruskal)
-> ```python
-> def min_cost_connect_points_kruskal(points):
->     n = len(points)
->     edges = []
->     for i in range(n):
->         for j in range(i + 1, n):
->             d = abs(points[i][0]-points[j][0]) + abs(points[i][1]-points[j][1])
->             edges.append((d, i, j))
->     edges.sort()
->     parent = list(range(n))
->     def find(x):
->         while parent[x] != x:
->             parent[x] = parent[parent[x]]
->             x = parent[x]
->         return x
->     total = count = 0
->     for d, a, b in edges:
->         ra, rb = find(a), find(b)
->         if ra == rb: continue
->         parent[ra] = rb
->         total += d
->         count += 1
->         if count == n - 1: break
->     return total
-> ```
-
-**Key takeaway:** MST: Prim for dense graphs, Kruskal for sparse with explicit edges. Both heavily reuse skills from earlier topics.
+**Key takeaway:** MST: Prim for dense graphs, Kruskal for sparse with explicit edges.
 
 ---
 
