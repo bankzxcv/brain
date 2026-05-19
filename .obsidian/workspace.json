@@ -25,12 +25,14 @@
             "id": "c37c1f1707b59194",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Drawing 2026-04-07 21.14.14.excalidraw.md"
+                "file": "Kubernetes/Kubernetes Study.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "excalidraw-icon",
-              "title": "Drawing 2026-04-07 21.14.14.excalidraw"
+              "icon": "lucide-file",
+              "title": "Kubernetes Study"
             }
           }
         ],
@@ -169,13 +171,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Drawing 2026-04-07 21.14.14.excalidraw.md",
+                "file": "Kubernetes/Kubernetes Study.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Drawing 2026-04-07 21.14.14.excalidraw"
+              "title": "Outline of Kubernetes Study"
             }
           }
         ],
@@ -199,23 +201,29 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "c37c1f1707b59194",
+  "active": "90013c075f7f4b85",
   "lastOpenFiles": [
-    "Reverse Engineering/Reverse Engineering Practice/11 - Protocol Reverse Engineering.md",
+    "LeetCode/LeetCode Workflows",
+    "LeetCode/LeetCode Practice",
+    "LeetCode",
+    "Golang/Golang Study.md",
+    "Kubernetes/ArgoCD/Practice - GitOps with ArgoCD.md",
+    "Kubernetes/Docker/Practice - Docker Fundamentals.md",
+    "Kubernetes/Kubernetes Study.md",
+    "PI-Mono - AI Coding Agent for Software Development.md",
+    "KanbanWorks.md",
+    "CLAUDE.md",
     "Drawing 2026-04-07 21.14.14.excalidraw.md",
+    "Reverse Engineering/Reverse Engineering Practice/11 - Protocol Reverse Engineering.md",
     "Reverse Engineering/Reverse Engineering Practice/13 - AI-Assisted Reverse Engineering.md",
     "Reverse Engineering/Reverse Engineering Practice/07 - Ghidra Deep Dive.md",
     "Reverse Engineering/Reverse Engineering Workflows/01 - Reverse a CLI Utility.md",
     "Reverse Engineering/Reverse Engineering Workflows/02 - Analyze a Network Protocol.md",
     "Reverse Engineering/Reverse Engineering Workflows/03 - Patch a License Check.md",
     "Reverse Engineering/Reverse Engineering Study.md",
-    "Golang/Golang Study.md",
     "Reverse Engineering/Reverse Engineering Practice/10 - Anti-Reverse Engineering.md",
     "AGENTS.md",
     "Reverse Engineering/Reverse Engineering Workflows/05 - Reconstruct Source from Stripped Binary.md",
-    "CLAUDE.md",
-    "KanbanWorks.md",
-    "PI-Mono - AI Coding Agent for Software Development.md",
     "Kubernetes/Workflows/05 - Advanced Deployment Strategies.md",
     "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
     "Kubernetes/Workflows/03 - GitOps Pipeline.md",
@@ -223,10 +231,6 @@
     "Kubernetes/Workflows/01 - Microservice Deployment.md",
     "Kubernetes/Helm/Practice - Helm Charts.md",
     "Kubernetes/GitHub Actions/Practice - CI CD Pipelines.md",
-    "Kubernetes/Docker/Practice - Docker Fundamentals.md",
-    "Kubernetes/Core/Practice - Workloads and Scheduling.md",
-    "Kubernetes/Core/Practice - Services and Networking.md",
-    "Kubernetes/Core/Practice - Pods and Deployments.md",
     "Kubernetes/Workflows",
     "Kubernetes/Helm",
     "Kubernetes/GitHub Actions",
@@ -234,8 +238,6 @@
     "Kubernetes/Core",
     "Kubernetes/ArgoCD",
     "Kubernetes",
-    "Golang/Golang Workflows",
-    "Golang/Golang Practice",
-    "Golang"
+    "Golang/Golang Workflows"
   ]
 }
