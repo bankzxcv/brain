@@ -280,6 +280,48 @@ Longest path **(in edges)** between any two nodes.
 
 > A path through node `n` has length `leftDepth + rightDepth`. Update global; return `1 + max(leftDepth, rightDepth)` to the parent.
 
+> [!example]- 📊 Visual: longest path through a node
+> ```text
+>   Tree:                          
+>            1                     
+>           / \                    
+>          2   3                   
+>         / \                      
+>        4   5                     
+> 
+>   At each node, gather:
+>     L = longest downward path in left subtree
+>     R = longest downward path in right subtree
+>     "through-me" path length = L + R   (in edges)
+>     return to parent: 1 + max(L, R)    (single-path going up)
+> 
+>   ┌──────── path through node 2: 4→2→5  (length 2) ────────┐
+>   │                                                         │
+>   │   L=1 (4)        R=1 (5)                                │
+>   │   leaf→2          leaf→2                                │
+>   │   contrib 2 = 2                                         │
+>   │                                                         │
+>   └─────────────────────────────────────────────────────────┘
+> 
+>   ┌──── path through node 1: 4→2→1→3  (length 3) ✓ best ────┐
+>   │                                                         │
+>   │   L=2 (4→2)      R=1 (3→1)                              │
+>   │   contrib 1 = 3 ← global best updated                   │
+>   │                                                         │
+>   └─────────────────────────────────────────────────────────┘
+> 
+>   Visualize the winning path:
+> 
+>            1 ●━━━━━●
+>           / ┃     ┃ \
+>          2 ●       ● 3
+>         / ┃
+>        4 ●   5
+> 
+>   The diameter (3 edges) doesn't have to go through the root —
+>   but every diameter passes through SOME node as its apex. Try each.
+> ```
+
 > [!info]- 🔍 Dry Run: [1,2,3,4,5]
 > ```text
 > Tree:
@@ -483,6 +525,37 @@ Return values grouped by level.
 ### 🧠 Pattern: BFS with Level Size Loop
 
 > Queue. Each outer iteration, snapshot `len(queue)` and process exactly that many — that's one level.
+
+> [!example]- 📊 Visual: BFS by level
+> ```text
+>   Tree:
+>            3        ← Level 0
+>           / \
+>          9   20     ← Level 1
+>              | \
+>             15  7   ← Level 2
+> 
+>   BFS expansion (queue snapshot per layer):
+> 
+>     start:    queue = [3]              process 1 node    → out = [[3]]
+>               ↓ enqueue children
+>     layer 1:  queue = [9, 20]          process 2 nodes   → out = [[3], [9,20]]
+>               ↓ enqueue children (9 has none; 20 has 15,7)
+>     layer 2:  queue = [15, 7]          process 2 nodes   → out = [[3],[9,20],[15,7]]
+>               ↓ no children
+>               queue = []                end
+> 
+>   Trick: snapshot `n = len(queue)` BEFORE the inner loop so newly-enqueued
+>          children (next level) don't leak into the current iteration.
+> 
+>   ┌─────────────────────────────────┐
+>   │  for _ in range(len(q)):        │  ← lock the level size here
+>   │      node = q.popleft()         │
+>   │      level.append(node.val)     │
+>   │      if node.left:  q.append(...│
+>   │      if node.right: q.append(...│
+>   └─────────────────────────────────┘
+> ```
 
 > [!info]- 🔍 Dry Run: [3,9,20,null,null,15,7]
 > ```text
@@ -829,6 +902,45 @@ Not a BST — general binary tree.
 
 > If current node is p or q → return self. Else, recurse children. If both sides return non-null → current is LCA. Else, return the non-null side.
 
+> [!example]- 📊 Visual: LCA logic at each node
+> ```text
+>   Tree:                Looking for LCA of p=5 and q=1
+> 
+>            3
+>           / \
+>          5   1
+>         / \
+>        6   2
+>           / \
+>          7   4
+> 
+>   Post-order DFS returns one of:
+>     • node itself if it IS p or q
+>     • LCA if found below
+>     • null otherwise
+> 
+>   Recursion bubbling up:
+> 
+>            3 ◀── L=5(non-null), R=1(non-null) → SPLIT → return 3 (LCA!) ✓
+>           / \
+>      5 →●   ●→ 1
+>         ↑      ↑
+>         "I am p,        "I am q,
+>          return self"    return self"
+>         /\
+>        6  2
+>         (subtree of 5 doesn't matter — once we returned 5, parent decides)
+> 
+>   ─────────────────────────────────────────
+>   Different case: p=5, q=4 (q is descendant of p)
+> 
+>   gain(5) sees: 5 IS p → return 5 (don't look further)
+>   gain(3): L=5, R=null → return L=5
+> 
+>   Answer = 5.  The "stop at first match" rule auto-handles
+>   the ancestor-descendant case correctly.
+> ```
+
 > [!info]- 🔍 Dry Run: root=[3,5,1,6,2,0,8,null,null,7,4], p=5, q=1
 > ```text
 > Tree:
@@ -1115,6 +1227,33 @@ Max sum of any path (any node to any node, edges may go up-and-down at one apex)
 ### 🧠 Pattern: DFS Returns "Best Downward Gain", Global Tracks "Through-Me"
 
 > Each node: best path going down = `node.val + max(0, leftGain, rightGain)` returned upward (clamp negatives to 0 — don't take them). Update global with `node.val + max(0,L) + max(0,R)` (through-me path).
+
+> [!example]- 📊 Visual: max path through a node
+> ```text
+>   Tree:
+>           -10              gain(-10) = -10 + max(9, 35) = 25 (returned up)
+>           /  \              through-me = -10 + 9 + 35 = 34
+>          9    20            
+>              /  \           gain(20) = 20 + max(15, 7) = 35
+>            15    7           through-me = 20 + 15 + 7 = 42  ✓ best
+> 
+>   Winning path: 15 ─→ 20 ─→ 7    (sum = 42)
+> 
+>                  -10
+>                  /  \
+>                 9    ●20●━━●7
+>                      ┃
+>                      ●15
+> 
+>   Two values per recursive call — easy to confuse:
+> 
+>     RETURNED upward:  node.val + max(0, L, R)    "best single-path going up"
+>                       ↑ at most ONE branch contributes
+>     UPDATE global:    node.val + max(0,L) + max(0,R)   "best path with me as apex"
+>                       ↑ BOTH branches contribute (the V-shape)
+> 
+>   clamp(0): a negative gain only HURTS — drop that subtree.
+> ```
 
 > [!info]- 🔍 Dry Run: [-10,9,20,null,null,15,7]
 > ```text

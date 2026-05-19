@@ -43,6 +43,33 @@ status: in-progress
 
 **LC #56** · Medium
 
+> [!example]- 📊 Visual: timeline merge
+> ```text
+>   Input intervals (after sort by start):
+> 
+>    1───3
+>      2─────6
+>                    8──10
+>                                15─────18
+> 
+>   Sweep left-to-right; if current overlaps top of result, extend top:
+> 
+>   Step 1: take [1,3]:                   [1───3]
+>   Step 2: [2,6] starts at 2 ≤ 3 →       [1─────6]    (merged, extend end to 6)
+>   Step 3: [8,10] starts at 8 > 6 →      [1─────6] [8─10]   (new segment)
+>   Step 4: [15,18] starts at 15 > 10 →   [1─────6] [8─10] [15───18]
+> 
+>   Final timeline:
+> 
+>    ▓▓▓▓▓▓     ▓▓▓        ▓▓▓▓
+>    1    6     8 10       15 18
+> 
+>   Result = [[1, 6], [8, 10], [15, 18]]
+> 
+>   Overlap test (for half-closed convention):
+>     [a, b] and [c, d] overlap iff  c ≤ b  (sorted by start, so a ≤ c)
+> ```
+
 > [!info]- 🔍 Dry Run: intervals=[[1,3],[2,6],[8,10],[15,18]]
 > ```text
 > Sort by start: already sorted.
@@ -209,6 +236,34 @@ status: in-progress
 ## P5: Meeting Rooms II
 
 **LC #253** · Medium
+
+> [!example]- 📊 Visual: meeting timeline
+> ```text
+>   intervals = [[0,30], [5,10], [15,20]]
+> 
+>   Timeline (concurrent overlap = rooms needed):
+> 
+>     [0────────────────30]      ← Room A
+>          [5─10]                ← Room B (overlaps A)
+>                  [15──20]      ← reuses Room B
+> 
+>     Time:   0   5   10  15  20      30
+>     Rooms:  1   2   1   2   1       0
+>                 ↑           
+>             peak = 2 rooms needed
+> 
+>   Sweep approach: two sorted arrays of events
+> 
+>     starts: 0 ─── 5 ────────── 15
+>     ends:                  10 ────── 20 ────── 30
+> 
+>     At each "start" event:
+>       if start ≥ earliest pending end → reuse (advance ends pointer)
+>       else                            → new room
+> 
+>   Min heap variant: heap holds end times of rooms currently in use.
+>     When a new meeting starts: top.end ≤ start → pop (release), then push new end.
+> ```
 
 > [!info]- 🔍 Dry Run: intervals=[[0,30],[5,10],[15,20]]
 > ```text

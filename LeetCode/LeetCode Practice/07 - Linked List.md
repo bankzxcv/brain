@@ -55,6 +55,31 @@ Reverse a singly linked list.
 
 > `prev`, `curr`, `next`. Save `next`, point `curr.next ← prev`, advance both. Return `prev` (new head).
 
+> [!example]- 📊 Visual: pointer dance
+> ```text
+>   Initial:
+>     prev      curr
+>      ↓         ↓
+>     null     [ 1 ] → [ 2 ] → [ 3 ] → null
+> 
+>   After step 1 (flip 1's arrow):
+>                       prev      curr
+>                        ↓         ↓
+>     null ← [ 1 ]     [ 2 ] → [ 3 ] → null
+> 
+>   After step 2 (flip 2's arrow):
+>                                  prev      curr
+>                                   ↓         ↓
+>     null ← [ 1 ] ← [ 2 ]        [ 3 ] → null
+> 
+>   After step 3 (flip 3's arrow):
+>                                            prev      curr
+>                                             ↓         ↓
+>     null ← [ 1 ] ← [ 2 ] ← [ 3 ]          null
+> 
+>   Return prev = node(3). Reversed list:  3 → 2 → 1 → null
+> ```
+
 > [!info]- 🔍 Dry Run: 1 → 2 → 3 → null
 > ```text
 > Setup:
@@ -245,6 +270,36 @@ Return the node where the cycle begins, or None.
 > 
 > **Why?** Let `H` = distance from head to cycle start, `D` = distance from cycle start to meeting point, `C` = cycle length. Slow traveled `H+D`; fast traveled `H+D+kC`; fast = 2× slow → `H+D = kC` → `H = kC - D`. So `H` steps from head and `H` steps from meeting point both land at start.
 
+> [!example]- 📊 Visual: cycle geometry
+> ```text
+>             ┌─── H ───┐
+>     head → [A] → [B] → [C] ← cycle entry
+>                         ↓
+>                        [D]
+>                         ↓
+>                        [E]              cycle length C
+>                         ↓
+>                        [F]
+>                         ↓
+>     meeting → [M] ← ← ← [G]
+>                ↑
+>                slow and fast first meet HERE
+> 
+>   Walking distances at meeting:
+>     slow  walks: H + D       (D = entry → meeting along cycle)
+>     fast  walks: H + D + kC  (some extra full loops)
+>     fast = 2 × slow
+>     →  H + D + kC = 2(H + D)
+>     →  H = kC - D
+>     →  H ≡ -D  (mod C)
+>     →  H steps from M (going forward in cycle) lands at entry C
+> 
+>   Phase 2 — reset one pointer to head, step both 1× each:
+>     p1 from head:       walks H steps, lands at cycle entry
+>     p2 from meeting:    walks H steps, also lands at cycle entry
+>     They MEET at the cycle entry!  ← return this node.
+> ```
+
 > [!info]- 🔍 Dry Run: 3 → 2 → 0 → -4 → (back to 2)
 > ```text
 > Nodes: A=3, B=2, C=0, D=-4; D.next = B (forms cycle 2→0→-4→2)
@@ -312,6 +367,41 @@ Return the node where the cycle begins, or None.
 ### 🧠 Pattern: N-Ahead Pointer + Dummy
 
 > Move `fast` n+1 steps ahead. Then walk both until `fast` is null — `slow` is at the node **before** the one to remove.
+
+> [!example]- 📊 Visual: N-ahead pointer
+> ```text
+>   List: 1 → 2 → 3 → 4 → 5,  n=2  (remove 2nd-from-end → remove 4)
+> 
+>   Goal: `slow` should land on node 3 (the one BEFORE target node 4).
+>         If slow is at 3, then slow.next = 4 (remove) and slow.next = slow.next.next.
+> 
+>   Use a DUMMY → 1 → 2 → 3 → 4 → 5
+>   slow = dummy   fast = dummy
+> 
+>   Phase 1: move fast (n+1)=3 steps ahead:
+> 
+>     dummy ─ 1 ─ 2 ─ 3 ─ 4 ─ 5
+>       ↑           ↑
+>      slow        fast      (gap of 3 nodes)
+> 
+>   Phase 2: walk BOTH until fast hits null:
+> 
+>     step 1:   slow=1,  fast=4
+>     dummy ─ 1 ─ 2 ─ 3 ─ 4 ─ 5
+>             ↑                    ↑
+>            slow                  fast (kept the same offset)
+> 
+>     step 2:   slow=2,  fast=5
+>     step 3:   slow=3,  fast=null  ← STOP, slow is the predecessor
+> 
+>     dummy ─ 1 ─ 2 ─ 3 ─ 4 ─ 5
+>                     ↑   ╳ remove this
+>                    slow
+> 
+>   Action:  slow.next = slow.next.next     →   1 ─ 2 ─ 3 ─ 5
+> 
+>   The dummy elegantly handles the case "remove the head".
+> ```
 
 > [!info]- 🔍 Dry Run: 1→2→3→4→5, n=2
 > ```text
@@ -531,6 +621,47 @@ Each node has `next` AND `random`. Deep copy.
 
 > 1. Find midpoint (fast/slow). 2. Reverse second half. 3. Merge two halves alternating.
 
+> [!example]- 📊 Visual: split → reverse → interleave
+> ```text
+>   Input:    1 → 2 → 3 → 4 → 5
+> 
+>   ┌─ Step 1: find midpoint (slow/fast pointers) ──────────┐
+>   │                                                       │
+>   │  After fast/slow runs:                                │
+>   │                                                       │
+>   │      head    slow                                     │
+>   │       ↓       ↓                                       │
+>   │       1 → 2 → 3 → 4 → 5                               │
+>   │                                                       │
+>   └───────────────────────────────────────────────────────┘
+> 
+>   ┌─ Step 2: split into two halves, reverse the second ───┐
+>   │                                                       │
+>   │      Half A:    1 → 2 → 3 → null                      │
+>   │      Half B:    4 → 5 → null                          │
+>   │                                                       │
+>   │   Reverse B:    5 → 4 → null                          │
+>   │                                                       │
+>   └───────────────────────────────────────────────────────┘
+> 
+>   ┌─ Step 3: interleave A and reversed B ─────────────────┐
+>   │                                                       │
+>   │      A: 1 → 2 → 3                                     │
+>   │      B: 5 → 4                                         │
+>   │                                                       │
+>   │   Pick alternately:                                   │
+>   │      1 → 5 → 2 → 4 → 3                                │
+>   │                                                       │
+>   └───────────────────────────────────────────────────────┘
+> 
+>   Result: 1 → 5 → 2 → 4 → 3 → null
+> 
+>   Three composable subroutines, none of them new:
+>     midpoint    (fast/slow)
+>     reverse     (3-pointer dance)
+>     merge       (dummy + tail)
+> ```
+
 > [!info]- 🔍 Dry Run: 1 → 2 → 3 → 4 → 5
 > ```text
 > Phase 1 — Find midpoint (slow ends at middle):
@@ -722,6 +853,39 @@ Reverse every k consecutive nodes; leave remainder if < k.
 ### 🧠 Pattern: Hash Map + Doubly Linked List
 
 > Doubly linked list orders recency (head = most recent). Hash map gives O(1) lookup of the node. Move-to-front on `get` and `put`. Evict tail on overflow.
+
+> [!example]- 📊 Visual: hash + DLL structure
+> ```text
+>   ┌──────────────────────────────────────────────────────┐
+>   │ map: { 1: ●─┐                                        │
+>   │         3: ●─┼─┐                                     │
+>   │         5: ●─┼─┼─┐                                   │
+>   │       }     │ │ │                                    │
+>   └─────────────┼─┼─┼────────────────────────────────────┘
+>                 │ │ │
+>      ┌─────┐    ▼ │ │   ┌─────┐         ┌─────┐    ┌─────┐
+>      │HEAD │↔ [3,X]↔─── [1,Y] ↔──────── [5,Z] ↔──│TAIL │
+>      └─────┘     ↑                                └─────┘
+>                  │ ◀── most recent (just touched)
+>                  
+>      head ↔ (most recent) ↔ ... ↔ (least recent) ↔ tail
+> 
+>   Operations (all O(1)):
+> 
+>     get(k):                   put(k, v) new key:
+>       node = map[k]              create node n
+>       remove(node)               if size == cap:
+>       addFront(node)               lru = tail.prev
+>       return node.val              remove(lru)
+>                                    delete map[lru.key]
+>     put(k, v) existing:          addFront(n)
+>       node = map[k]              map[k] = n
+>       node.val = v
+>       remove(node)
+>       addFront(node)
+> 
+>   Sentinel head and tail nodes (dummies) avoid null-edge cases.
+> ```
 
 > [!info]- 🔍 Dry Run: cap=2; put(1,1), put(2,2), get(1), put(3,3), get(2)
 > ```text

@@ -66,6 +66,45 @@ Given `nums[]` and `target`, return indices of two numbers that sum to target. E
 2. **Sort + two pointers** · O(n log n)/O(1). Destroys original indices → **disqualified**.
 3. **Hash map, one pass — FINAL** · O(n)/O(n). Walk once; for each `x` check if `target-x` already seen.
 
+> [!example]- 📊 Visual: array + hash map evolution
+> ```text
+>           ┌────┬────┬────┬────┐
+>   nums =  │ 2  │ 7  │ 11 │ 15 │       target = 9
+>           └────┴────┴────┴────┘
+>             0    1    2    3
+> 
+>   Step 1 (i=0):
+>     ┌─→ x=2          need = 9-2 = 7
+>     │   ┌────┬────┬────┬────┐
+>     │   │ 2  │ 7  │ 11 │ 15 │
+>     │   └────┴────┴────┴────┘
+>     │     ↑
+>     │     i=0
+>     │
+>     └─→  seen: { }                         not in map
+>          seen: { 2 → 0 }                   ← store
+> 
+>   Step 2 (i=1):
+>         x=7          need = 9-7 = 2
+>         ┌────┬────┬────┬────┐
+>         │ 2  │ 7  │ 11 │ 15 │
+>         └────┴────┴────┴────┘
+>                ↑
+>                i=1
+> 
+>         seen: { 2 → 0 }
+>                 ^^^^
+>                 MATCH! complement found
+> 
+>         ┌───┐         ┌───┐
+>         │ 2 │═════════│ 7 │ ← pair sums to 9
+>         └───┘         └───┘
+>           ↑             ↑
+>          [0]           [1]
+> 
+>   ✅ return [0, 1]
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[2,7,11,15], target=9
 > ```text
 > Setup:

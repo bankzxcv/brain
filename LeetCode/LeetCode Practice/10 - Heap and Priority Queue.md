@@ -322,6 +322,40 @@ Maintain min-heap of size K. `add(x)`: push, evict if oversize. Top is current K
 > 
 > Median = `top(low)` (odd total) or average of tops (even total).
 
+> [!example]- 📊 Visual: two heaps split at the median
+> ```text
+>   After adding [1, 5, 2, 4, 3]  (already balanced):
+> 
+>        low (max-heap)         high (min-heap)
+>        bottom half           top half
+> 
+>             3 ◀── median candidate         4 ◀── median candidate
+>            / \                            / \
+>           2   1                          5  (empty)
+> 
+>        max of low = 3                  min of high = 4
+>        median = (3 + 4) / 2 = 3.5    (even total = 6 elements? wait 5 here)
+> 
+>   ─────────────────────────────────────────────────
+>   For 5 elements:    low has 3, high has 2  →  median = top(low) = 3
+>   For 6 elements:    low has 3, high has 3  →  median = (top(low) + top(high)) / 2
+>   
+>   Invariant: |low| - |high| ∈ {0, 1}
+>              all values in low  ≤  all values in high
+> 
+>   ─────────────────────────────────────────────────
+>   The "push → pop → push" rebalance trick on addNum(x):
+> 
+>     1. push x into low                  (always)
+>     2. pop low's top → push into high   (forces a transfer)
+>     3. if |high| > |low|:
+>          pop high's top → push back into low
+> 
+>   Step 2 makes sure the new element ends up in the correct half
+>   (if it was too big for low, it bubbles to the top and gets ejected to high).
+>   Step 3 keeps the size invariant.
+> ```
+
 > [!info]- 🔍 Dry Run: addNum(1), findMedian, addNum(2), findMedian, addNum(3), findMedian
 > ```text
 > Setup:

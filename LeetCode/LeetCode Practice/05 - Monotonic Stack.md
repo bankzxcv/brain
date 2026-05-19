@@ -213,6 +213,42 @@ For each day, how many days until a warmer temperature?
 
 NGE on values, return **index differences** instead of values. Push indices.
 
+> [!example]- 📊 Visual: temperatures + stack
+> ```text
+>   T = [73, 74, 75, 71, 69, 72, 76, 73]
+> 
+>   Bars (top axis = days, height = temp):
+> 
+>   76 │                       █
+>   75 │       █              ██
+>   74 │     ███             ███
+>   73 │   █████              ███  █
+>   72 │   █████          █  ███  █
+>   71 │   █████      █  ██  ███  █
+>   ...
+>      └────────────────────────────
+>        0   1  2   3   4  5   6   7
+> 
+>   Decreasing stack of indices waiting for a HOTTER day:
+> 
+>   day 0 (73):  push       stack = [0]
+>   day 1 (74):  74 > T[0]=73 → pop 0, out[0]=1-0=1.  push 1.  stack=[1]
+>   day 2 (75):  pop 1, out[1]=2-1=1. push 2. stack=[2]
+>   day 3 (71):  71 < 75 → push.  stack=[2,3]
+>   day 4 (69):  69 < 71 → push.  stack=[2,3,4]
+>   day 5 (72):  72 > 69 pop 4 (out[4]=1)
+>                72 > 71 pop 3 (out[3]=2)
+>                72 < 75 → push.   stack=[2,5]
+>   day 6 (76):  76 > 72 pop 5 (out[5]=1)
+>                76 > 75 pop 2 (out[2]=4)
+>                push.            stack=[6]
+>   day 7 (73):  73 < 76 → push.   stack=[6,7]
+> 
+>   Remaining stack [6,7] never found a warmer day → out[6]=out[7]=0.
+> 
+>   Each index pushed/popped at most once → O(n).
+> ```
+
 > [!info]- 🔍 Dry Run: T=[73,74,75,71,69,72,76,73]
 > ```text
 > Setup:
@@ -307,6 +343,43 @@ Find largest rectangle in histogram of bar heights.
 1. **For each pair (l,r), min × width** · O(n²).
 2. **For each bar, scan left/right for first lower** · O(n²).
 3. **One increasing stack — FINAL** · O(n)/O(n). On pop, current `i` is right boundary, new top is left boundary.
+
+> [!example]- 📊 Visual: histogram + largest rectangle
+> ```text
+>   heights = [2, 1, 5, 6, 2, 3]
+> 
+>   6 │          █
+>   5 │       ███████
+>   4 │       ███████
+>   3 │       ███████      █
+>   2 │ ███   ███████  ███████
+>   1 │ █████ ███████  ███████
+>   0 └────────────────────────
+>       0  1  2  3  4  5
+> 
+>   For each bar, ask: how wide can I extend left/right while everyone is ≥ me?
+> 
+>   Bar 0 (h=2): blocked by bar 1 (h=1<2). Width = 1. Area = 2.
+>   Bar 1 (h=1): can extend over the whole array! Width = 6. Area = 6.
+>   Bar 2 (h=5): blocked by bar 4 (h=2). Width = 2 (bars 2-3). Area = 10.
+>   Bar 3 (h=6): blocked immediately. Width = 1. Area = 6.
+>   Bar 4 (h=2): can extend to bar 5 (h=3 ≥ 2) and back to bar 2... but blocked left by h=1.
+>                Actually width = 2 (bars 4-5). Area = 4.
+>   Bar 5 (h=3): width = 1. Area = 3.
+> 
+>   Max = 10 (bars 2-3, height 5, width 2):
+> 
+>   6 │          █
+>   5 │       ▓▓▓▓▓▓▓        ← winning rectangle
+>   4 │       ▓▓▓▓▓▓▓
+>   3 │       ▓▓▓▓▓▓▓      █
+>   2 │ ███   ▓▓▓▓▓▓▓  ███████
+>   1 │ █████ ▓▓▓▓▓▓▓  ███████
+>     └────────────────────────
+>       0  1  2  3  4  5
+> 
+>   Mono stack finds left/right "first smaller" in O(n) total.
+> ```
 
 > [!info]- 🔍 Dry Run: heights=[2,1,5,6,2,3]
 > ```text

@@ -68,6 +68,35 @@ All subsets of distinct `nums`.
 
 > At index `i`, snapshot the current path, then for each `j ≥ i`, include `nums[j]` and recurse with `j+1`.
 
+> [!example]- 📊 Visual: recursion tree
+> ```text
+>   nums = [1, 2, 3]
+> 
+>                          [ ]                 ← snapshot at each node
+>                       /   |    \
+>                      /    |     \
+>                  pick 1  pick 2  pick 3
+>                    /       |       \
+>                  [1]      [2]      [3]       ← snapshot
+>                  / \       |
+>                 /   \      |
+>             pick 2  pick 3 pick 3
+>               /       \      \
+>             [1,2]   [1,3]   [2,3]            ← snapshot
+>              /
+>            pick 3
+>            /
+>         [1,2,3]                              ← snapshot
+> 
+>   Snapshots collected (each node emits its current path):
+>     [ ], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]
+> 
+>   Each recursion uses `start_index` to avoid re-picking earlier elements
+>   (so we never produce permutations, only subsets).
+> 
+>   Total subsets = 2^n = 8 ✓
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,2,3]
 > ```text
 > Setup: out=[], path=[]
@@ -702,6 +731,43 @@ For each cut point: if `s[i..j]` is a palindrome, include and recurse on `j+1`.
 > - **`r - c`** (main diagonal, "\")
 > 
 > Adding a queen at `(r, c)` is valid iff `c`, `r+c`, `r-c` are unused.
+
+> [!example]- 📊 Visual: diagonal identities
+> ```text
+>   Anti-diagonal (/) — constant r+c:
+> 
+>     c=0  c=1  c=2  c=3
+>     ─────────────────
+>     r+c=0  1   2   3       r=0
+>     r+c=1  2   3   4       r=1
+>     r+c=2  3   4   5       r=2
+>     r+c=3  4   5   6       r=3
+> 
+>     Each anti-diagonal has a unique r+c value.
+>     If queen at (1,2) has r+c=3, any other (r,c) with r+c=3 attacks it.
+> 
+>   Main diagonal (\) — constant r-c:
+> 
+>     c=0  c=1  c=2  c=3
+>     ─────────────────
+>     r-c= 0  -1  -2  -3     r=0
+>     r-c= 1   0  -1  -2     r=1
+>     r-c= 2   1   0  -1     r=2
+>     r-c= 3   2   1   0     r=3
+> 
+>   So for any new queen at (r, c):
+>     check that column c is unused
+>     check that r+c is unused
+>     check that r-c is unused
+>   If all three pass → safe to place.
+> 
+>   One of the two valid 4-Queens placements:
+> 
+>     . Q . .       cols     = {0:_, 1:Q@row 0, 2:_, 3:_}
+>     . . . Q       r+c set  = {0+1=1, 1+3=4, 2+0=2, 3+2=5}
+>     Q . . .       r-c set  = {0-1=-1, 1-3=-2, 2-0=2, 3-2=1}
+>     . . Q .
+> ```
 
 > [!info]- 🔍 Dry Run: n=4
 > ```text

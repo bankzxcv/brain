@@ -57,6 +57,38 @@ Count connected groups of `'1'` in a 2D grid.
 
 > For each unvisited `'1'`, run DFS/BFS to mark the entire island. Each launch = one island.
 
+> [!example]- 📊 Visual: flood fill
+> ```text
+>   Original grid:           After flood-fill island 1:
+>     1 1 0 0                  . . 0 0       (. = visited)
+>     1 0 0 1     ─────→       . 0 0 1
+>     0 0 1 1                  0 0 1 1
+>     ↑
+>     Start DFS here (0,0)
+> 
+>   DFS spreads through 4-connected '1' cells:
+> 
+>     (0,0) ●━━●(0,1)          first island consists
+>      ┃                       of these 3 cells
+>     (1,0) ●
+> 
+>   After this DFS:  count = 1, all visited turned to 0.
+> 
+>   Continue scanning... find next '1' at (1,3):
+> 
+>     0 0 0 0
+>     0 0 0 ●               second island:
+>     0 0 ● ●                 (1,3), (2,2), (2,3)
+>          \ /                3 cells connected
+>           ●
+> 
+>   After 2nd DFS:  count = 2.   Scan finishes.  Answer = 2 islands.
+> 
+>   ─────────────────────────────────────────
+>   Why mutating the grid is OK (in interviews, ask first!):
+>   It's the cheapest "visited" set you can have — no extra space.
+> ```
+
 > [!info]- 🔍 Dry Run: grid=[["1","1","0","0"],["1","0","0","1"],["0","0","1","1"]]
 > ```text
 > count = 0
@@ -307,6 +339,31 @@ Minutes until all fresh oranges rot (rot spreads to 4-neighbors per minute).
 ### Approach
 
 Multi-source BFS from all initially-rotten oranges. Track minutes via BFS level.
+
+> [!example]- 📊 Visual: spreading rot in layers
+> ```text
+>   Legend:  ☠ rotten   ◯ fresh   · empty   ✗ just rotted this layer
+> 
+>   t=0 (start):              t=1 (rot spreads to 4-neighbors):
+>     ☠ ◯ ◯                     ☠ ✗ ◯
+>     ◯ ◯ ·                     ✗ ◯ ·
+>     · ◯ ◯                     · ◯ ◯
+>     2 fresh become rotten      
+> 
+>   t=2:                       t=3:
+>     ☠ ☠ ✗                     ☠ ☠ ☠
+>     ☠ ✗ ·                     ☠ ☠ ·
+>     · ◯ ◯                     · ✗ ◯
+> 
+>   t=4:                       
+>     ☠ ☠ ☠                     all rotten → done in 4 minutes
+>     ☠ ☠ ·
+>     · ☠ ✗
+> 
+>   Multi-source BFS: every initially-rotten cell sits in the queue at t=0.
+>   Each iteration peels off one whole "layer" of new infections.
+>   Final answer = depth when queue empties (or -1 if any ◯ remains).
+> ```
 
 > [!info]- 🔍 Dry Run: grid=[[2,1,1],[1,1,0],[0,1,1]]
 > ```text

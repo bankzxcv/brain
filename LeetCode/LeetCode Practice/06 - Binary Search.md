@@ -63,6 +63,39 @@ while l ≤ r:
 return -1
 ```
 
+> [!example]- 📊 Visual: search space shrinking
+> ```text
+>   nums = [1, 3, 5, 7, 9, 11]   target = 7
+>   idx:    0  1  2  3  4  5
+> 
+>   Iter 1:   l=0                            r=5
+>             ▼                              ▼
+>           ┌───┬───┬───┬───┬───┬───┐
+>           │ 1 │ 3 │ 5 │ 7 │ 9 │11 │
+>           └───┴───┴───┴───┴───┴───┘
+>                       ▲ mid=2 (val 5)
+>             5 < 7 → search RIGHT half
+> 
+>   Iter 2:                  l=3       r=5
+>                            ▼         ▼
+>           ┌───┬───┬───┬───┬───┬───┐
+>           │░░░│░░░│░░░│ 7 │ 9 │11 │
+>           └───┴───┴───┴───┴───┴───┘
+>                                ▲ mid=4 (val 9)
+>             9 > 7 → search LEFT half (within current range)
+> 
+>   Iter 3:                  l=3 
+>                            r=3
+>                            ▼
+>           ┌───┬───┬───┬───┬───┬───┐
+>           │░░░│░░░│░░░│ 7 │░░░│░░░│
+>           └───┴───┴───┴───┴───┴───┘
+>                            ▲ mid=3 (val 7) → MATCH
+> 
+>   Each iteration HALVES the search space → log₂(n) iterations max.
+>   For n=10⁶: only ~20 iterations.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,3,5,7,9,11], target=7
 > ```text
 > Setup:

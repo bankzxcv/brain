@@ -133,6 +133,44 @@ Length of longest substring with all unique chars.
 
 > Expand `r` while window valid (no repeat). On repeat, shrink `l` until valid again. Track max window size.
 
+> [!example]- 📊 Visual: window expand & shrink
+> ```text
+>   s = "a b c a b c b b"
+>        0 1 2 3 4 5 6 7
+> 
+>   r=2: window expanding, no repeats:
+>        [ a  b  c ] a  b  c  b  b
+>        ↑       ↑
+>        l       r
+>        seen = {a, b, c}     best = 3 ✓
+> 
+>   r=3: 'a' already in seen → SHRINK from left
+>        a [ b  c  a ] b  c  b  b
+>           ↑      ↑
+>           l      r
+>        seen = {b, c, a}    best = 3
+> 
+>   r=4: 'b' in seen → shrink past it
+>        a  b [ c  a  b ] c  b  b
+>              ↑       ↑
+>              l       r
+>        seen = {c, a, b}    best = 3
+> 
+>   r=6: 'b' in seen, shrink TWICE past both b's:
+>        a  b  c  a  b [ c  b ] b
+>                       ↑    ↑
+>                       l    r
+>        best = 3
+> 
+>   r=7: 'b' in seen, shrink until 'b' removed:
+>        a  b  c  a  b  c  b [ b ]
+>                              ↑↑
+>                              l,r
+>        best = 3
+> 
+>   Each character entered/exited the window at most once → O(n).
+> ```
+
 > [!info]- 🔍 Dry Run: s="abcabcbb"
 > ```text
 > Setup:

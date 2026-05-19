@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
+                "file": "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01 - Google Phone Screen Set"
+              "title": "01 - Arrays and Hashing"
             }
           }
         ],
@@ -171,13 +171,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
+                "file": "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 01 - Google Phone Screen Set"
+              "title": "Outline of 01 - Arrays and Hashing"
             }
           }
         ],
@@ -203,13 +203,13 @@
   },
   "active": "c37c1f1707b59194",
   "lastOpenFiles": [
+    "LeetCode/LeetCode Study.md",
+    "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
     "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
     "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
     "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
     "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
-    "LeetCode/LeetCode Study.md",
     "Kubernetes/Kubernetes Study.md",
-    "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
     "LeetCode/LeetCode Practice/19 - Bit Manipulation.md",
     "LeetCode/LeetCode Practice/18 - Math and Geometry.md",
     "LeetCode/LeetCode Practice/17 - Intervals.md",

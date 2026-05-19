@@ -492,6 +492,44 @@ Heights array; pick two lines, max water = `min(h_l, h_r) * (r - l)`.
 1. **Brute force pairs** · O(n²). TLE at n=10⁵.
 2. **Two pointers (move shorter) — FINAL** · O(n)/O(1).
 
+> [!example]- 📊 Visual: container with bars
+> ```text
+>   heights = [1, 8, 6, 2, 5, 4, 8, 3, 7]
+> 
+>   8 │   █           █             
+>   7 │   █           █         █   
+>   6 │   █  █        █         █   
+>   5 │   █  █     █  █         █   
+>   4 │   █  █     █  █  █      █   
+>   3 │   █  █     █  █  █   █  █   
+>   2 │   █  █  █  █  █  █   █  █   
+>   1 │ █ █  █  █  █  █  █   █  █   
+>     └────────────────────────────
+>       0  1  2  3  4  5  6  7  8
+> 
+>   Two pointers — start at the ends, move the SHORTER inward:
+> 
+>   Iter 1: l=0 (h=1) and r=8 (h=7)
+>           area = min(1,7) × (8-0) = 1 × 8 = 8     (shallow)
+>           Move l (shorter) →
+> 
+>   Iter 2: l=1 (h=8) and r=8 (h=7)
+>           area = min(8,7) × (8-1) = 7 × 7 = 49 ✓ ← BEST
+> 
+>              ┌──── width 7 ────┐
+>              │                 │
+>           7 ─┤                 ├─ water level = min(8,7) = 7
+>              │░░░░░░░░░░░░░░░░░│
+>              │░░░░░░░░░░░░░░░░░│
+>              █                 █
+>              1                 8
+>          h=8                h=7
+> 
+>   Key insight: moving the TALLER side can never gain area —
+>   width shrinks AND height is still bounded by the same shorter wall.
+>   Only the shorter side might be replaced by something taller.
+> ```
+
 > [!info]- 🔍 Dry Run: h=[1,8,6,2,5,4,8,3,7]
 > ```text
 > Setup:
@@ -595,6 +633,32 @@ Total water trapped between bars of varying heights.
 2. **Precompute leftMax[] and rightMax[]** · O(n)/O(n).
 3. **Monotonic stack** · O(n)/O(n). Also works (see Monotonic Stack topic).
 4. **Two pointers — FINAL** · O(n)/O(1).
+
+> [!example]- 📊 Visual: trapped water
+> ```text
+>   heights = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
+> 
+>   Bars + trapped water (~ = water trapped above):
+> 
+>   3 │                  █                  
+>   2 │       █          █  █     █         
+>   1 │    █  █~ █~ █~ █ █  █  █~ █  █      
+>   0 │ █  █  █  █  █  █ █  █  █  █  █  █   
+>     └──────────────────────────────────
+>       0  1  2  3  4  5 6  7  8  9  10 11
+> 
+>   Water at each index = min(left_max, right_max) − height[i]
+> 
+>   index:    0  1  2  3  4  5  6  7  8  9  10 11
+>   l_max:    0  1  1  2  2  2  2  3  3  3  3  3
+>   r_max:    3  3  3  3  3  3  3  3  2  2  2  1
+>   bound:    0  1  1  2  2  2  2  3  2  2  2  1
+>   height:   0  1  0  2  1  0  1  3  2  1  2  1
+>   water:    0  0  1  0  1  2  1  0  0  1  0  0  = 6 total
+> 
+>   Two-pointer trick: whichever side's running max is SMALLER bounds
+>   the water on that side — settle it first, move that side inward.
+> ```
 
 > [!info]- 🔍 Dry Run: h=[0,1,0,2,1,0,1,3,2,1,2,1]
 > ```text
@@ -877,6 +941,30 @@ Sort an array of 0s/1s/2s in place.
 
 1. **Counting sort (2 passes)** · O(n)/O(1). Works.
 2. **Dutch flag (one pass) — FINAL** · O(n)/O(1).
+
+> [!example]- 📊 Visual: 3-way partition
+> ```text
+>   Invariant during sweep:
+> 
+>     ┌──────┬─────────┬──────────────┬──────┐
+>     │ 0s   │   1s    │   ??? unseen │  2s  │
+>     └──────┴─────────┴──────────────┴──────┘
+>     ↑      ↑         ↑              ↑      ↑
+>     0     low       mid            high   n-1
+> 
+>   Three regions:
+>     [0..low-1]   : all 0s         (sorted)
+>     [low..mid-1] : all 1s         (sorted)
+>     [mid..high]  : unprocessed
+>     [high+1..n-1]: all 2s         (sorted)
+> 
+>   At each step, dispatch on nums[mid]:
+>     0 → swap(low, mid); low++, mid++   (extend 0-region)
+>     1 → mid++                          (extend 1-region)
+>     2 → swap(mid, high); high--        (don't advance mid! new value unseen)
+> 
+>   Final state: all three regions correctly partitioned → sorted.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[2,0,2,1,1,0]
 > ```text
