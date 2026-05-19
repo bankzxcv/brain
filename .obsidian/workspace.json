@@ -203,6 +203,7 @@
   },
   "active": "90013c075f7f4b85",
   "lastOpenFiles": [
+    "LeetCode/LeetCode Practice/03 - Sliding Window.md",
     "LeetCode/LeetCode Practice/02 - Two Pointers.md",
     "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
     "LeetCode/LeetCode Study.md",
@@ -231,7 +232,6 @@
     "Kubernetes/Workflows/04 - Full CI CD Pipeline.md",
     "Kubernetes/Workflows/03 - GitOps Pipeline.md",
     "Kubernetes/Workflows/02 - Helm Multi-Tier App.md",
-    "Kubernetes/Workflows/01 - Microservice Deployment.md",
     "Kubernetes/Workflows",
     "Kubernetes/Helm",
     "Kubernetes/GitHub Actions",
