@@ -167,30 +167,30 @@ Two patterns per week. Re-drill weak topics in the final week.
 
 ## Practice Drills
 
-19 topic files, ~230 problems total, frequency-weighted.
+19 topic files, **~238 problems total** (with **24+ Hard** problems for Google-level depth). Each problem has a **🔍 Dry Run** collapsible callout showing step-by-step debugger-style tracing — type these in interviews to demonstrate your thinking.
 
-| # | Topic | Problems | Patterns |
-|---|---|---|---|
-| 01 | [[LeetCode Practice/01 - Arrays and Hashing]] | 16 | Complement Lookup, Prefix Sum |
-| 02 | [[LeetCode Practice/02 - Two Pointers]] | 12 | Opposite, Same-dir, Fast/Slow |
-| 03 | [[LeetCode Practice/03 - Sliding Window]] | 12 | Fixed window, Variable window |
-| 04 | [[LeetCode Practice/04 - Stack]] | 10 | LIFO mechanics, eval, parentheses |
-| 05 | [[LeetCode Practice/05 - Monotonic Stack]] | 10 | Next greater/smaller |
-| 06 | [[LeetCode Practice/06 - Binary Search]] | 14 | Sorted search, Search on answer |
-| 07 | [[LeetCode Practice/07 - Linked List]] | 14 | Reverse, merge, cycle, manipulation |
-| 08 | [[LeetCode Practice/08 - Trees]] | 18 | DFS, BFS, BST |
-| 09 | [[LeetCode Practice/09 - Tries]] | 8 | Prefix tree, word search |
-| 10 | [[LeetCode Practice/10 - Heap and Priority Queue]] | 12 | Top-K, merge-K, schedule |
-| 11 | [[LeetCode Practice/11 - Backtracking]] | 12 | Subsets, permutations, combinations |
-| 12 | [[LeetCode Practice/12 - Graphs]] | 16 | BFS/DFS on grid + adjacency |
-| 13 | [[LeetCode Practice/13 - Advanced Graphs]] | 12 | Topo Sort, Union-Find, Dijkstra |
-| 14 | [[LeetCode Practice/14 - 1D Dynamic Programming]] | 16 | Fib-like, Kadane, LIS, coin change |
-| 15 | [[LeetCode Practice/15 - 2D Dynamic Programming]] | 12 | LCS, edit distance, grid DP |
-| 16 | [[LeetCode Practice/16 - Greedy]] | 10 | Jump game family, scheduling |
-| 17 | [[LeetCode Practice/17 - Intervals]] | 10 | Merge, insert, overlap |
-| 18 | [[LeetCode Practice/18 - Math and Geometry]] | 8 | Pow, rotation, reservoir |
-| 19 | [[LeetCode Practice/19 - Bit Manipulation]] | 8 | XOR tricks, masks, single number |
-| | **Total** | **230** | |
+| # | Topic | Problems | Hard count | Patterns |
+|---|---|---|---|---|
+| 01 | [[LeetCode Practice/01 - Arrays and Hashing]] | 17 | 2 | Complement Lookup, Prefix Sum, Rolling Hash |
+| 02 | [[LeetCode Practice/02 - Two Pointers]] | 12 | 1 | Opposite, Same-dir, Fast/Slow |
+| 03 | [[LeetCode Practice/03 - Sliding Window]] | 12 | 3 | Fixed window, Variable window |
+| 04 | [[LeetCode Practice/04 - Stack]] | 12 | 2 | LIFO mechanics, eval, parentheses |
+| 05 | [[LeetCode Practice/05 - Monotonic Stack]] | 10 | 3 | Next greater/smaller |
+| 06 | [[LeetCode Practice/06 - Binary Search]] | 14 | 2 | Sorted search, Search on answer |
+| 07 | [[LeetCode Practice/07 - Linked List]] | 14 | 2 | Reverse, merge, cycle, manipulation |
+| 08 | [[LeetCode Practice/08 - Trees]] | 18 | 2 | DFS, BFS, BST |
+| 09 | [[LeetCode Practice/09 - Tries]] | 8 | 2 | Prefix tree, word search |
+| 10 | [[LeetCode Practice/10 - Heap and Priority Queue]] | 12 | 3 | Top-K, merge-K, schedule |
+| 11 | [[LeetCode Practice/11 - Backtracking]] | 13 | 2 | Subsets, permutations, combinations, Sudoku |
+| 12 | [[LeetCode Practice/12 - Graphs]] | 16 | 1 | BFS/DFS on grid + adjacency |
+| 13 | [[LeetCode Practice/13 - Advanced Graphs]] | 12 | 2 | Topo Sort, Union-Find, Dijkstra |
+| 14 | [[LeetCode Practice/14 - 1D Dynamic Programming]] | 17 | 1 | Fib-like, Kadane, LIS, regex matching |
+| 15 | [[LeetCode Practice/15 - 2D Dynamic Programming]] | 12 | 3 | LCS, edit distance, burst balloons |
+| 16 | [[LeetCode Practice/16 - Greedy]] | 11 | 1 | Jump game family, scheduling, candy |
+| 17 | [[LeetCode Practice/17 - Intervals]] | 10 | 1 | Merge, insert, overlap |
+| 18 | [[LeetCode Practice/18 - Math and Geometry]] | 9 | 1 | Pow, rotation, reverse pairs |
+| 19 | [[LeetCode Practice/19 - Bit Manipulation]] | 9 | 1 | XOR tricks, masks, bit trie |
+| | **Total** | **238** | **35** | |
 
 ---
 
