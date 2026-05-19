@@ -11,25 +11,19 @@ status: in-progress
 
 # LeetCode Practice: Greedy
 
-10 problems · pick locally-optimal choice that leads to a globally-optimal solution.
+11 problems · pick locally-optimal choice that leads to a globally-optimal solution.
 
 > [!abstract] Pattern recap
-> Greedy works when the problem has the **greedy choice property**: a local optimal choice leads to a global optimal solution. Proving greediness requires either:
-> - **Exchange argument** — swapping to greedy can't hurt
-> - **Cut-and-paste** — replace any optimal solution's step with greedy's, no worse
-> - **Matroid theory** — rare in interviews
-> 
-> In an interview: state your greedy rule, sketch why it works, code it. Don't over-prove.
+> Greedy works when the problem has the **greedy choice property**: a local optimal choice leads to a global optimal solution.
 
 > [!warning] Greedy ≠ first guess
-> Many "obvious" greedy approaches FAIL. Always check: does locally-best break a future-needed option? E.g., Coin Change with `[1, 3, 4]` target 6: greedy 4+1+1=3 coins; optimal 3+3=2.
+> Many "obvious" greedy approaches FAIL. Always check: does locally-best break a future-needed option?
 
 > [!tip] When greedy DOES work
 > - Interval scheduling: sort by END time
 > - Activity selection: pick earliest-finish-first
 > - Jump game: track furthest reachable
 > - Gas station: skip stations that net negative
-> - Huffman coding: pop two smallest
 
 ## Index
 
@@ -45,6 +39,7 @@ status: in-progress
 | P8 | Valid Parenthesis String | 678 | Med | Two counters (min/max open) |
 | P9 | Best Time to Buy/Sell Stock II | 122 | Easy | Sum positive diffs |
 | P10 | Boats to Save People | 881 | Med | Two pointers + greedy |
+| P11 | Candy | 135 | **Hard** | Two-pass greedy |
 
 ---
 
@@ -52,11 +47,30 @@ status: in-progress
 
 **LC #55** · Medium
 
-Can you reach the last index? `nums[i]` = max jump length.
-
-### 🧠 Pattern: Track Furthest Reachable
-
-> Walk left to right. At each `i`, if `i > furthest_reachable`, return false. Else update `furthest = max(furthest, i + nums[i])`.
+> [!info]- 🔍 Dry Run: nums=[2,3,1,1,4]
+> ```text
+> furthest = 0
+> 
+> i=0, x=2:  i (0) ≤ furthest (0) → still reachable
+>            furthest = max(0, 0+2) = 2
+> i=1, x=3:  i (1) ≤ furthest (2) → reachable
+>            furthest = max(2, 1+3) = 4
+> i=2, x=1:  2 ≤ 4 OK; furthest = max(4, 2+1) = 4
+> i=3, x=1:  3 ≤ 4 OK; furthest = max(4, 3+1) = 4
+> i=4, x=4:  4 ≤ 4 OK; furthest = max(4, 4+4) = 8 (but doesn't matter, already past end)
+> 
+> Reached end without dropping out.
+> 
+> ✅ Answer: true
+> 
+> ─────────────────────────────────────────
+> Counter-example: nums=[3,2,1,0,4]
+>   i=0 x=3: furthest=3
+>   i=1 x=2: 1≤3 OK; furthest=max(3,3)=3
+>   i=2 x=1: 2≤3 OK; furthest=max(3,3)=3
+>   i=3 x=0: 3≤3 OK; furthest=max(3,3)=3
+>   i=4: i=4 > furthest=3 → return false
+> ```
 
 > [!success]- Python
 > ```python
@@ -68,7 +82,7 @@ Can you reach the last index? `nums[i]` = max jump length.
 >     return True
 > ```
 
-**Key takeaway:** Reachability problems → "can I still get here?" greedy. Single-pass O(n).
+**Key takeaway:** Reachability problems → "can I still get here?" greedy.
 
 ---
 
@@ -76,11 +90,34 @@ Can you reach the last index? `nums[i]` = max jump length.
 
 **LC #45** · Medium
 
-Min number of jumps to reach the end.
-
-### 🧠 Pattern: BFS-like Levels
-
-> Treat each "jump range" as a level. Within current level, scan to find `farthest`. When you exhaust current level → increment jumps, move to next level.
+> [!info]- 🔍 Dry Run: nums=[2,3,1,1,4]
+> ```text
+> jumps = 0
+> cur_end = 0      ← end of "current level" reach
+> farthest = 0     ← end of "next level" reach
+> 
+> i=0 (don't enter loop iter for last index; loop i in range(n-1)):
+>   x=2 → farthest = max(0, 0+2) = 2
+>   i == cur_end (0) → jumps++, cur_end = farthest = 2
+>   jumps=1
+> 
+> i=1:
+>   x=3 → farthest = max(2, 1+3) = 4
+>   i (1) == cur_end (2)? NO
+> 
+> i=2:
+>   x=1 → farthest = max(4, 2+1) = 4
+>   i == cur_end (2)? YES → jumps++, cur_end = 4
+>   jumps=2
+> 
+> i=3:
+>   x=1 → farthest = max(4, 3+1) = 4
+>   i == cur_end? NO
+> 
+> Loop ends.
+> 
+> ✅ Answer: 2 jumps   (0 → idx 1 → idx 4)
+> ```
 
 > [!success]- Python
 > ```python
@@ -104,11 +141,21 @@ Min number of jumps to reach the end.
 
 **LC #53** · Medium
 
-(Also covered in [[01 - Arrays and Hashing]] P12 as Kadane.)
-
-### Greedy framing
-
-> If `cur < 0`, discard — it can only hurt future sums. Start fresh.
+> [!info]- 🔍 Dry Run: nums=[-2,1,-3,4,-1,2,1,-5,4]
+> ```text
+> cur = best = -2
+> 
+> x=1:  cur < 0 → reset to x: cur = 1; best = max(-2, 1) = 1
+> x=-3: cur ≥ 0? No actually cur=1 ≥ 0, extend: cur = 1 + (-3) = -2; best = 1
+> x=4:  cur < 0 → reset: cur = 4; best = max(1, 4) = 4
+> x=-1: cur=4 ≥ 0, extend: cur = 3; best = 4
+> x=2:  extend: cur = 5; best = 5
+> x=1:  extend: cur = 6; best = 6
+> x=-5: extend: cur = 1; best = 6
+> x=4:  extend: cur = 5; best = 6
+> 
+> ✅ Answer: 6
+> ```
 
 > [!success]- Python
 > ```python
@@ -128,12 +175,24 @@ Min number of jumps to reach the end.
 
 **LC #134** · Medium
 
-Circular route. `gas[i]` and `cost[i]`. Find start index, or -1.
-
-### 🧠 Pattern: Net + Earliest Restart
-
-> If `sum(gas) < sum(cost)`: impossible (-1).
-> Else: walk once. When tank goes negative, the answer **cannot** be any index from `start..current` (every earlier start had even more deficit by now). Reset `start = i+1`, `tank = 0`.
+> [!info]- 🔍 Dry Run: gas=[1,2,3,4,5], cost=[3,4,5,1,2]
+> ```text
+> Total gas = 15, total cost = 15. Equal → possible.
+> 
+> start = 0, tank = 0
+> 
+> i=0: tank += gas[0]-cost[0] = 1-3 = -2 → tank = -2
+>      tank < 0 → reset: start = i+1 = 1, tank = 0
+> i=1: tank += 2-4 = -2; tank=-2 < 0 → start=2, tank=0
+> i=2: tank += 3-5 = -2; start=3, tank=0
+> i=3: tank += 4-1 = 3; tank=3
+> i=4: tank += 5-2 = 3; tank=6
+> 
+> Loop ends. total gas == total cost → start=3 is valid.
+> 
+> ✅ Answer: 3
+>   Verify: from station 3: +4-1=3, station 4: 3+5-2=6, station 0: 6+1-3=4, station 1: 4+2-4=2, station 2: 2+3-5=0. Made it.
+> ```
 
 > [!success]- Python
 > ```python
@@ -156,11 +215,38 @@ Circular route. `gas[i]` and `cost[i]`. Find start index, or -1.
 
 **LC #846** · Medium
 
-Can you partition hand into groups of `groupSize` consecutive integers?
-
-### 🧠 Pattern: Always Start a Group with the Smallest Remaining
-
-> Count freq. Sorted iteration; for each min remaining, try to form a group; decrement counts.
+> [!info]- 🔍 Dry Run: hand=[1,2,3,6,2,3,4,7,8], groupSize=3
+> ```text
+> len(hand)=9 % 3 = 0 ✓
+> 
+> Counter: {1:1, 2:2, 3:2, 6:1, 4:1, 7:1, 8:1}
+> Sorted keys: [1, 2, 3, 4, 6, 7, 8]
+> 
+> Process x=1: c = cnt[1] = 1
+>   for i=0..2 (groupSize): cnt[1+i] must be >= 1
+>     cnt[1]=1 ≥ 1 ✓; cnt[1] -= 1 = 0
+>     cnt[2]=2 ≥ 1 ✓; cnt[2] -= 1 = 1
+>     cnt[3]=2 ≥ 1 ✓; cnt[3] -= 1 = 1
+>   Took group [1,2,3]
+> 
+> Process x=2: cnt[2]=1 ≠ 0
+>   for i=0..2:
+>     cnt[2]=1 ≥ 1; cnt[2] -= 1 = 0
+>     cnt[3]=1 ≥ 1; cnt[3] -= 1 = 0
+>     cnt[4]=1 ≥ 1; cnt[4] -= 1 = 0
+>   Took group [2,3,4]
+> 
+> Process x=3: cnt[3]=0 → skip
+> Process x=4: cnt[4]=0 → skip
+> 
+> Process x=6: cnt[6]=1
+>   for i=0..2: cnt[6]=1; cnt[7]=1; cnt[8]=1 → all ≥ 1, decrement
+>   Took group [6,7,8]
+> 
+> Process x=7, x=8: cnt=0 → skip
+> 
+> All groups formed. ✅ Answer: true
+> ```
 
 > [!success]- Python
 > ```python
@@ -185,11 +271,32 @@ Can you partition hand into groups of `groupSize` consecutive integers?
 
 **LC #1899** · Medium
 
-You can take componentwise max of any 2 triplets. Reach `target = [a, b, c]`?
-
-### 🧠 Pattern: Filter + Compose
-
-> Ignore any triplet that exceeds any component of target. From remaining, check if for each component, at least one triplet equals target's value there.
+> [!info]- 🔍 Dry Run: triplets=[[2,5,3],[1,8,4],[1,7,5]], target=[2,7,5]
+> ```text
+> good = [False, False, False]   (target hit at each position)
+> 
+> Triplet (2,5,3):
+>   2 > 2? NO. 5 > 7? NO. 3 > 5? NO. Eligible.
+>   Check matches:
+>     2 == 2 → good[0] = True
+>     5 == 7? NO
+>     3 == 5? NO
+> 
+> Triplet (1,8,4):
+>   1 > 2? NO. 8 > 7? YES → skip (this triplet has 8 in position 1 which exceeds 7)
+> 
+> Triplet (1,7,5):
+>   1 > 2? NO. 7 > 7? NO. 5 > 5? NO. Eligible.
+>   Check:
+>     1 == 2? NO
+>     7 == 7 → good[1] = True
+>     5 == 5 → good[2] = True
+> 
+> all(good) = True
+> 
+> ✅ Answer: true
+>   By componentwise-max of [2,5,3] and [1,7,5] = [2,7,5] = target.
+> ```
 
 > [!success]- Python
 > ```python
@@ -211,24 +318,40 @@ You can take componentwise max of any 2 triplets. Reach `target = [a, b, c]`?
 
 **LC #763** · Medium
 
-Partition string so each letter appears in only one part. Return part sizes.
-
-### 🧠 Pattern: Last-Occurrence Window
-
-> Record each char's last index. Walk; extend current window to `max(end, last[ch])`. When `i == end`, cut.
-
-### Trace
-
-```
-"ababcbacadefegdehijhklij"
-last={ a:8, b:5, c:7, d:14, e:15, f:11, g:13, h:19, i:22, j:23, k:20, l:21 }
-
-i=0 'a' end=max(0,8)=8
-i=1 'b' end=max(8,5)=8
-i=2 'a' end=8
-... walk until i=8: end=8. Cut. Part size 8+1-0=9.
-restart from 9...
-```
+> [!info]- 🔍 Dry Run: s="ababcbacadefegdehijhklij"
+> ```text
+> last index of each char:
+>   a:8, b:5, c:7, d:14, e:15, f:11, g:13, h:19, i:22, j:23, k:20, l:21
+> 
+> start = 0, end = 0
+> 
+> i=0 'a': end = max(0, 8) = 8
+> i=1 'b': end = max(8, 5) = 8
+> i=2 'a': end = max(8, 8) = 8
+> i=3 'b': end = 8
+> i=4 'c': end = max(8, 7) = 8
+> i=5 'b': end = 8
+> i=6 'a': end = 8
+> i=7 'c': end = 8
+> i=8 'a': end = 8; i == end → cut! part size = 8-0+1 = 9; start = 9
+> i=9 'd': end = max(9, 14) = 14
+> i=10 'e': end = max(14, 15) = 15
+> i=11 'f': end = max(15, 11) = 15
+> i=12 'e': end = 15
+> i=13 'g': end = max(15, 13) = 15
+> i=14 'd': end = 15
+> i=15 'e': end = 15; i == end → cut! part size = 15-9+1 = 7; start = 16
+> i=16 'h': end = max(16, 19) = 19
+> i=17 'i': end = max(19, 22) = 22
+> i=18 'j': end = max(22, 23) = 23
+> i=19 'h': end = 23
+> i=20 'k': end = max(23, 20) = 23
+> i=21 'l': end = max(23, 21) = 23
+> i=22 'i': end = 23
+> i=23 'j': end = 23; i == end → cut! size = 23-16+1 = 8
+> 
+> ✅ Answer: [9, 7, 8]
+> ```
 
 > [!success]- Python
 > ```python
@@ -252,11 +375,37 @@ restart from 9...
 
 **LC #678** · Medium
 
-`*` may be `(`, `)`, or empty.
-
-### 🧠 Pattern: Track Min and Max Possible Open Count
-
-> `lo` = min open (treat * as `)` if possible). `hi` = max open (treat * as `(`). On `(`: both +1. On `)`: both -1. On `*`: lo-1, hi+1. Clamp `lo` at 0. If `hi < 0`: invalid. End: `lo == 0`.
+> [!info]- 🔍 Dry Run: s="(*))"
+> ```text
+> lo = hi = 0
+> 
+> c='(': lo=1, hi=1
+> c='*': lo=0 (treat as ')'), hi=2 (treat as '(')
+>   But if lo would go negative, clamp at 0.
+>   lo=max(0, 0) = 0
+> c=')': lo=-1 → max(0)=0; hi=1
+> c=')': lo=-1 → 0; hi=0
+> 
+> End check: lo == 0? YES → valid
+> 
+> ✅ Answer: true
+>   (Interpretation: '*' becomes '(', giving "(())")
+> 
+> ─────────────────────────────────────────
+> Counter-example: s="(("
+>   '(': lo=1, hi=1
+>   '(': lo=2, hi=2
+>   End: lo=2 ≠ 0 → false
+> 
+> ─────────────────────────────────────────
+> Edge case: hi goes negative → s="(()))"
+>   '(': lo=1 hi=1
+>   '(': lo=2 hi=2
+>   ')': lo=1 hi=1
+>   ')': lo=0 hi=0
+>   ')': lo=-1→0 hi=-1
+>   hi < 0 during processing → return false immediately
+> ```
 
 > [!success]- Python
 > ```python
@@ -271,7 +420,7 @@ restart from 9...
 >     return lo == 0
 > ```
 
-**Key takeaway:** Wildcards → track range of states. Beautiful, hard to invent under pressure — memorize.
+**Key takeaway:** Wildcards → track range of states.
 
 ---
 
@@ -279,11 +428,19 @@ restart from 9...
 
 **LC #122** · Easy
 
-Multiple transactions allowed.
-
-### 🧠 Pattern: Sum Positive Differences
-
-> Greedy: any positive price diff = "buy yesterday, sell today". Sum them.
+> [!info]- 🔍 Dry Run: prices=[7,1,5,3,6,4]
+> ```text
+> Sum of positive adjacent diffs:
+>   day 1-0: 1-7 = -6 → 0
+>   day 2-1: 5-1 = 4 → +4
+>   day 3-2: 3-5 = -2 → 0
+>   day 4-3: 6-3 = 3 → +3
+>   day 5-4: 4-6 = -2 → 0
+> 
+> Total = 4 + 3 = 7
+> 
+> ✅ Answer: 7   (buy at 1 sell at 5, buy at 3 sell at 6 → 4+3=7)
+> ```
 
 > [!success]- Python
 > ```python
@@ -291,7 +448,7 @@ Multiple transactions allowed.
 >     return sum(max(0, prices[i] - prices[i-1]) for i in range(1, len(prices)))
 > ```
 
-**Key takeaway:** "Many transactions" = greedy on adjacent diffs. Equivalent to picking every up-stretch.
+**Key takeaway:** "Many transactions" = greedy on adjacent diffs.
 
 ---
 
@@ -299,11 +456,38 @@ Multiple transactions allowed.
 
 **LC #881** · Medium
 
-Each boat: limit weight, max 2 people. Min boats.
-
-### Approach
-
-Sort. Two pointers — lightest + heaviest. If they fit together, pair; else, heaviest goes alone.
+> [!info]- 🔍 Dry Run: people=[3,2,2,1], limit=3
+> ```text
+> Sort: [1, 2, 2, 3]
+> l=0, r=3, boats=0
+> 
+> Iter 1: 1+3=4 > 3 → heaviest alone; r-- to 2; boats=1
+> Iter 2: 1+2=3 ≤ 3 → both go; l++ to 1; r-- to 1; boats=2
+> 
+> l==r=1: still one person left
+>   1+2=3 ≤ 3? wait l=r so one boat for that single person:
+>   Actually loop continues while l <= r.
+>   l=1, r=1: 2+2=4 > 3 → boat alone; r--; boats=3
+>   
+> Wait let me redo carefully:
+> 
+> ─────────────────────────────────────────
+> Re-trace: people=[3,2,2,1] sorted = [1,2,2,3]
+> l=0, r=3, boats=0
+> 
+> Iter 1: people[0]+people[3] = 1+3 = 4 > 3 → only heaviest goes
+>   r=2, boats=1
+> 
+> Iter 2: people[0]+people[2] = 1+2 = 3 ≤ 3 → both go
+>   l=1, r=1, boats=2
+> 
+> Iter 3: people[1]+people[1] (same person): 2+2=4 > 3 → only one
+>   r=0, boats=3
+> 
+> Now l=1 > r=0 → exit loop.
+> 
+> ✅ Answer: 3 boats
+> ```
 
 > [!success]- Python
 > ```python
@@ -320,6 +504,63 @@ Sort. Two pointers — lightest + heaviest. If they fit together, pair; else, he
 > ```
 
 **Key takeaway:** Sort + two pointers = classic greedy pattern when pairs need to be optimized.
+
+---
+
+## P11: Candy
+
+**LC #135** · **Hard**
+
+Give candies to children with ratings: every child gets at least 1; higher-rated child gets more than each neighbor.
+
+### 🧠 Pattern: Two-Pass Greedy (Left-to-Right + Right-to-Left)
+
+> Each constraint involves only one neighbor. Solve left-neighbor and right-neighbor constraints independently with two sweeps, then take max.
+
+> [!info]- 🔍 Dry Run: ratings=[1,0,2]
+> ```text
+> Init candies = [1, 1, 1]
+> 
+> Left-to-right sweep (ensure left-neighbor constraint):
+>   i=1: ratings[1]=0 > ratings[0]=1? NO → skip
+>   i=2: ratings[2]=2 > ratings[1]=0? YES → candies[2] = candies[1] + 1 = 2
+>   candies = [1, 1, 2]
+> 
+> Right-to-left sweep (ensure right-neighbor constraint):
+>   i=1: ratings[1]=0 > ratings[2]=2? NO → skip
+>   i=0: ratings[0]=1 > ratings[1]=0? YES → candies[0] = max(candies[0]=1, candies[1]+1=2) = 2
+>   candies = [2, 1, 2]
+> 
+> Sum = 2 + 1 + 2 = 5
+> 
+> ✅ Answer: 5
+> 
+> ─────────────────────────────────────────
+> ratings=[1,2,2]:
+>   init [1,1,1]
+>   L→R: i=1: 2>1 → candies[1]=2. i=2: 2>2? NO. → [1,2,1]
+>   R→L: i=1: 2>2 NO. i=0: 1>2 NO. → [1,2,1]
+>   Sum = 4
+>   Note: child 2 has ratings[2]==ratings[1]=2, so the "strictly higher" rule doesn't apply between them.
+> ```
+
+> [!success]- Python
+> ```python
+> def candy(ratings):
+>     n = len(ratings)
+>     candies = [1] * n
+>     for i in range(1, n):
+>         if ratings[i] > ratings[i - 1]:
+>             candies[i] = candies[i - 1] + 1
+>     for i in range(n - 2, -1, -1):
+>         if ratings[i] > ratings[i + 1]:
+>             candies[i] = max(candies[i], candies[i + 1] + 1)
+>     return sum(candies)
+> ```
+
+**Variants:** Trapping Rain Water (two-sweep max), Best Time to Buy and Sell Stock with Cooldown (two passes).
+
+**Key takeaway:** When a constraint has a "look left" AND "look right" dependency, two passes suffice. Each is independently greedy; the final `max` reconciles.
 
 ---
 
