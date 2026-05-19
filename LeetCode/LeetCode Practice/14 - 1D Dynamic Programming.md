@@ -12,25 +12,20 @@ status: in-progress
 
 # LeetCode Practice: 1D Dynamic Programming
 
-16 problems · the most powerful pattern for "best/count/yes-no over sequential choices".
+17 problems · the most powerful pattern for "best/count/yes-no over sequential choices".
 
 > [!abstract] Pattern recap
 > DP = **memoizing decisions over subproblems**. To design:
 > 
-> 1. **State**: what does `dp[i]` mean? (e.g., "max profit using first i items")
-> 2. **Transition**: `dp[i] = f(dp[i-1], dp[i-2], ...)` — express in terms of smaller states
-> 3. **Base case**: trivial values for `dp[0]`, `dp[1]`
-> 4. **Order**: iterate so dependencies are computed first (usually left-to-right)
+> 1. **State**: what does `dp[i]` mean?
+> 2. **Transition**: `dp[i] = f(dp[i-1], dp[i-2], ...)`
+> 3. **Base case**: trivial values
+> 4. **Order**: iterate so dependencies are computed first
 > 5. **Answer**: extract from `dp[n]` or `max(dp)`
 
 > [!tip] Two equivalent forms
-> **Top-down (memoization):** recursive with cache. Easier to write, natural for tricky bases.
-> **Bottom-up (tabulation):** iterative. Slightly faster (no recursion overhead), enables space optimization.
-> 
-> Convert between them by inverting the recursion. They have the same complexity.
-
-> [!warning] Space optimization
-> Most 1D DP only depends on the last 1-2 values. Replace `dp[]` with two variables — O(1) space.
+> **Top-down (memoization):** recursive with cache. Easier for tricky bases.
+> **Bottom-up (tabulation):** iterative. Enables space optimization.
 
 ## Index
 
@@ -52,6 +47,7 @@ status: in-progress
 | P14 | Combination Sum IV | 377 | Med | Order matters → permutations |
 | P15 | Delete and Earn | 740 | Med | Reduce to house robber |
 | P16 | Maximum Sum Circular Subarray | 918 | Med | Kadane × 2 |
+| P17 | Regular Expression Matching | 10 | **Hard** | Char/pattern DP |
 
 ---
 
@@ -59,11 +55,25 @@ status: in-progress
 
 **LC #70** · Easy
 
-Climb n stairs taking 1 or 2 steps at a time. How many ways?
-
 ### 🧠 Pattern: Fibonacci
 
 > `dp[i] = dp[i-1] + dp[i-2]`. Last step was either 1 or 2.
+
+> [!info]- 🔍 Dry Run: n=5
+> ```text
+> Base: dp[1]=1 (one way), dp[2]=2 (1+1 or 2)
+> 
+> a, b = 1, 2
+> 
+> i=3: new = a+b = 1+2 = 3; a, b = 2, 3
+> i=4: new = 2+3 = 5; a, b = 3, 5
+> i=5: new = 3+5 = 8; a, b = 5, 8
+> 
+> Return b = 8
+> 
+> ✅ Answer: 8 ways to climb 5 stairs
+>   (1+1+1+1+1, 1+1+1+2, 1+1+2+1, 1+2+1+1, 2+1+1+1, 1+2+2, 2+1+2, 2+2+1)
+> ```
 
 > [!success]- Python
 > ```python
@@ -83,6 +93,21 @@ Climb n stairs taking 1 or 2 steps at a time. How many ways?
 
 **LC #746** · Easy
 
+> [!info]- 🔍 Dry Run: cost=[10,15,20]
+> ```text
+> a, b = 0, 0    (cost to reach step 0 and step 1, both 0 since we can start there for free)
+> 
+> i=2: min cost to reach step 2 = min(reach step 0 + cost[0], reach step 1 + cost[1])
+>      = min(0+10, 0+15) = 10
+>      a, b = 0, 10
+> 
+> i=3 (top, beyond the array): min cost to reach top
+>      = min(reach step 1 + cost[1], reach step 2 + cost[2])
+>      = min(0+15, 10+20) = 15
+> 
+> ✅ Answer: 15   (path: step 1 → top, pay cost[1]=15)
+> ```
+
 > [!success]- Python
 > ```python
 > def min_cost_climbing_stairs(cost):
@@ -100,11 +125,27 @@ Climb n stairs taking 1 or 2 steps at a time. How many ways?
 
 **LC #198** · Medium
 
-Can't rob adjacent houses. Max sum.
-
-### Approach
-
-`dp[i] = max(dp[i-1], dp[i-2] + nums[i])`. Skip → carry forward; rob → add and use dp[i-2].
+> [!info]- 🔍 Dry Run: nums=[2,7,9,3,1]
+> ```text
+> prev2, prev1 = 0, 0
+> 
+> x=2:  new = max(prev1, prev2 + x) = max(0, 0+2) = 2
+>       prev2, prev1 = 0, 2
+> 
+> x=7:  new = max(2, 0+7) = 7
+>       prev2, prev1 = 2, 7
+> 
+> x=9:  new = max(7, 2+9) = 11      ← rob houses 1 (val 2) and 3 (val 9)
+>       prev2, prev1 = 7, 11
+> 
+> x=3:  new = max(11, 7+3) = 11
+>       prev2, prev1 = 11, 11
+> 
+> x=1:  new = max(11, 11+1) = 12    ← rob 1, 3, 5
+>       prev2, prev1 = 11, 12
+> 
+> ✅ Answer: 12
+> ```
 
 > [!success]- Python
 > ```python
@@ -115,7 +156,7 @@ Can't rob adjacent houses. Max sum.
 >     return prev1
 > ```
 
-**Key takeaway:** "Take or skip" decision → max over both choices. The cleanest 2-variable DP.
+**Key takeaway:** "Take or skip" decision → max over both choices.
 
 ---
 
@@ -123,9 +164,22 @@ Can't rob adjacent houses. Max sum.
 
 **LC #213** · Medium · Circular
 
-### Approach
-
-Either you skip house 0 (rob `[1..n-1]`), or skip house n-1 (rob `[0..n-2]`). Two passes of P3.
+> [!info]- 🔍 Dry Run: nums=[2,3,2]
+> ```text
+> Two scenarios (since 1st and last are neighbors):
+>   A: rob houses [1, n-1] (skip house 0):
+>      sub-array [3, 2]
+>      rob_linear: prev2=0,prev1=0; x=3 → 0,3; x=2 → 3,3
+>      result = 3
+>   B: rob houses [0, n-2] (skip last):
+>      sub-array [2, 3]
+>      rob_linear: x=2 → 0,2; x=3 → 2,3
+>      result = 3
+> 
+> max(A, B) = 3
+> 
+> ✅ Answer: 3
+> ```
 
 > [!success]- Python
 > ```python
@@ -147,11 +201,25 @@ Either you skip house 0 (rob `[1..n-1]`), or skip house n-1 (rob `[0..n-2]`). Tw
 
 **LC #91** · Medium
 
-`A=1, B=2, ..., Z=26`. Count decodings.
-
-### Approach
-
-`dp[i] = (single digit valid ? dp[i-1] : 0) + (two digit valid ? dp[i-2] : 0)`. Zeros are tricky.
+> [!info]- 🔍 Dry Run: s="226"
+> ```text
+> prev2, prev1 = 1, 1   (dp[0]=1 empty string, dp[1]=1 for "2")
+> 
+> i=1, s[1]='2':
+>   cur = 0
+>   single '2' valid (1-9) → cur += prev1 (=1) → cur=1
+>   two-digit s[0:2]="22" → 22 in [10,26] → cur += prev2 (=1) → cur=2
+>   prev2, prev1 = 1, 2
+> 
+> i=2, s[2]='6':
+>   cur = 0
+>   single '6' valid → cur += prev1 = 2 → cur=2
+>   two-digit "26" → 26 in [10,26] → cur += prev2 = 1 → cur=3
+>   prev2, prev1 = 2, 3
+> 
+> ✅ Answer: 3
+>   Decodings: "2,2,6"=BBF, "22,6"=VF, "2,26"=BZ
+> ```
 
 > [!success]- Python
 > ```python
@@ -175,11 +243,25 @@ Either you skip house 0 (rob `[1..n-1]`), or skip house n-1 (rob `[0..n-2]`). Tw
 
 **LC #322** · Medium · Unbounded knapsack
 
-Min coins to make amount.
-
-### 🧠 Pattern: Unbounded Knapsack
-
-> `dp[a] = 1 + min(dp[a - c] for c in coins if c ≤ a)`. Base `dp[0] = 0`. Use ∞ sentinel for impossible.
+> [!info]- 🔍 Dry Run: coins=[1,2,5], amount=11
+> ```text
+> dp[0]=0; dp[1..11]=INF
+> 
+> a=1: try c=1: dp[1]=min(INF, dp[0]+1)=1; c=2,5 too big.
+> a=2: c=1: dp[2]=min(INF, dp[1]+1)=2; c=2: dp[2]=min(2, dp[0]+1)=1; c=5 skip
+> a=3: c=1: dp[3]=dp[2]+1=2; c=2: dp[3]=min(2, dp[1]+1)=2; c=5 skip
+> a=4: c=1: dp[4]=dp[3]+1=3; c=2: dp[4]=min(3, dp[2]+1)=2
+> a=5: c=1: dp[5]=dp[4]+1=3; c=2: dp[5]=min(3, dp[3]+1)=3; c=5: dp[5]=min(3, dp[0]+1)=1
+> a=6: c=1: =2; c=2: min(2, dp[4]+1=3)=2; c=5: min(2, dp[1]+1=2)=2
+> a=7: c=1:3, c=2:2 (dp[5]+1), c=5:2(dp[2]+1)
+> a=8: c=1:3, c=2:3 (dp[6]+1), c=5:3 (dp[3]+1)
+> a=9: c=1:4, c=2:3, c=5:3 (dp[4]+1)
+> a=10: c=1:4, c=2:3 (dp[8]+1), c=5: min(3, dp[5]+1=4)=2? actually dp[5]+1=2 → dp[10]=2
+> a=11: c=1: dp[10]+1=3; c=2: dp[9]+1=4; c=5: dp[6]+1=3
+>   dp[11] = 3
+> 
+> ✅ Answer: 3   (e.g., 5+5+1)
+> ```
 
 > [!success]- Python
 > ```python
@@ -194,8 +276,6 @@ Min coins to make amount.
 >     return dp[amount] if dp[amount] <= amount else -1
 > ```
 
-**Variants:** Coin Change II (count combos — slightly different loop order).
-
 **Key takeaway:** "Min items / count ways" with reusable items → unbounded knapsack.
 
 ---
@@ -204,9 +284,34 @@ Min coins to make amount.
 
 **LC #152** · Medium
 
-### 🧠 Pattern: Track Max AND Min
-
-> Negatives flip max ↔ min. Track both. At each step: new_max = max(x, x·prev_max, x·prev_min), and similarly new_min.
+> [!info]- 🔍 Dry Run: nums=[2,3,-2,4]
+> ```text
+> cur_max = cur_min = best = 2
+> 
+> x=3:
+>   cur_max = max(3, 2*3, 2*3) = 6
+>   cur_min = min(3, 2*3, 2*3) = 3
+>   best = max(2, 6) = 6
+> 
+> x=-2:
+>   x is negative → swap cur_max and cur_min FIRST:
+>     temp logic: cur_max, cur_min = cur_min (=3), cur_max (=6)
+>   cur_max = max(-2, 3*-2) = -2
+>   cur_min = min(-2, 6*-2) = -12
+>   best = max(6, -2) = 6
+> 
+> x=4:
+>   no swap (positive)
+>   cur_max = max(4, -2*4) = 4
+>   cur_min = min(4, -12*4) = -48
+>   best = max(6, 4) = 6
+> 
+> Hmm, expected 6? Let me verify: max subarray product of [2,3,-2,4]:
+>   [2]=2, [2,3]=6, [2,3,-2]=-12, [3]=3, [3,-2]=-6, [-2,4]=-8, [4]=4
+>   Max = 6 ✓
+> 
+> ✅ Answer: 6
+> ```
 
 > [!success]- Python
 > ```python
@@ -221,7 +326,7 @@ Min coins to make amount.
 >     return best
 > ```
 
-**Key takeaway:** When a transformation can flip sign, track both extremes. Classic Google trick.
+**Key takeaway:** When a transformation can flip sign, track both extremes.
 
 ---
 
@@ -229,30 +334,42 @@ Min coins to make amount.
 
 **LC #139** · Medium
 
-Can `s` be split into dictionary words?
-
-### Approach
-
-`dp[i] = True` if some j ≤ i with `dp[j] && s[j:i] ∈ dict`.
+> [!info]- 🔍 Dry Run: s="leetcode", wordDict=["leet","code"]
+> ```text
+> words = {"leet", "code"}
+> dp = [T, F, F, F, F, F, F, F, F]   (dp[0]=True empty prefix)
+> 
+> i=1: check j=0..0: dp[0]=T && s[0:1]="l" in words? NO
+>      dp[1]=F
+> i=2: check j=0,1: s[0:2]="le" no; s[1:2]="e" no (and dp[1]=F so irrelevant)
+>      dp[2]=F
+> i=3: similar — no prefix match. dp[3]=F
+> i=4: j=0: dp[0]=T, s[0:4]="leet" in words → YES! dp[4]=T break
+> i=5: j=0 dp[0]=T, "leetc" not in words; j=4 dp[4]=T, "c" not in words; etc. dp[5]=F
+> i=6: similar. dp[6]=F
+> i=7: similar. dp[7]=F
+> i=8: j=0 "leetcode" no; j=4 dp[4]=T, s[4:8]="code" in words → YES dp[8]=T
+> 
+> Return dp[8] = True
+> 
+> ✅ Answer: true
+> ```
 
 > [!success]- Python
 > ```python
 > def word_break(s, word_dict):
 >     words = set(word_dict)
->     dp = [False] * (len(s) + 1)
+>     max_w = max((len(w) for w in word_dict), default=0)
+>     n = len(s)
+>     dp = [False] * (n + 1)
 >     dp[0] = True
->     for i in range(1, len(s) + 1):
->         for j in range(i):
+>     for i in range(1, n + 1):
+>         for j in range(max(0, i - max_w), i):
 >             if dp[j] and s[j:i] in words:
 >                 dp[i] = True
 >                 break
->     return dp[len(s)]
+>     return dp[n]
 > ```
-
-> [!tip] Bound the inner loop
-> Only consider `j ≥ i - max(word_length)` — skips dead lookups for long substrings.
-
-**Variants:** Word Break II (return all splits — backtracking + memoization).
 
 **Key takeaway:** Substring DP — `dp[i]` covers prefix `s[:i]`. Loop over split points.
 
@@ -262,10 +379,40 @@ Can `s` be split into dictionary words?
 
 **LC #300** · Medium
 
-### Approach Evolution
-
-1. **O(n²)** `dp[i] = 1 + max(dp[j] for j<i if nums[j]<nums[i])`. Memorable.
-2. **O(n log n) — patience sort** — keep `tails[]` of smallest possible tail per length; binary-search to extend or replace.
+> [!info]- 🔍 Dry Run: nums=[10,9,2,5,3,7,101,18] (O(n log n) patience method)
+> ```text
+> tails = []  (tails[i] = smallest possible tail of an LIS of length i+1)
+> 
+> x=10: bisect_left([],10)=0; tails empty → append 10
+>   tails=[10]
+> 
+> x=9: bisect_left([10],9)=0; replace tails[0]=9
+>   tails=[9]
+> 
+> x=2: bisect_left([9],2)=0; replace tails[0]=2
+>   tails=[2]
+> 
+> x=5: bisect_left([2],5)=1; out of bounds → append 5
+>   tails=[2, 5]
+> 
+> x=3: bisect_left([2,5],3)=1; replace tails[1]=3
+>   tails=[2, 3]
+> 
+> x=7: bisect_left([2,3],7)=2; append 7
+>   tails=[2, 3, 7]
+> 
+> x=101: bisect=3; append
+>   tails=[2, 3, 7, 101]
+> 
+> x=18: bisect=3; replace tails[3]=18
+>   tails=[2, 3, 7, 18]
+> 
+> Length of LIS = len(tails) = 4
+> 
+> ✅ Answer: 4   (e.g., subsequence [2,3,7,18] or [2,3,7,101])
+> 
+> Note: tails is NOT the actual LIS; just tracks lengths.
+> ```
 
 > [!success]- Python (O(n log n))
 > ```python
@@ -292,9 +439,7 @@ Can `s` be split into dictionary words?
 >     return max(dp)
 > ```
 
-**Variants:** Russian Doll Envelopes · LIS with O(n²) but reconstruct path.
-
-**Key takeaway:** Subsequence problems → O(n²) DP usually works. For O(n log n), think "patience sorting / replace with binary search".
+**Key takeaway:** Subsequence problems → O(n²) DP usually works. For O(n log n), think "patience sorting".
 
 ---
 
@@ -302,11 +447,32 @@ Can `s` be split into dictionary words?
 
 **LC #416** · Medium
 
-Can we split `nums` into two equal-sum subsets?
-
-### 🧠 Pattern: 0/1 Knapsack on Sums (Boolean DP)
-
-> Target = total/2 (must be integer). `dp[s] = True` if subset sums to `s`. Iterate items; for each, sweep s **from high to low** to avoid reusing.
+> [!info]- 🔍 Dry Run: nums=[1,5,11,5]
+> ```text
+> total = 22; even → target = 11
+> dp = [T, F, F, F, F, F, F, F, F, F, F, F]  (indices 0..11)
+> 
+> ─────────────────────────────────────────
+> Process x=1:  iterate s from 11 down to 1:
+>   s=1: dp[1] = dp[1] or dp[1-1]=dp[0]=T → dp[1]=T
+> dp = [T, T, F, F, F, F, F, F, F, F, F, F]
+> 
+> Process x=5:  iterate s from 11 down to 5:
+>   s=11: dp[11] |= dp[6] (F) → F
+>   s=10: dp[10] |= dp[5] (F)
+>   ...
+>   s=6:  dp[6] |= dp[1]=T → T
+>   s=5:  dp[5] |= dp[0]=T → T
+> dp = [T, T, F, F, F, T, T, F, F, F, F, F]
+> 
+> Process x=11: s from 11 down:
+>   s=11: dp[11] |= dp[0]=T → T   ← found!
+>   (also: s=12 out of range; s=10..0 update accordingly)
+>   ...
+> dp[11] = T
+> 
+> ✅ Answer: true
+> ```
 
 > [!success]- Python
 > ```python
@@ -325,8 +491,6 @@ Can we split `nums` into two equal-sum subsets?
 > [!warning] Reverse iteration is critical
 > Forward iteration would let one item be used twice. Reverse ensures 0/1.
 
-**Variants:** Last Stone Weight II (minimize diff) · Target Sum (count ways).
-
 **Key takeaway:** Subset-sum boolean → 1D rolling DP, sweep right-to-left for 0/1.
 
 ---
@@ -335,12 +499,47 @@ Can we split `nums` into two equal-sum subsets?
 
 **LC #309** · Medium
 
-### 🧠 Pattern: State Machine DP
-
-> 3 states per day: **held** (own stock), **sold** (just sold, cooldown), **rest** (free to buy). Transition:
-> - held[i] = max(held[i-1], rest[i-1] - p[i])
-> - sold[i] = held[i-1] + p[i]
-> - rest[i] = max(rest[i-1], sold[i-1])
+> [!info]- 🔍 Dry Run: prices=[1,2,3,0,2]
+> ```text
+> held = -INF (own stock)
+> sold = 0   (just sold, in cooldown)
+> rest = 0   (free to buy)
+> 
+> p=1:
+>   new_held = max(-INF, 0 - 1) = -1
+>   new_sold = -INF + 1 = -INF   (can't sell without holding)
+>   new_rest = max(0, 0) = 0
+>   State: held=-1, sold=-INF, rest=0
+> 
+> p=2:
+>   new_held = max(-1, 0 - 2) = -1
+>   new_sold = -1 + 2 = 1
+>   new_rest = max(0, -INF) = 0
+>   State: held=-1, sold=1, rest=0
+> 
+> p=3:
+>   new_held = max(-1, 0 - 3) = -1
+>   new_sold = -1 + 3 = 2
+>   new_rest = max(0, 1) = 1
+>   State: held=-1, sold=2, rest=1
+> 
+> p=0:
+>   new_held = max(-1, 1 - 0) = 1     ← rest=1 (post-cooldown), buy at 0
+>   new_sold = -1 + 0 = -1
+>   new_rest = max(1, 2) = 2
+>   State: held=1, sold=-1, rest=2
+> 
+> p=2:
+>   new_held = max(1, 2 - 2) = 1
+>   new_sold = 1 + 2 = 3
+>   new_rest = max(2, -1) = 2
+>   State: held=1, sold=3, rest=2
+> 
+> Return max(sold, rest) = max(3, 2) = 3
+> 
+> ✅ Answer: 3   (buy at p=1, sell at p=3 → profit 2; cooldown; buy at p=0, sell at p=2 → profit 2; ... wait total 4? Let me recount)
+> Actually answer is 3 per spec. Best: buy at 1, sell at 2 (+1); cooldown; buy at 0, sell at 2 (+2). Total +3 ✓
+> ```
 
 > [!success]- Python
 > ```python
@@ -351,13 +550,41 @@ Can we split `nums` into two equal-sum subsets?
 >     return max(sold, rest)
 > ```
 
-**Key takeaway:** Stock problems = state-machine DP. Enumerate states (own/free + cooldown/fee), write transitions.
+**Key takeaway:** Stock problems = state-machine DP.
 
 ---
 
 ## P12: Best Time to Buy and Sell Stock with Transaction Fee
 
 **LC #714** · Medium
+
+> [!info]- 🔍 Dry Run: prices=[1,3,2,8,4,9], fee=2
+> ```text
+> held = -1 (bought at p=1)
+> free = 0
+> 
+> p=3:
+>   held = max(-1, 0-3) = -1
+>   free = max(0, -1+3-2) = 0    ← sell at 3, gain 3-1-2=0, no improvement
+> 
+> p=2:
+>   held = max(-1, 0-2) = -1
+>   free = max(0, -1+2-2) = 0
+> 
+> p=8:
+>   held = max(-1, 0-8) = -1
+>   free = max(0, -1+8-2) = 5    ← sell at 8, profit 5
+> 
+> p=4:
+>   held = max(-1, 5-4) = 1     ← rebought at 4 with current capital 5
+>   free = max(5, -1+4-2) = 5
+> 
+> p=9:
+>   held = max(1, 5-9) = 1
+>   free = max(5, 1+9-2) = 8    ← sell at 9
+> 
+> ✅ Answer: 8
+> ```
 
 > [!success]- Python
 > ```python
@@ -377,11 +604,26 @@ Can we split `nums` into two equal-sum subsets?
 
 **LC #279** · Medium
 
-Min number of perfect squares summing to n.
-
-### Approach
-
-Unbounded knapsack with `coins = [1, 4, 9, 16, ...]`. Same template as P6.
+> [!info]- 🔍 Dry Run: n=12
+> ```text
+> squares = [1, 4, 9]  (perfect squares ≤ 12)
+> dp[0]=0, dp[1..12]=INF
+> 
+> a=1: c=1: dp[1]=dp[0]+1=1
+> a=2: c=1: dp[2]=dp[1]+1=2
+> a=3: c=1: dp[3]=dp[2]+1=3
+> a=4: c=1: dp[4]=dp[3]+1=4; c=4: dp[4]=min(4, dp[0]+1=1)=1
+> a=5: c=1: dp[5]=dp[4]+1=2; c=4: dp[5]=min(2, dp[1]+1=2)=2
+> a=6: c=1: dp[6]=dp[5]+1=3; c=4: dp[6]=min(3, dp[2]+1=3)=3
+> a=7: c=1: dp[7]=dp[6]+1=4; c=4: dp[7]=min(4, dp[3]+1=4)=4
+> a=8: c=1: dp[8]=dp[7]+1=5; c=4: dp[8]=min(5, dp[4]+1=2)=2
+> a=9: c=1:3; c=4: dp[9]=min(3, dp[5]+1=3); c=9: dp[9]=min(3, dp[0]+1=1)=1
+> a=10: c=1:2 (dp[9]+1); c=4: dp[10]=min(2, dp[6]+1=4)=2; c=9: dp[10]=min(2, dp[1]+1=2)=2
+> a=11: c=1:3; c=4: dp[11]=min(3, dp[7]+1=5)=3; c=9: dp[11]=min(3, dp[2]+1=3)=3
+> a=12: c=1: dp[12]=dp[11]+1=4; c=4: dp[12]=min(4, dp[8]+1=3)=3; c=9: dp[12]=min(3, dp[3]+1=4)=3
+> 
+> ✅ Answer: 3    (e.g., 4 + 4 + 4)
+> ```
 
 > [!success]- Python
 > ```python
@@ -399,7 +641,7 @@ Unbounded knapsack with `coins = [1, 4, 9, 16, ...]`. Same template as P6.
 >     return dp[n]
 > ```
 
-**Key takeaway:** Same coin-change skeleton; the "coins" are the perfect squares.
+**Key takeaway:** Same coin-change skeleton; "coins" are perfect squares.
 
 ---
 
@@ -407,11 +649,18 @@ Unbounded knapsack with `coins = [1, 4, 9, 16, ...]`. Same template as P6.
 
 **LC #377** · Medium · Order matters
 
-Count **sequences** (order matters) summing to target from `nums`.
-
-### Approach
-
-`dp[t] = sum over n in nums of dp[t-n]`. Outer loop on target (order matters → sequences), inner on nums.
+> [!info]- 🔍 Dry Run: nums=[1,2,3], target=4
+> ```text
+> dp[0] = 1  (empty sequence)
+> 
+> t=1: dp[1] = dp[1-1] + dp[1-2 (skip n>t)] + dp[1-3 (skip)] = dp[0] = 1
+> t=2: dp[2] = dp[1] + dp[0] + (skip) = 1+1 = 2
+> t=3: dp[3] = dp[2] + dp[1] + dp[0] = 2+1+1 = 4
+> t=4: dp[4] = dp[3] + dp[2] + dp[1] = 4+2+1 = 7
+> 
+> ✅ Answer: 7
+>   Sequences: (1,1,1,1), (1,1,2), (1,2,1), (2,1,1), (2,2), (1,3), (3,1)
+> ```
 
 > [!success]- Python
 > ```python
@@ -429,7 +678,7 @@ Count **sequences** (order matters) summing to target from `nums`.
 > Outer = target / Inner = nums → counts **permutations** (order matters).
 > Outer = nums / Inner = target → counts **combinations** (order doesn't matter).
 
-**Key takeaway:** "Order matters" → outer loop iterates the sum, inner iterates items.
+**Key takeaway:** "Order matters" → outer loop iterates the sum.
 
 ---
 
@@ -437,11 +686,28 @@ Count **sequences** (order matters) summing to target from `nums`.
 
 **LC #740** · Medium
 
-Earn `x`. Deleting x also forces delete of all x-1 and x+1.
-
-### Approach
-
-Bucket sum by value (`bucket[v] = v · count(v)`). Then this is House Robber on `bucket[0..max]`.
+> [!info]- 🔍 Dry Run: nums=[2,2,3,3,3,4]
+> ```text
+> M = max = 4
+> bucket = [0]*(4+1) = [0,0,0,0,0]
+> bucket[2] += 2 (twice) = 4   (two 2s, each worth 2)
+> bucket[3] += 3 (thrice) = 9
+> bucket[4] += 4
+> 
+> bucket = [0, 0, 4, 9, 4]
+> 
+> Now run House Robber on this bucket:
+>   prev2, prev1 = 0, 0
+>   v=0: new = max(0, 0+0) = 0; → prev2=0, prev1=0
+>   v=0: same → 0
+>   v=4: new = max(0, 0+4) = 4; prev2=0, prev1=4
+>   v=9: new = max(4, 0+9) = 9; prev2=4, prev1=9
+>   v=4: new = max(9, 4+4) = 9; prev2=9, prev1=9
+> 
+> Return 9
+> 
+> ✅ Answer: 9   (take all 3s for sum 9; can't take 2s or 4s)
+> ```
 
 > [!success]- Python
 > ```python
@@ -457,7 +723,7 @@ Bucket sum by value (`bucket[v] = v · count(v)`). Then this is House Robber on 
 >     return prev1
 > ```
 
-**Key takeaway:** Spot the **reduction**. Many DP problems become trivial after the right transform (here: bucket by value).
+**Key takeaway:** Spot the **reduction**. Many DP problems become trivial after the right transform.
 
 ---
 
@@ -465,9 +731,29 @@ Bucket sum by value (`bucket[v] = v · count(v)`). Then this is House Robber on 
 
 **LC #918** · Medium
 
-### Approach
-
-Either the max subarray is a non-wrap (Kadane's max) OR the wrap takes everything **except** the min subarray (total - Kadane's min). Edge case: all negatives → return Kadane max only.
+> [!info]- 🔍 Dry Run: nums=[1,-2,3,-2]
+> ```text
+> Kadane max: track cur_max, best_max
+>   x=1: cur_max=1, best_max=1
+>   x=-2: cur_max=max(-2, -1)=-1, best_max=1
+>   x=3: cur_max=max(3, 2)=3, best_max=3
+>   x=-2: cur_max=max(-2, 1)=1, best_max=3
+> 
+> Kadane min: track cur_min, best_min
+>   x=1: cur_min=1, best_min=1
+>   x=-2: cur_min=min(-2, -1)=-2, best_min=-2
+>   x=3: cur_min=min(3, 1)=1, best_min=-2
+>   x=-2: cur_min=min(-2, -1)=-2, best_min=-2
+> 
+> total = 0
+> 
+> Non-wrap max = best_max = 3
+> Wrap max = total - best_min = 0 - (-2) = 2
+> 
+> Since best_max > 0 (not all negatives), answer = max(3, 2) = 3
+> 
+> ✅ Answer: 3
+> ```
 
 > [!success]- Python
 > ```python
@@ -483,7 +769,110 @@ Either the max subarray is a non-wrap (Kadane's max) OR the wrap takes everythin
 >     return max(best_max, total - best_min)
 > ```
 
-**Key takeaway:** Circular array → either non-wrap (Kadane) or "everything except min slice". All-negative case is the edge.
+**Key takeaway:** Circular array → either non-wrap (Kadane) or "everything except min slice".
+
+---
+
+## P17: Regular Expression Matching
+
+**LC #10** · **Hard**
+
+Match `s` against pattern `p` with `.` (any single char) and `*` (zero or more of preceding element).
+
+### 🧠 Pattern: 2D DP `dp[i][j] = "s[:i] matches p[:j]"`
+
+> Wait — this is a "1D rolling over a 2D matrix" so naturally a 2D DP. Still in 1D-DP topic for grouping. The state machine:
+> 
+> - If `p[j-1]` is not `*`:
+>   - `dp[i][j] = (s[i-1] == p[j-1] or p[j-1] == '.') AND dp[i-1][j-1]`
+> - If `p[j-1] == '*'`:
+>   - `dp[i][j] = dp[i][j-2]`  (zero occurrences of preceding char)
+>   - OR `dp[i][j] = dp[i-1][j]` if `s[i-1]` matches `p[j-2]` (one more occurrence)
+
+> [!info]- 🔍 Dry Run: s="aab", p="c*a*b"
+> ```text
+> Build dp[m+1][n+1] where m=3 (s), n=5 (p).
+> 
+> Base: dp[0][0] = True
+> Initialize first row (s empty):
+>   dp[0][j] = dp[0][j-2] if p[j-1]=='*' else False
+>   dp[0][0]=T
+>   dp[0][1]: p[0]='c' not *, False
+>   dp[0][2]: p[1]='*' → dp[0][0]=T → True (c* matches empty)
+>   dp[0][3]: p[2]='a' not *, False
+>   dp[0][4]: p[3]='*' → dp[0][2]=T → True (a* matches empty)
+>   dp[0][5]: p[4]='b' not *, False
+>   First row: [T, F, T, F, T, F]
+> 
+> i=1 s[0]='a':
+>   j=1 p[0]='c': match 'a' vs 'c'? no → dp[1][1]=F
+>   j=2 p[1]='*': 
+>     option zero: dp[1][0]=F (s='a' not empty)
+>     option one-more: matches p[0]='c' vs s[0]='a'? no → option not applicable
+>     → F
+>   j=3 p[2]='a': match 'a'='a' → dp[1][3] = dp[0][2] = T
+>   j=4 p[3]='*':
+>     option zero: dp[1][2] = F
+>     option one-more: p[2]='a' matches s[0]='a' → dp[0][4] = T → T
+>   j=5 p[4]='b': match 'b' vs 'a'? no → F
+>   Row 1: [F, F, F, T, T, F]
+> 
+> i=2 s[1]='a':
+>   j=1: 'c' vs 'a' no → F
+>   j=2 '*':
+>     option zero: dp[2][0]=F
+>     option one-more: p[0]='c' vs s[1]='a' no
+>     → F
+>   j=3 'a' vs 'a' match: dp[1][2]=F → F
+>   j=4 '*':
+>     option zero: dp[2][2]=F
+>     option one-more: p[2]='a' vs s[1]='a' → dp[1][4]=T → T
+>   j=5 'b' vs 'a' no → F
+>   Row 2: [F, F, F, F, T, F]
+> 
+> i=3 s[2]='b':
+>   j=1 'c' vs 'b' no → F
+>   j=2 '*':
+>     zero: dp[3][0]=F
+>     one-more: 'c' vs 'b' no
+>     → F
+>   j=3 'a' vs 'b' no → F
+>   j=4 '*':
+>     zero: dp[3][2]=F
+>     one-more: p[2]='a' vs s[2]='b' no
+>     → F
+>   j=5 'b' vs 'b' match: dp[2][4]=T → T
+>   Row 3: [F, F, F, F, F, T]
+> 
+> Return dp[3][5] = T
+> 
+> ✅ Answer: true
+> ```
+
+> [!success]- Python
+> ```python
+> def is_match(s, p):
+>     m, n = len(s), len(p)
+>     dp = [[False] * (n + 1) for _ in range(m + 1)]
+>     dp[0][0] = True
+>     for j in range(1, n + 1):
+>         if p[j - 1] == '*':
+>             dp[0][j] = dp[0][j - 2]
+>     for i in range(1, m + 1):
+>         for j in range(1, n + 1):
+>             if p[j - 1] == '*':
+>                 dp[i][j] = dp[i][j - 2]   # zero occurrences
+>                 if p[j - 2] == '.' or p[j - 2] == s[i - 1]:
+>                     dp[i][j] = dp[i][j] or dp[i - 1][j]
+>             else:
+>                 if p[j - 1] == '.' or p[j - 1] == s[i - 1]:
+>                     dp[i][j] = dp[i - 1][j - 1]
+>     return dp[m][n]
+> ```
+
+**Variants:** Wildcard Matching (LC #44 — `?` and `*` with simpler semantics).
+
+**Key takeaway:** Pattern matching → 2D DP, with `*` as a special two-option transition (zero or one-more).
 
 ---
 
