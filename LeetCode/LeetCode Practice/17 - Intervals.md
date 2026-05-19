@@ -20,10 +20,7 @@ status: in-progress
 > 2. **Sort by end** (then greedy pick non-overlapping)
 > 3. **Sweep line** — convert intervals to start/end events, sort, scan
 > 
-> **Overlap test**: `[a, b]` and `[c, d]` overlap iff `max(a, c) < min(b, d)` (or `≤` if endpoints touching counts).
-
-> [!tip] Inclusive vs exclusive endpoints
-> Clarify in the interview. `[1,3]` and `[3,5]` may or may not overlap depending on convention. Use `<=` for closed/closed; `<` for half-open.
+> **Overlap test**: `[a, b]` and `[c, d]` overlap iff `max(a, c) < min(b, d)`.
 
 ## Index
 
@@ -37,7 +34,7 @@ status: in-progress
 | P6 | Min Arrows to Burst Balloons | 452 | Med | Sort by end, greedy |
 | P7 | Interval List Intersections | 986 | Med | Two pointers |
 | P8 | Car Pooling | 1094 | Med | Sweep line / prefix sum |
-| P9 | Employee Free Time | 759 | Hard | Heap or merge intervals |
+| P9 | Employee Free Time | 759 | **Hard** | Heap or merge intervals |
 | P10 | Max Events You Can Attend | 1353 | Med | Heap of ends |
 
 ---
@@ -46,9 +43,28 @@ status: in-progress
 
 **LC #56** · Medium
 
-### Approach
-
-Sort by start. Walk: if current.start ≤ prev.end → merge (extend end). Else, push new.
+> [!info]- 🔍 Dry Run: intervals=[[1,3],[2,6],[8,10],[15,18]]
+> ```text
+> Sort by start: already sorted.
+> 
+> out = [[1, 3]]
+> 
+> ─────────────────────────────────────────
+> Process [2, 6]:
+>   2 ≤ out[-1].end (3)? YES → merge
+>   out[-1].end = max(3, 6) = 6
+>   out = [[1, 6]]
+> 
+> Process [8, 10]:
+>   8 ≤ 6? NO → start new
+>   out = [[1, 6], [8, 10]]
+> 
+> Process [15, 18]:
+>   15 ≤ 10? NO → start new
+>   out = [[1, 6], [8, 10], [15, 18]]
+> 
+> ✅ Answer: [[1, 6], [8, 10], [15, 18]]
+> ```
 
 > [!success]- Python
 > ```python
@@ -71,9 +87,37 @@ Sort by start. Walk: if current.start ≤ prev.end → merge (extend end). Else,
 
 **LC #57** · Medium · intervals pre-sorted
 
-### Approach
-
-3 phases: append all that end before newInterval starts; merge all that overlap with newInterval; append the rest.
+> [!info]- 🔍 Dry Run: intervals=[[1,3],[6,9]], new=[2,5]
+> ```text
+> Phase 1 — append all intervals ending BEFORE new starts:
+>   i=0, [1,3]: 3 < 2? NO → stop
+>   out = []
+> 
+> Phase 2 — merge all overlapping with new:
+>   i=0, [1,3]: 1 ≤ new.end=5? YES → merge
+>     new.start = min(2, 1) = 1
+>     new.end = max(5, 3) = 5
+>     i++
+>   i=1, [6,9]: 6 ≤ 5? NO → stop
+>   out.append([1, 5])
+> 
+> Phase 3 — append remaining:
+>   i=1, [6,9]: append
+>   out = [[1, 5], [6, 9]]
+> 
+> ✅ Answer: [[1, 5], [6, 9]]
+> 
+> ─────────────────────────────────────────
+> Example: intervals=[[1,2],[3,5],[6,7],[8,10],[12,16]], new=[4,8]
+>   Phase 1: [1,2] (2 < 4) → append. out=[[1,2]]. Then [3,5]: 5<4 NO → stop.
+>   Phase 2: [3,5] overlaps → merge new = [min(4,3), max(8,5)] = [3,8]. i=2.
+>            [6,7]: 6 ≤ 8 → merge new=[3, max(8,7)]=[3,8]. i=3.
+>            [8,10]: 8 ≤ 8 → merge new=[3, max(8,10)]=[3,10]. i=4.
+>            [12,16]: 12 ≤ 10? NO → stop.
+>   out.append([3,10]).
+>   Phase 3: append [12,16].
+>   Result: [[1,2],[3,10],[12,16]]
+> ```
 
 > [!success]- Python
 > ```python
@@ -99,11 +143,19 @@ Sort by start. Walk: if current.start ≤ prev.end → merge (extend end). Else,
 
 **LC #435** · Medium
 
-Min intervals to remove so the rest don't overlap.
-
-### 🧠 Pattern: Sort by END, Greedy Earliest-End
-
-> Pick intervals with smallest end first; this leaves the most room. Remove anything that overlaps the last kept.
+> [!info]- 🔍 Dry Run: intervals=[[1,2],[2,3],[3,4],[1,3]]
+> ```text
+> Sort by END: [[1,2],[2,3],[1,3],[3,4]]
+> 
+> end = -∞, removed = 0
+> 
+> [1,2]: start=1 ≥ -∞ → keep. end = 2
+> [2,3]: start=2 ≥ 2 → keep. end = 3
+> [1,3]: start=1 ≥ 3? NO → remove. removed++ = 1
+> [3,4]: start=3 ≥ 3 → keep. end = 4
+> 
+> ✅ Answer: 1   (remove [1,3] to leave [[1,2],[2,3],[3,4]] non-overlapping)
+> ```
 
 > [!success]- Python
 > ```python
@@ -126,7 +178,19 @@ Min intervals to remove so the rest don't overlap.
 
 **LC #252** · Easy
 
-Can a single person attend all meetings (any overlap → no)?
+> [!info]- 🔍 Dry Run: intervals=[[0,30],[5,10],[15,20]]
+> ```text
+> Sort by start: [[0,30],[5,10],[15,20]]
+> 
+> i=1: intervals[1].start (5) < intervals[0].end (30)? YES → overlap → return false
+> 
+> ✅ Answer: false
+> 
+> Example with no overlap: [[7,10],[2,4]]
+>   sort: [[2,4],[7,10]]
+>   i=1: 7 < 4? NO → continue
+>   loop ends → true
+> ```
 
 > [!success]- Python
 > ```python
@@ -144,11 +208,22 @@ Can a single person attend all meetings (any overlap → no)?
 
 ## P5: Meeting Rooms II
 
-**LC #253** · Medium · (Heap version in [[10 - Heap and Priority Queue]] P10)
+**LC #253** · Medium
 
-### Sweep-line alternative
-
-Sort starts and ends separately. Two pointers. Increment rooms on each start; decrement on end if start has passed. Max running.
+> [!info]- 🔍 Dry Run: intervals=[[0,30],[5,10],[15,20]]
+> ```text
+> starts sorted = [0, 5, 15]
+> ends sorted = [10, 20, 30]
+> 
+> j = 0, rooms = 0, best = 0
+> 
+> s=0: starts[0]=0 ≥ ends[j=0]=10? NO → rooms++=1. best=1
+> s=5: 5 ≥ 10? NO → rooms++=2. best=2
+> s=15: 15 ≥ 10? YES → j++. rooms stays at 2.
+>   (We reuse the room that ended at 10.)
+>   
+> ✅ Answer: 2
+> ```
 
 > [!success]- Python
 > ```python
@@ -174,9 +249,20 @@ Sort starts and ends separately. Two pointers. Increment rooms on each start; de
 
 **LC #452** · Medium
 
-### Approach
-
-Sort by end. Shoot arrow at the smallest end; this destroys all balloons starting before it. Repeat.
+> [!info]- 🔍 Dry Run: points=[[10,16],[2,8],[1,6],[7,12]]
+> ```text
+> Sort by end: [[1,6],[2,8],[7,12],[10,16]]
+> 
+> arrows = 1; end = points[0][1] = 6
+> 
+> [2,8]: start=2 > end=6? NO → covered by same arrow at x=6
+> [7,12]: 7 > 6? YES → need new arrow; arrows=2; end=12
+> [10,16]: 10 > 12? NO → covered
+> 
+> ✅ Answer: 2
+>   Arrow 1 at x=6 hits balloons [1,6] and [2,8].
+>   Arrow 2 at x=12 hits [7,12] and [10,16].
+> ```
 
 > [!success]- Python
 > ```python
@@ -199,11 +285,52 @@ Sort by end. Shoot arrow at the smallest end; this destroys all balloons startin
 
 **LC #986** · Medium
 
-Both lists pre-sorted and non-overlapping internally.
-
-### 🧠 Pattern: Two Pointers
-
-> Overlap = `[max(a.start, b.start), min(a.end, b.end)]` if max ≤ min. Advance the one with smaller end.
+> [!info]- 🔍 Dry Run: A=[[0,2],[5,10],[13,23],[24,25]], B=[[1,5],[8,12],[15,24],[25,26]]
+> ```text
+> i=0, j=0:
+>   lo = max(0, 1) = 1
+>   hi = min(2, 5) = 2
+>   1 ≤ 2 → out.append([1, 2])
+>   A[0].end=2 < B[0].end=5 → i++
+> 
+> i=1, j=0:
+>   lo = max(5, 1) = 5
+>   hi = min(10, 5) = 5
+>   5 ≤ 5 → out.append([5, 5])
+>   A[1].end=10 > B[0].end=5 → j++
+> 
+> i=1, j=1:
+>   lo = max(5, 8) = 8
+>   hi = min(10, 12) = 10
+>   8 ≤ 10 → out.append([8, 10])
+>   A[1].end=10 < B[1].end=12 → i++
+> 
+> i=2, j=1:
+>   lo = max(13, 8) = 13
+>   hi = min(23, 12) = 12
+>   13 ≤ 12? NO → no intersection
+>   A[2].end=23 > B[1].end=12 → j++
+> 
+> i=2, j=2:
+>   lo = max(13, 15) = 15
+>   hi = min(23, 24) = 23
+>   15 ≤ 23 → out.append([15, 23])
+>   A[2].end=23 < B[2].end=24 → i++
+> 
+> i=3, j=2:
+>   lo = max(24, 15) = 24
+>   hi = min(25, 24) = 24
+>   out.append([24, 24])
+>   A[3].end=25 > B[2].end=24 → j++
+> 
+> i=3, j=3:
+>   lo = max(24, 25) = 25
+>   hi = min(25, 26) = 25
+>   out.append([25, 25])
+>   A[3].end=25 < B[3].end=26 → i++  → i out of bounds, exit
+> 
+> ✅ Answer: [[1,2], [5,5], [8,10], [15,23], [24,24], [25,25]]
+> ```
 
 > [!success]- Python
 > ```python
@@ -227,11 +354,30 @@ Both lists pre-sorted and non-overlapping internally.
 
 **LC #1094** · Medium
 
-Trip = `[passengers, from, to]`. Capacity check.
-
-### 🧠 Pattern: Sweep Line via Difference Array
-
-> Mark `+passengers` at `from`, `-passengers` at `to`. Sweep; running sum must never exceed capacity.
+> [!info]- 🔍 Dry Run: trips=[[2,1,5],[3,3,7]], capacity=4
+> ```text
+> diff array (size 1001): all zeros
+> 
+> trip [p=2, from=1, to=5]:
+>   diff[1] += 2 → diff[1] = 2
+>   diff[5] -= 2 → diff[5] = -2
+> 
+> trip [p=3, from=3, to=7]:
+>   diff[3] += 3 → 3
+>   diff[7] -= 3 → -3
+> 
+> diff (relevant): index 1=2, 3=3, 5=-2, 7=-3
+> 
+> Sweep:
+>   cur = 0
+>   i=0: cur=0
+>   i=1: cur=2 ≤ 4 OK
+>   i=2: cur=2
+>   i=3: cur=5 > 4 → return false
+> 
+> ✅ Answer: false
+>   At time 3 we'd have 2+3=5 passengers, exceeds capacity 4.
+> ```
 
 > [!success]- Python
 > ```python
@@ -247,22 +393,32 @@ Trip = `[passengers, from, to]`. Capacity check.
 >     return True
 > ```
 
-> [!tip] Difference array vs heap
-> Diff array works when coordinates are bounded integers (`≤ 1000` here). Else use heap of events.
-
 **Key takeaway:** "Concurrent at point T" → difference array (bounded) or sweep with sorted events.
 
 ---
 
 ## P9: Employee Free Time
 
-**LC #759** · Hard
+**LC #759** · **Hard**
 
-Given each employee's working intervals, find common free time.
-
-### Approach
-
-Flatten all intervals, sort by start, sweep merging — gaps between merged intervals = free time.
+> [!info]- 🔍 Dry Run: schedule=[[(1,2),(5,6)], [(1,3)], [(4,10)]]
+> ```text
+> Flatten and sort: [(1,2), (1,3), (4,10), (5,6)]
+> 
+> Merge:
+>   merged = [(1,2)]
+>   (1,3): 1 ≤ 2 (merged top end) → merge: top.end = max(2,3) = 3
+>     merged = [(1,3)]
+>   (4,10): 4 ≤ 3? NO → append
+>     merged = [(1,3), (4,10)]
+>   (5,6): 5 ≤ 10? YES → merge: top.end = max(10, 6) = 10
+>     merged = [(1,3), (4,10)]
+> 
+> Free time = gaps between consecutive merged intervals:
+>   gap = (merged[0].end, merged[1].start) = (3, 4) → free interval [3, 4]
+> 
+> ✅ Answer: [[3, 4]]
+> ```
 
 > [!success]- Python
 > ```python
@@ -277,7 +433,7 @@ Flatten all intervals, sort by start, sweep merging — gaps between merged inte
 >     return [Interval(merged[i].end, merged[i+1].start) for i in range(len(merged) - 1)]
 > ```
 
-**Key takeaway:** Free time = "negative space" of merged busy intervals. Reduce to P1 + take gaps.
+**Key takeaway:** Free time = "negative space" of merged busy intervals.
 
 ---
 
@@ -285,11 +441,34 @@ Flatten all intervals, sort by start, sweep merging — gaps between merged inte
 
 **LC #1353** · Medium
 
-Each event `[start, end]`, attend any one day in range. Each day attend one event.
-
-### 🧠 Pattern: Min-Heap of End Days, Sweep Per Day
-
-> Sort by start. Walk days 1..max_day. Push all events starting today. Pop events whose end < today. Attend the one with smallest end day (it dies soonest).
+> [!info]- 🔍 Dry Run: events=[[1,2],[2,3],[3,4]]
+> ```text
+> Sort by start: [[1,2],[2,3],[3,4]]
+> 
+> i=0, heap = [], day=0, attended=0
+> 
+> Loop while i < n or heap:
+>   heap empty? YES; day = events[0].start = 1
+> 
+>   Add all events with start ≤ day=1: events[0]=[1,2] → push end=2; i=1
+>   heap = [2]
+>   Pop expired (end < day=1): heap[0]=2 ≥ 1 → keep
+>   Attend: pop 2 → attended=1; day=2
+> 
+>   Add events with start ≤ 2: events[1]=[2,3] → push 3; i=2
+>   heap = [3]
+>   Pop expired: 3 ≥ 2 → keep
+>   Attend: pop 3 → attended=2; day=3
+> 
+>   Add events with start ≤ 3: events[2]=[3,4] → push 4; i=3
+>   heap = [4]
+>   Pop expired: 4 ≥ 3 → keep
+>   Attend: pop 4 → attended=3; day=4
+> 
+>   Loop exit (i=3=n, heap empty)
+> 
+> ✅ Answer: 3
+> ```
 
 > [!success]- Python
 > ```python
