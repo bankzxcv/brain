@@ -21,8 +21,6 @@ status: in-progress
 > - `insert(word)` → O(k)
 > - `search(word)` → O(k)
 > - `startsWith(prefix)` → O(k)
-> 
-> **Space** — bounded by total characters across all words.
 
 > [!tip] Two implementations
 > - **Map of children**: `{char: node}` — flexible, handles any alphabet
@@ -34,11 +32,11 @@ status: in-progress
 |---|---|---|---|---|
 | P1 | Implement Trie | 208 | Med | Insert / search / prefix |
 | P2 | Add and Search Words | 211 | Med | `.` wildcard via DFS |
-| P3 | Word Search II | 212 | Hard | Trie + DFS pruning |
+| P3 | Word Search II | 212 | **Hard** | Trie + DFS pruning |
 | P4 | Replace Words | 648 | Med | Shortest prefix match |
 | P5 | Longest Word in Dictionary | 720 | Med | DFS over trie |
 | P6 | Maximum XOR of Two Numbers | 421 | Med | Binary trie (bit-indexed) |
-| P7 | Stream of Characters | 1032 | Hard | Reverse trie |
+| P7 | Stream of Characters | 1032 | **Hard** | Reverse trie |
 | P8 | Map Sum Pairs | 677 | Med | Trie + subtree sum |
 
 ---
@@ -52,6 +50,49 @@ Implement `insert`, `search`, `startsWith`.
 ### Approach
 
 Node = `{children: Map, isEnd: bool}`. Walk one char at a time, creating nodes as needed.
+
+> [!info]- 🔍 Dry Run: insert("apple"), search("apple"), search("app"), startsWith("app"), insert("app"), search("app")
+> ```text
+> Setup:
+>   root = {}    (each node is a dict; '$' key signals "word ends here")
+> 
+> ─────────────────────────────────────────
+> insert("apple"):
+>   walk 'a': not in root → create root['a'] = {}
+>   walk 'p': not in root['a'] → create
+>   walk 'p': create
+>   walk 'l': create
+>   walk 'e': create
+>   mark end: leaf['$'] = True
+>   Tree (conceptual):
+>     root → a → p → p → l → e($)
+> 
+> ─────────────────────────────────────────
+> search("apple"):
+>   walk a→p→p→l→e — all exist
+>   final node has '$'? YES → return true
+> 
+> ─────────────────────────────────────────
+> search("app"):
+>   walk a→p→p — all exist
+>   final node has '$'? NO (it's just a prefix) → return false
+> 
+> ─────────────────────────────────────────
+> startsWith("app"):
+>   walk a→p→p — all exist
+>   return true (don't care about $)
+> 
+> ─────────────────────────────────────────
+> insert("app"):
+>   walk a→p→p (all exist)
+>   mark second-p's '$' = True
+> 
+> ─────────────────────────────────────────
+> search("app") again:
+>   walk to second p; node['$']=true → return true
+> 
+> ✅ All operations correct.
+> ```
 
 > [!success]- JS
 > ```js
@@ -115,6 +156,43 @@ Node = `{children: Map, isEnd: bool}`. Walk one char at a time, creating nodes a
 
 > On `.`, try all children — recurse.
 
+> [!info]- 🔍 Dry Run: addWord("bad"), addWord("dad"), addWord("mad"), search("pad"), search(".ad"), search("b..")
+> ```text
+> After adds:
+>   root
+>    ├ b → a → d($)
+>    ├ d → a → d($)
+>    └ m → a → d($)
+> 
+> ─────────────────────────────────────────
+> search("pad"):
+>   dfs(root, i=0): c='p'. root has 'p'? NO → return false
+> 
+> ─────────────────────────────────────────
+> search(".ad"):
+>   dfs(root, i=0): c='.' → try every child
+>     try 'b': dfs(b_node, i=1)
+>       c='a'. b_node has 'a' ✓ → dfs(a_node, i=2)
+>         c='d'. a_node has 'd' ✓ → dfs(d_node, i=3)
+>           i==len → check isEnd. d_node has '$' ✓ → return true!
+>     short-circuit: return true
+> 
+> ─────────────────────────────────────────
+> search("b.."):
+>   dfs(root, 0): c='b'. exists → dfs(b_node, 1)
+>     c='.': try all children of b_node
+>       try 'a': dfs(a_node, 2)
+>         c='.': try all children of a_node
+>           try 'd': dfs(d_node, 3)
+>             i==len → d_node has '$' ✓ → true
+>           return true
+>         return true
+>       return true
+>     return true
+> 
+> ✅ "pad"→false, ".ad"→true, "b.."→true
+> ```
+
 > [!success]- JS
 > ```js
 > class WordDictionary {
@@ -169,7 +247,7 @@ Node = `{children: Map, isEnd: bool}`. Walk one char at a time, creating nodes a
 
 ## P3: Word Search II
 
-**LC #212** · Hard · Trie + DFS over grid
+**LC #212** · **Hard** · Trie + DFS over grid
 
 Given an `m×n` board and a list of words, return words present on the board.
 
@@ -178,6 +256,49 @@ Given an `m×n` board and a list of words, return words present on the board.
 > Naive: run Word Search I (DFS) for each word → O(words × m·n × 4^k). Too slow.
 > 
 > **Better:** Insert all words into a trie. Walk every starting cell; descend trie + grid together, pruning when no child matches.
+
+> [!info]- 🔍 Dry Run: board=[["o","a","a","n"],["e","t","a","e"],["i","h","k","r"],["i","f","l","v"]], words=["oath","pea","eat","rain"]
+> ```text
+> Trie of words:
+>   root
+>    ├ o → a → t → h($, full word "oath")
+>    ├ p → e → a($)
+>    ├ e → a → t($)
+>    └ r → a → i → n($)
+> 
+> Walk every cell (r,c) and try to descend trie:
+> 
+> Start (0,0) 'o': trie has 'o' → enter
+>   At trie:o, at grid (0,0)
+>   Mark (0,0) as visited (replace with '#')
+>   Try neighbors: (1,0)='e' — trie:o has 'a' child? Doesn't match 'e' → skip
+>     (0,1)='a' — matches trie:o → 'a' → descend
+>       At trie:o.a, grid (0,1)
+>       Try (1,1)='t' — matches trie:o.a → 't' → descend
+>         At trie:o.a.t, grid (1,1)
+>         Try (2,1)='h' — matches trie:o.a.t → 'h' → descend
+>           At trie:o.a.t.h, end marker '$' = "oath"
+>           Found! out.append("oath")
+> 
+> Start (1,3) 'e': trie has 'e' → enter trie:e
+>   (0,3)='n' — trie:e has 'a'? No match
+>   (2,3)='r' — no
+>   (1,2)='a' — match! descend to trie:e.a
+>     check '$': YES at trie:e.a... wait, "ea" is not a word.
+>     Actually "eat" is, "pea" is. Path: e→a doesn't have $.
+>     Continue:
+>     (0,2)='a' — but trie:e.a expects 't' next (for "eat"). Doesn't match.
+>     (2,2)='k' — no
+>     (1,1)='t' — match! descend to trie:e.a.t which has '$' → "eat"
+>     Found! out.append("eat")
+> 
+> ... (similar exploration finds nothing else; "pea" and "rain" not on the board)
+> 
+> ✅ Answer: ["oath", "eat"]
+> ```
+
+> [!tip] Trie pruning makes this fast
+> When a leaf is fully consumed, delete it from its parent — future searches skip it.
 
 > [!success]- Python
 > ```python
@@ -209,9 +330,6 @@ Given an `m×n` board and a list of words, return words present on the board.
 >     return out
 > ```
 
-> [!tip] Trie pruning makes this fast
-> When a leaf is fully consumed, delete it from its parent — future searches skip it.
-
 **Key takeaway:** Many-pattern search on a grid → trie + DFS + pruning. The trie tells you which paths are still viable.
 
 ---
@@ -225,6 +343,41 @@ Replace each word in a sentence with its **shortest root** from a dictionary.
 ### Approach
 
 Build trie of roots. For each word, walk trie; on `isEnd`, output that prefix.
+
+> [!info]- 🔍 Dry Run: dictionary=["cat","bat","rat"], sentence="the cattle was rattled by the battery"
+> ```text
+> Trie of roots:
+>   root
+>    ├ c → a → t($)
+>    ├ b → a → t($)
+>    └ r → a → t($)
+> 
+> Process each word:
+> 
+>   "the":
+>     walk trie: 't' not in root → no root prefix → keep "the"
+> 
+>   "cattle":
+>     walk trie:
+>       i=0 'c' ✓ enter
+>       i=1 'a' ✓ enter
+>       i=2 't' ✓ enter
+>       check $: YES → return "cat" (the shortest root)
+>     → replace "cattle" with "cat"
+> 
+>   "was": walk trie 'w' not in root → keep "was"
+> 
+>   "rattled": walk → 'r','a','t' → '$' hit → "rat"
+> 
+>   "by": keep
+>   "the": keep
+> 
+>   "battery": 'b','a','t' → '$' → "bat"
+> 
+> Join: "the cat was rat by the bat"
+> 
+> ✅ Answer: "the cat was rat by the bat"
+> ```
 
 > [!success]- Python
 > ```python
@@ -257,6 +410,39 @@ Longest word that can be built **one char at a time**, each prefix in dict. Ties
 ### Approach
 
 Trie of words. DFS preferring lex order; only descend if `isEnd`. Track longest path.
+
+> [!info]- 🔍 Dry Run: words=["w","wo","wor","worl","world"]
+> ```text
+> Trie:
+>   root
+>    └ w($) → o($) → r($) → l($) → d($)
+> 
+> All prefixes are valid words ('$' at every level).
+> 
+> dfs(root, ""):
+>   children sorted: ['w']
+>   for c='w': child has '$' → recurse dfs(w_node, "w")
+>     check '$' at w_node: YES, len("w")=1 > best=0 → best="w"
+>     children sorted: ['o']
+>     for c='o': child has '$' → dfs(o_node, "wo")
+>       best update: len 2 > 1 → best="wo"
+>       continue: 'r' has '$' → dfs("wor")
+>         best="wor"
+>         'l' has '$' → dfs("worl")
+>           best="worl"
+>           'd' has '$' → dfs("world")
+>             best="world" (len 5)
+>             d has no more children
+> 
+> ✅ Answer: "world"
+> 
+> ─────────────────────────────────────────
+> words=["a","banana","app","appl","ap","apply","apple"]
+> Trie path 'app' has $ at a,ap,app,appl,apple, and apply.
+>   apple len 5
+>   apply len 5
+> Tie → lex smallest → "apple"
+> ```
 
 > [!success]- Python
 > ```python
@@ -294,6 +480,40 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 
 > Insert each number as a 32-bit binary string into a trie (root → MSB → LSB). For each number, traverse trie greedily preferring the **opposite** bit at each level (maximizes XOR). The path gives the best pair.
 
+> [!info]- 🔍 Dry Run: nums=[3,10,5,25,2,8]
+> ```text
+> Binary (truncated to 5 bits for illustration):
+>    3 = 00011
+>   10 = 01010
+>    5 = 00101
+>   25 = 11001
+>    2 = 00010
+>    8 = 01000
+> 
+> Build trie (MSB first):
+>   root
+>    ├ 0 → 0 → 0 → 1 → 1   (3)
+>    ├ 0 → 1 → 0 → 1 → 0   (10)
+>    ├ 0 → 0 → 1 → 0 → 1   (5)
+>    ├ 1 → 1 → 0 → 0 → 1   (25)
+>    ├ 0 → 0 → 0 → 1 → 0   (2)
+>    └ 0 → 1 → 0 → 0 → 0   (8)
+> 
+> For x=5 (00101), walk trie preferring opposite bit:
+>   bit 4 of 5 = 0 → want 1 → trie has '1' (path for 25)? YES → cur += 16, descend right
+>   bit 3 = 0 → want 1; at this node, only the 25 path is here → '1' present → cur += 8
+>   bit 2 = 1 → want 0; 25 path has '0' here → cur += 4
+>   bit 1 = 0 → want 1; 25 path has '0' (bit 1 of 25 is 0) → fall back to '0' → cur += 0
+>   bit 0 = 1 → want 0; 25 path has '1' (bit 0) → fall back → cur += 0
+>   final cur = 16+8+4 = 28
+> 
+> Check: 5 XOR 25 = 00101 XOR 11001 = 11100 = 28 ✓
+> 
+> Try other x's... the max across all is 28.
+> 
+> ✅ Answer: 28
+> ```
+
 > [!success]- Python
 > ```python
 > def find_maximum_xor(nums):
@@ -324,13 +544,55 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 
 ## P7: Stream of Characters
 
-**LC #1032** · Hard
+**LC #1032** · **Hard**
 
 `query(c)` returns true if recent suffix matches any word in dictionary.
 
 ### 🧠 Pattern: Reverse Trie + Recent Buffer
 
 > Insert each word **reversed** into a trie. For `query`, walk recent chars **backwards** through the trie; if any prefix (= original suffix) hits `isEnd`, return true.
+
+> [!info]- 🔍 Dry Run: words=["cd","f","kl"], queries: 'a','b','c','d','e','f','g','h','i','j','k','l'
+> ```text
+> Insert reversed:
+>   "cd" reversed = "dc" → trie path d → c($)
+>   "f" reversed  = "f"  → trie path f($)
+>   "kl" reversed = "lk" → trie path l → k($)
+> 
+> Trie:
+>   root
+>    ├ d → c($)
+>    ├ f($)
+>    └ l → k($)
+> 
+> Buffer accumulates each char appended.
+> 
+> ─────────────────────────────────────────
+> query('a'): buf=['a']
+>   reverse walk: 'a' → root has 'a'? NO → return false
+> 
+> query('b'): buf=['a','b']
+>   walk reversed: 'b' → no → false
+> 
+> query('c'): buf=[...,'c']
+>   walk reversed: 'c' → root has 'c'? NO → false
+> 
+> query('d'): buf=[...,'d']
+>   walk reversed: 'd' → root has 'd' ✓ → enter; check '$'? NO
+>     next char back: 'c' → root.d has 'c' ✓ → check '$' YES → return TRUE
+>   (we matched "cd" — the suffix of stream ending at this query)
+> 
+> query('e'): walk 'e' → false
+> 
+> query('f'): walk 'f' → root has 'f', '$' YES → TRUE (matched "f")
+> 
+> ... (continue similarly; 'k' alone won't match because we need 'l' after it)
+> 
+> query('k'): walk back 'k' → root has 'k'? NO → false   (note: 'kl' reversed starts with 'l')
+> 
+> query('l'): walk back 'l' → root has 'l' ✓, '$' NO
+>             next back 'k' → root.l has 'k' ✓, '$' YES → TRUE
+> ```
 
 > [!success]- Python
 > ```python
@@ -369,6 +631,50 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 ### Approach
 
 Trie node stores `total` (sum of all subtree values). On insert, walk and **add delta** = newVal − oldVal at every node on the path.
+
+> [!info]- 🔍 Dry Run: insert("apple", 3), sum("ap"), insert("app", 2), sum("ap")
+> ```text
+> Setup: root = {_total: 0}, vals = {}
+> 
+> ─────────────────────────────────────────
+> insert("apple", 3):
+>   delta = 3 - 0 = 3
+>   vals["apple"] = 3
+>   walk and add delta to every node:
+>     root._total += 3 → 3
+>     'a' node: create, _total=3
+>     'p' node: create, _total=3
+>     'p' node: create, _total=3
+>     'l' node: create, _total=3
+>     'e' node: create, _total=3
+> 
+> ─────────────────────────────────────────
+> sum("ap"):
+>   walk root → a → p
+>   return p._total = 3
+> 
+> ─────────────────────────────────────────
+> insert("app", 2):
+>   delta = 2 - 0 = 2 (key "app" was not present)
+>   vals["app"] = 2
+>   walk a, p, p (existing): add 2 to each + root
+>     root._total = 5
+>     a._total = 5
+>     p._total = 5
+>     p._total = 5     ← this is where "app" ends; we mark it implicitly
+>   ('app' has 3 chars; walk and increment every level by 2)
+> 
+> ─────────────────────────────────────────
+> sum("ap"):
+>   walk root → a → p
+>   return p._total = 5     (covers both "apple" and "app" descendants)
+> 
+> ─────────────────────────────────────────
+> If we did insert("apple", 7) later:
+>   delta = 7 - 3 = 4
+>   walk and add 4 to all nodes on "apple" path.
+>   root._total: 5+4=9
+> ```
 
 > [!success]- Python
 > ```python
