@@ -18,17 +18,6 @@ status: in-progress
 > 1. **Dummy head** for clean head-insertion / removal logic
 > 2. **Two pointers** (fast/slow or N-ahead) for cycle/midpoint/Nth-from-end
 > 3. **Reverse in place** — `prev/curr/next` three-pointer dance
-> 
-> ```
-> # In-place reverse skeleton:
-> prev, curr = None, head
-> while curr:
->     nxt = curr.next
->     curr.next = prev
->     prev = curr
->     curr = nxt
-> return prev
-> ```
 
 > [!warning] Always draw before you code
 > Linked-list problems are paper-friendly. Draw 3 nodes, label `prev/curr/next` at every step. Coding without drawing = bugs.
@@ -45,12 +34,12 @@ status: in-progress
 | P6 | Add Two Numbers | 2 | Med | Carry + dummy |
 | P7 | Copy List with Random Pointer | 138 | Med | Hash map (or weave-clone) |
 | P8 | Reorder List | 143 | Med | Midpoint + reverse + merge |
-| P9 | Reverse Nodes in k-Group | 25 | Hard | Reverse with anchor |
+| P9 | Reverse Nodes in k-Group | 25 | **Hard** | Reverse with anchor |
 | P10 | LRU Cache | 146 | Med | Hash + doubly linked list |
 | P11 | Remove Linked List Elements | 203 | Easy | Dummy filter |
 | P12 | Palindrome Linked List | 234 | Easy | Mid + reverse + compare |
 | P13 | Intersection of Two Linked Lists | 160 | Easy | Length difference |
-| P14 | Merge k Sorted Lists | 23 | Hard | Min-heap |
+| P14 | Merge k Sorted Lists | 23 | **Hard** | Min-heap |
 
 ---
 
@@ -66,16 +55,39 @@ Reverse a singly linked list.
 
 > `prev`, `curr`, `next`. Save `next`, point `curr.next ← prev`, advance both. Return `prev` (new head).
 
-### Trace
-
-```
-1 → 2 → 3 → null
-prev=null curr=1
-  nxt=2  1.next=null  prev=1  curr=2     null←1   2→3→null
-  nxt=3  2.next=1     prev=2  curr=3     null←1←2 3→null
-  nxt=null 3.next=2   prev=3  curr=null  null←1←2←3
-return 3 (new head)
-```
+> [!info]- 🔍 Dry Run: 1 → 2 → 3 → null
+> ```text
+> Setup:
+>   prev = null
+>   curr = head = node(1)
+> 
+> ─────────────────────────────────────────
+> Iter 1: curr = node(1)
+>   nxt = curr.next = node(2)
+>   curr.next = prev    (i.e., node(1).next = null)
+>   prev = curr         → prev = node(1)
+>   curr = nxt          → curr = node(2)
+>   List now: null ← 1   ;   curr=2 → 3 → null
+> 
+> Iter 2: curr = node(2)
+>   nxt = node(3)
+>   node(2).next = prev = node(1)
+>   prev = node(2)
+>   curr = node(3)
+>   List now: null ← 1 ← 2   ;   curr=3 → null
+> 
+> Iter 3: curr = node(3)
+>   nxt = null
+>   node(3).next = node(2)
+>   prev = node(3)
+>   curr = null
+>   List now: null ← 1 ← 2 ← 3
+> 
+> Loop exit (curr is null).
+> 
+> ✅ Answer: prev = node(3) (new head)
+>   Reversed list: 3 → 2 → 1 → null
+> ```
 
 > [!success]- JS
 > ```js
@@ -117,6 +129,57 @@ return 3 (new head)
 
 > Dummy avoids special-casing the head. Walk both lists, append the smaller; advance.
 
+> [!info]- 🔍 Dry Run: l1=1→2→4, l2=1→3→4
+> ```text
+> Setup:
+>   dummy = node(0)
+>   tail  = dummy
+> 
+> ─────────────────────────────────────────
+> Iter 1: l1=1, l2=1
+>   l1.val(1) <= l2.val(1) → take l1
+>   tail.next = l1                   (dummy → 1)
+>   l1 = l1.next = node(2)
+>   tail = node(1)
+>   State: dummy → 1
+> 
+> Iter 2: l1=2, l2=1
+>   l1.val(2) <= l2.val(1)? NO → take l2
+>   tail.next = l2                   (dummy → 1 → 1)
+>   l2 = node(3)
+>   tail = node(1) [the second one]
+>   State: dummy → 1 → 1
+> 
+> Iter 3: l1=2, l2=3
+>   2 <= 3 → take l1
+>   tail.next = l1
+>   l1 = node(4)
+>   tail = node(2)
+>   State: dummy → 1 → 1 → 2
+> 
+> Iter 4: l1=4, l2=3
+>   4 <= 3? NO → take l2
+>   tail.next = l2
+>   l2 = node(4)
+>   tail = node(3)
+>   State: dummy → 1 → 1 → 2 → 3
+> 
+> Iter 5: l1=4, l2=4
+>   4 <= 4 → take l1
+>   tail.next = l1
+>   l1 = null
+>   tail = node(4)
+>   State: dummy → 1 → 1 → 2 → 3 → 4
+> 
+> Loop exits (l1 is null).
+> 
+> tail.next = l2 (or l1, whichever has remaining)
+>             = node(4) (from l2)
+>   State: dummy → 1 → 1 → 2 → 3 → 4 → 4
+> 
+> ✅ Answer: dummy.next = 1 → 1 → 2 → 3 → 4 → 4
+> ```
+
 > [!success]- JS
 > ```js
 > const mergeTwoLists = (l1, l2) => {
@@ -153,6 +216,8 @@ return 3 (new head)
 
 ## P3: Linked List Cycle
 
+**LC #141** · Easy
+
 (See [[02 - Two Pointers]] P11 for the full discussion of Floyd's tortoise & hare.)
 
 > [!success]- Python
@@ -180,16 +245,28 @@ Return the node where the cycle begins, or None.
 > 
 > **Why?** Let `H` = distance from head to cycle start, `D` = distance from cycle start to meeting point, `C` = cycle length. Slow traveled `H+D`; fast traveled `H+D+kC`; fast = 2× slow → `H+D = kC` → `H = kC - D`. So `H` steps from head and `H` steps from meeting point both land at start.
 
-### Trace
-
-```
-1→2→3→4→5→3(back to)
-slow & fast meet at 5 (say)
-reset slow=1
-step both:
-  slow=2 fast=3
-  slow=3 fast=3 ✓ → cycle start = 3
-```
+> [!info]- 🔍 Dry Run: 3 → 2 → 0 → -4 → (back to 2)
+> ```text
+> Nodes: A=3, B=2, C=0, D=-4; D.next = B (forms cycle 2→0→-4→2)
+> 
+> Phase 1: Floyd until meeting
+>   slow=A, fast=A
+>   step 1: slow=B, fast=C
+>   step 2: slow=C, fast=B    (D→B is cycle back)
+>   step 3: slow=D, fast=D    MEET at node D
+> 
+> ─────────────────────────────────────────
+> Phase 2: Reset, step both 1x
+>   p = head = A
+>   slow stays at D (the meeting point)
+> 
+>   iter: p=A, slow=D
+>     p != slow → advance both
+>     p = B, slow = D.next = B
+>   iter: p=B, slow=B → MATCH
+> 
+> ✅ Answer: cycle starts at node B (value 2)
+> ```
 
 > [!success]- JS
 > ```js
@@ -236,6 +313,37 @@ step both:
 
 > Move `fast` n+1 steps ahead. Then walk both until `fast` is null — `slow` is at the node **before** the one to remove.
 
+> [!info]- 🔍 Dry Run: 1→2→3→4→5, n=2
+> ```text
+> Goal: remove the 2nd-from-end → remove node(4).
+> 
+> Setup:
+>   dummy → 1 → 2 → 3 → 4 → 5
+>   slow = dummy, fast = dummy
+> 
+> ─────────────────────────────────────────
+> Phase 1 — Move fast (n+1)=3 steps ahead:
+>   fast = node(1)
+>   fast = node(2)
+>   fast = node(3)
+> 
+>   Now fast is 3 nodes ahead of slow (dummy → ... → 3).
+> 
+> ─────────────────────────────────────────
+> Phase 2 — Move both until fast is null:
+>   iter: slow=node(1), fast=node(4)
+>   iter: slow=node(2), fast=node(5)
+>   iter: slow=node(3), fast=null  → exit
+> 
+> slow is at node(3) — the one BEFORE the target.
+> 
+> Phase 3 — Remove slow.next:
+>   slow.next = slow.next.next     (node(3).next = node(5))
+>   State: dummy → 1 → 2 → 3 → 5
+> 
+> ✅ Answer: 1 → 2 → 3 → 5
+> ```
+
 > [!success]- JS
 > ```js
 > const removeNthFromEnd = (head, n) => {
@@ -275,6 +383,37 @@ Two lists represent reversed integers. Add and return as linked list.
 ### Approach
 
 Walk both, sum digits + carry, append.
+
+> [!info]- 🔍 Dry Run: l1=2→4→3 (=342), l2=5→6→4 (=465); expected 807 → 7→0→8
+> ```text
+> Setup:
+>   dummy = node(0), tail = dummy
+>   carry = 0
+> 
+> ─────────────────────────────────────────
+> Iter 1: l1=2, l2=5, carry=0
+>   sum = 2 + 5 + 0 = 7
+>   carry = 7 // 10 = 0
+>   digit = 7 % 10 = 7
+>   append node(7); tail moves
+>   State: dummy → 7
+> 
+> Iter 2: l1=4, l2=6, carry=0
+>   sum = 4 + 6 + 0 = 10
+>   carry = 1, digit = 0
+>   append node(0)
+>   State: dummy → 7 → 0
+> 
+> Iter 3: l1=3, l2=4, carry=1
+>   sum = 3 + 4 + 1 = 8
+>   carry = 0, digit = 8
+>   append node(8)
+>   State: dummy → 7 → 0 → 8
+> 
+> Loop exits (both lists end, carry = 0).
+> 
+> ✅ Answer: 7 → 0 → 8   (reads as 807)
+> ```
 
 > [!success]- JS
 > ```js
@@ -321,6 +460,28 @@ Each node has `next` AND `random`. Deep copy.
 ### 🧠 Pattern: Hash Map old→new
 
 > Pass 1: clone each node, map `old → new`. Pass 2: wire next/random via the map.
+
+> [!info]- 🔍 Dry Run: Original A(7)→B(13)→C(11) with B.random=A, C.random=B
+> ```text
+> Pass 1 — clone each node, build old→new map:
+>   visit A: create A' (val 7); map[A] = A'
+>   visit B: create B' (val 13); map[B] = B'
+>   visit C: create C' (val 11); map[C] = C'
+>   map = {A: A', B: B', C: C'}
+> 
+> ─────────────────────────────────────────
+> Pass 2 — wire pointers via map:
+>   A':  A'.next   = map[A.next]   = map[B] = B'
+>        A'.random = map[A.random] = map[null] = null
+> 
+>   B':  B'.next   = map[B.next]   = map[C] = C'
+>        B'.random = map[B.random] = map[A] = A'
+> 
+>   C':  C'.next   = map[C.next]   = map[null] = null
+>        C'.random = map[C.random] = map[B] = B'
+> 
+> ✅ Answer: A' → B' → C' with proper random pointers preserved
+> ```
 
 > [!success]- JS
 > ```js
@@ -370,6 +531,46 @@ Each node has `next` AND `random`. Deep copy.
 
 > 1. Find midpoint (fast/slow). 2. Reverse second half. 3. Merge two halves alternating.
 
+> [!info]- 🔍 Dry Run: 1 → 2 → 3 → 4 → 5
+> ```text
+> Phase 1 — Find midpoint (slow ends at middle):
+>   slow=1, fast=1
+>   slow=2, fast=3
+>   slow=3, fast=5  (fast.next=null, stop)
+>   slow = node(3) — the middle.
+> 
+> ─────────────────────────────────────────
+> Phase 2 — Reverse second half (after slow):
+>   Take slow.next = 4 → 5
+>   Reverse: 5 → 4 → null
+>   Cut: slow.next = null
+>   Now: first half = 1 → 2 → 3 → null
+>        second half (prev) = 5 → 4 → null
+> 
+> ─────────────────────────────────────────
+> Phase 3 — Interleave:
+>   a = 1, b = 5
+>   iter 1:
+>     a_n = a.next = 2
+>     b_n = b.next = 4
+>     a.next = b           →  1 → 5
+>     b.next = a_n         →  5 → 2
+>     a = a_n = 2, b = b_n = 4
+>     State: 1 → 5 → 2 → 3 → null   ;   b=4 → null
+> 
+>   iter 2:
+>     a_n = 3
+>     b_n = null
+>     a.next = b           →  2 → 4
+>     b.next = a_n         →  4 → 3
+>     a=3, b=null
+>     State: 1 → 5 → 2 → 4 → 3 → null
+> 
+>   b is null → loop ends.
+> 
+> ✅ Answer: 1 → 5 → 2 → 4 → 3
+> ```
+
 > [!success]- JS
 > ```js
 > const reorderList = (head) => {
@@ -413,13 +614,55 @@ Each node has `next` AND `random`. Deep copy.
 
 ## P9: Reverse Nodes in k-Group
 
-**LC #25** · Hard
+**LC #25** · **Hard**
 
 Reverse every k consecutive nodes; leave remainder if < k.
 
 ### 🧠 Pattern: Reverse-Between with Anchor
 
 > Use a dummy. For each group: find the group's last node; if not enough, stop. Reverse the group between anchor and group-end. Move anchor to (originally) first node of the group (now last).
+
+> [!info]- 🔍 Dry Run: 1→2→3→4→5, k=2
+> ```text
+> dummy → 1 → 2 → 3 → 4 → 5
+> 
+> groupPrev = dummy
+> 
+> ─────────────────────────────────────────
+> ROUND 1: identify group [1, 2]
+>   walk k=2 steps from groupPrev → kth = node(2)
+>   kth not null → can reverse
+>   groupNext = kth.next = node(3)
+> 
+>   Reverse from groupPrev.next=node(1) up to (not including) groupNext=node(3):
+>     prev=node(3), curr=node(1)
+>     iter: nxt=node(2); curr.next=prev → 1→3; prev=1, curr=2
+>     iter: nxt=node(3); curr.next=prev → 2→1; prev=2, curr=3 (==groupNext, stop)
+>   After reverse: 2 → 1 → 3 → 4 → 5
+> 
+>   tmp = groupPrev.next = node(1)  (the original first; now last in group)
+>   groupPrev.next = kth = node(2)  (link dummy to new head of group)
+>   groupPrev = tmp = node(1)        (new anchor)
+> 
+>   State: dummy → 2 → 1 → 3 → 4 → 5
+> 
+> ─────────────────────────────────────────
+> ROUND 2: from groupPrev=node(1), walk k=2 → kth=node(4)
+>   groupNext = node(5)
+>   Reverse [3, 4]:
+>     prev=node(5), curr=node(3)
+>     iter: nxt=4; 3.next=5; prev=3, curr=4
+>     iter: nxt=5; 4.next=3; prev=4, curr=5 stop
+>   After: 4 → 3 → 5
+>   tmp = node(3); groupPrev.next = node(4); groupPrev = node(3)
+>   State: dummy → 2 → 1 → 4 → 3 → 5
+> 
+> ─────────────────────────────────────────
+> ROUND 3: walk k=2 from node(3) → 1 step to node(5), next is null at step 2 → kth=null
+>   Not enough nodes → stop.
+> 
+> ✅ Answer: 2 → 1 → 4 → 3 → 5
+> ```
 
 > [!success]- JS
 > ```js
@@ -480,12 +723,51 @@ Reverse every k consecutive nodes; leave remainder if < k.
 
 > Doubly linked list orders recency (head = most recent). Hash map gives O(1) lookup of the node. Move-to-front on `get` and `put`. Evict tail on overflow.
 
+> [!info]- 🔍 Dry Run: cap=2; put(1,1), put(2,2), get(1), put(3,3), get(2)
+> ```text
+> Structure: doubly linked list  head ↔ ... ↔ tail
+>   head and tail are sentinels (no data)
+> 
+> ─────────────────────────────────────────
+> put(1, 1):
+>   key 1 not in map → create node N1=(1,1)
+>   addFront(N1): head ↔ N1 ↔ tail
+>   map = {1: N1}
+> 
+> put(2, 2):
+>   create N2=(2,2)
+>   addFront: head ↔ N2 ↔ N1 ↔ tail
+>   map = {1: N1, 2: N2}
+> 
+> get(1):
+>   key 1 in map → N1
+>   remove(N1), addFront(N1):
+>     head ↔ N1 ↔ N2 ↔ tail
+>   return N1.val = 1
+> 
+> put(3, 3):
+>   key 3 not in map; size (2) == cap (2) → EVICT
+>     lru = tail.prev = N2
+>     remove(N2); delete map[2]
+>     map = {1: N1}
+>   create N3=(3,3); addFront(N3)
+>     head ↔ N3 ↔ N1 ↔ tail
+>   map = {1: N1, 3: N3}
+> 
+> get(2):
+>   key 2 NOT in map → return -1
+> 
+> ✅ Final state:
+>   list: head ↔ N3(3,3) ↔ N1(1,1) ↔ tail
+>   N3 is most recently used; N1 is LRU.
+> ```
+
 > [!success]- JS
 > ```js
 > class LRUCache {
 >   constructor(cap) {
 >     this.cap = cap; this.map = new Map();
->     this.head = { key: 0, val: 0 };  // sentinels
+>     this.head = { key: 0, val: 0 };
 >     this.tail = { key: 0, val: 0 };
 >     this.head.next = this.tail; this.tail.prev = this.head;
 >   }
@@ -536,9 +818,6 @@ Reverse every k consecutive nodes; leave remainder if < k.
 >             self.data.popitem(last=False)
 > ```
 
-> [!tip] Production note
-> Python's `OrderedDict` IS hash+DLL under the hood. In an interview, ask before using it — they may want you to implement the DLL.
-
 **Variants:** LFU Cache · LRU Cache with TTL.
 
 **Key takeaway:** O(1) for both lookup AND ordered eviction → hash + doubly linked list. Sentinels remove edge cases.
@@ -554,6 +833,38 @@ Remove all nodes with `val == target`.
 ### Approach
 
 Dummy + walk; skip matches.
+
+> [!info]- 🔍 Dry Run: 1→2→6→3→4→5→6, val=6
+> ```text
+> dummy → 1 → 2 → 6 → 3 → 4 → 5 → 6
+> p = dummy
+> 
+> ─────────────────────────────────────────
+> p=dummy, p.next=1
+>   1 == 6? NO → p = 1
+> 
+> p=1, p.next=2
+>   2 == 6? NO → p = 2
+> 
+> p=2, p.next=6
+>   6 == 6? YES → p.next = p.next.next  (skip the 6)
+>   State: 1 → 2 → 3 → 4 → 5 → 6  (relative to dummy)
+>   p stays at 2 (re-check new p.next)
+> 
+> p=2, p.next=3
+>   3 == 6? NO → p = 3
+> 
+> p=3, p.next=4 → p=4
+> p=4, p.next=5 → p=5
+> p=5, p.next=6
+>   YES → skip
+>   State: ... → 5 → null
+>   p stays at 5
+> 
+> p=5, p.next=null → exit
+> 
+> ✅ Answer: 1 → 2 → 3 → 4 → 5
+> ```
 
 > [!success]- JS
 > ```js
@@ -592,6 +903,31 @@ Dummy + walk; skip matches.
 ### Approach
 
 Find midpoint, reverse second half, compare.
+
+> [!info]- 🔍 Dry Run: 1 → 2 → 2 → 1
+> ```text
+> Phase 1 — Midpoint:
+>   slow=1, fast=1
+>   slow=2, fast=2 (the third node, val 2)
+>   slow=2 (third), fast=null (fourth.next=null but stops at top check)
+>   Actually trace: fast=1; iter1: fast=fast.next.next=2(3rd); iter2: fast=2(3rd).next.next=null. Stop.
+>   slow advanced twice: slow=2 (3rd node).
+> 
+> Phase 2 — Reverse from slow=node(3rd "2"):
+>   prev=null, slow=node3=2
+>   iter: nxt=node4=1; node3.next=null; prev=node3; slow=node4
+>   iter: nxt=null; node4.next=node3 (=2); prev=node4 (=1); slow=null
+>   prev now heads: 1 → 2 → null (reversed second half)
+> 
+> Phase 3 — Compare:
+>   a = original head = node1=1
+>   b = prev = node4=1
+>   iter: a.val=1, b.val=1 → match; a=node2=2, b=node3=2
+>   iter: a.val=2, b.val=2 → match; a=node3=2, b=null (we cut at slow earlier... actually we didn't cut, but b advances along reversed half)
+>   b=null → exit
+> 
+> ✅ Answer: true
+> ```
 
 > [!success]- JS
 > ```js
@@ -641,6 +977,24 @@ Find midpoint, reverse second half, compare.
 
 > When pointer A finishes, jump to head of B. When B finishes, jump to head of A. They traverse `m+n` total; if intersection exists, they meet there. Else, both reach `null` simultaneously.
 
+> [!info]- 🔍 Dry Run: A=[1,9,1,X,Y,Z], B=[3,X,Y,Z] (X,Y,Z are shared)
+> ```text
+> Lengths: A=6 nodes (1,9,1,X,Y,Z), B=4 nodes (3,X,Y,Z). Intersection at X.
+> 
+> p=A0(1), q=B0(3)
+> 
+> ─────────────────────────────────────────
+> step 1: p=9, q=X        (not equal: 9 vs X)
+> step 2: p=1, q=Y
+> step 3: p=X, q=Z
+> step 4: p=Y, q=null      → q jumps to head A → q=1(A0)
+> step 5: p=Z, q=9
+> step 6: p=null → jump to head B → p=3, q=1
+> step 7: p=X, q=X         ← MATCH!
+> 
+> ✅ Answer: X (the intersection node)
+> ```
+
 > [!success]- JS
 > ```js
 > const getIntersectionNode = (a, b) => {
@@ -669,7 +1023,7 @@ Find midpoint, reverse second half, compare.
 
 ## P14: Merge k Sorted Lists
 
-**LC #23** · Hard
+**LC #23** · **Hard**
 
 ### 🧠 Pattern: Min-Heap of Heads
 
@@ -680,6 +1034,56 @@ Find midpoint, reverse second half, compare.
 1. **Merge two at a time, k-1 times** · O(Nk).
 2. **Divide & conquer pairs** · O(N log k).
 3. **Min-heap — FINAL** · O(N log k)/O(k).
+
+> [!info]- 🔍 Dry Run: lists=[[1,4,5],[1,3,4],[2,6]]
+> ```text
+> Setup:
+>   Push each list's head into min-heap (tuples: (val, list_idx, node)):
+>     heap = [(1, 0, n1a), (1, 1, n1b), (2, 2, n2c)]
+> 
+> ─────────────────────────────────────────
+> Iter 1: pop (1, 0, n1a)
+>   append to result: dummy → 1(a)
+>   push next from list 0: n1a.next = 4 → push (4, 0, n4a)
+>   heap = [(1,1,n1b), (2,2,n2c), (4,0,n4a)]
+> 
+> Iter 2: pop (1, 1, n1b)
+>   append: dummy → 1 → 1(b)
+>   push n1b.next = 3 → (3, 1, n3b)
+>   heap = [(2,2,n2c), (4,0,n4a), (3,1,n3b)]
+> 
+> Iter 3: pop (2, 2, n2c)
+>   append: ...→ 1 → 1 → 2
+>   push 6 → (6, 2, ...)
+>   heap = [(3,1,...), (4,0,...), (6,2,...)]
+> 
+> Iter 4: pop (3, 1, ...)
+>   append → 3
+>   push 4 → (4, 1, ...)
+>   heap = [(4,0,...), (4,1,...), (6,2,...)]
+> 
+> Iter 5: pop (4, 0, ...) [or (4,1) depending on tiebreaker]
+>   append → 4
+>   push 5 → (5, 0, ...)
+>   heap = [(4,1,...), (6,2,...), (5,0,...)]
+> 
+> Iter 6: pop (4, 1, ...)
+>   append → 4
+>   nothing left in list 1, don't push
+>   heap = [(5,0,...), (6,2,...)]
+> 
+> Iter 7: pop (5, 0, ...)
+>   append → 5
+>   no more in list 0
+>   heap = [(6,2,...)]
+> 
+> Iter 8: pop (6, 2, ...)
+>   append → 6
+>   no more
+>   heap = []
+> 
+> ✅ Answer: 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6
+> ```
 
 > [!success]- JS
 > ```js
