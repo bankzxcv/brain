@@ -176,6 +176,31 @@ All subsets of distinct `nums`.
 
 > Sort first. In the loop, if `nums[j] == nums[j-1]` AND `j > i` (not the first sibling), skip — we've already explored this branch.
 
+> [!example]- 📊 Visual: skip dup at SAME level, not within path
+> ```text
+>   nums = [1, 2, 2]   (sorted)
+> 
+>                            [ ]
+>                       /     |      \
+>                    pick 1  pick 2  pick 2 ✗ SKIP
+>                                    (dup at same level)
+>                    /        |
+>                  [1]       [2]
+>                  / |        |
+>             pick 2 pick 2✗  pick 2     ← deeper "pick 2" is OK
+>               |   (same lvl  │           (different level, in path)
+>              [1,2] dup skip) [2,2]
+>               |
+>             pick 2          ← second 2 in the SAME path is fine
+>               |
+>             [1,2,2]
+> 
+>   Rule:  skip if  j > i  AND  nums[j] == nums[j-1]
+>          (means: not the first sibling, and equals left sibling)
+> 
+>   Results: [], [1], [1,2], [1,2,2], [2], [2,2]    ← no duplicates
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,2,2]
 > ```text
 > Sort: [1, 2, 2] (already sorted)
@@ -235,6 +260,29 @@ All subsets of distinct `nums`.
 ### 🧠 Pattern: Used Set + Try All Indices
 
 > Different from subsets: we visit ALL indices in every recursion, skipping those already used.
+
+> [!example]- 📊 Visual: permutation decision tree
+> ```text
+>   nums = [1, 2, 3]
+> 
+>                           [ ]
+>                  /         |         \
+>              pick 1     pick 2      pick 3
+>                /          |            \
+>             [1]          [2]           [3]
+>             / \          / \           / \
+>          pick2 pick3  pick1 pick3  pick1 pick2
+>          /      \      /     \      /     \
+>       [1,2]  [1,3]  [2,1]  [2,3]  [3,1]  [3,2]
+>         |      |      |      |      |      |
+>       pick3  pick2  pick3  pick1  pick2  pick1
+>         |      |      |      |      |      |
+>      [1,2,3][1,3,2][2,1,3][2,3,1][3,1,2][3,2,1]
+> 
+>   At each level: every UNUSED index is a child branch.
+>   `used[]` tracks which positions are already in the path.
+>   Leaves (depth = n) = n! = 6 full permutations.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,2,3]
 > ```text
@@ -301,6 +349,36 @@ All subsets of distinct `nums`.
 
 Same as P3 + dedup: sort; in the loop, skip if `nums[i] == nums[i-1] && !used[i-1]` (the previous duplicate hasn't been used yet → using this one creates a dup permutation).
 
+> [!example]- 📊 Visual: force canonical order on equal values
+> ```text
+>   nums = [1a, 1b, 2]   (sort; treat the two 1s as 1a, 1b)
+> 
+>                          [ ]
+>                /          |         \
+>            pick 1a     pick 1b ✗    pick 2
+>             (used[0]=F,             (used[2]=T)
+>              i=1: nums[1]==nums[0]
+>              & !used[0] → SKIP)
+> 
+>            /          \
+>        pick 1b      pick 2
+>        (used[0]=T,
+>         dup rule OK)
+>          /              \
+>     pick 2             pick 1a
+>      [1a,1b,2]    \ /     │
+>                    X    pick 1b ✗ (used[0]=F → SKIP)
+>                         │
+>                       [2,1a,1b]
+> 
+>   Rule:  if nums[i] == nums[i-1] AND used[i-1] == False → SKIP
+>          (the earlier dup hasn't been placed yet; using THIS one
+>           would create a permutation we'd reach via the earlier dup later)
+> 
+>   Effectively: equal values must be picked in their original index order.
+>   Results: [1,1,2], [1,2,1], [2,1,1]   ← no duplicates
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,1,2]
 > ```text
 > Sort: [1, 1, 2]
@@ -364,6 +442,26 @@ Same as P3 + dedup: sort; in the loop, skip if `nums[i] == nums[i-1] && !used[i-
 
 Choose `k` items from `1..n`.
 
+> [!example]- 📊 Visual: combinations decision tree (start-index)
+> ```text
+>   n = 4, k = 2     pool = [1, 2, 3, 4]
+> 
+>                            [ ]
+>            /         /         \         \
+>         pick 1   pick 2     pick 3     pick 4
+>           |         |          |          |
+>          [1]       [2]        [3]        [4]
+>         / | \      / \         |          
+>        2  3  4    3   4        4         (nothing to pick after 4)
+>        |  |  |    |   |        |
+>      [1,2][1,3][1,4][2,3][2,4][3,4]
+> 
+>   start_index keeps strictly increasing: at depth d picking index i,
+>   the next level starts at i+1. This ensures combos (order doesn't matter).
+> 
+>   Leaves at depth k = 2 → C(4,2) = 6 combinations.
+> ```
+
 > [!info]- 🔍 Dry Run: n=4, k=2
 > ```text
 > dfs(start=1) with path=[]:
@@ -415,6 +513,36 @@ Find all combos summing to target. Each number can be reused.
 ### 🧠 Pattern: Same Start (Allow Reuse)
 
 > Critical: on the recursive call, pass `i` (not `i+1`) — you may pick the same number again.
+
+> [!example]- 📊 Visual: reuse-allowed tree, recurse on SAME index
+> ```text
+>   candidates = [2, 3, 6, 7]   target = 7
+>   Each node label = remaining target after subtracting picks.
+> 
+>                       (rem=7)
+>          ┌──────────┬──────────┬──────────┐
+>        pick 2     pick 3     pick 6     pick 7
+>         (5)        (4)        (1)        (0) ✓ → [7]
+>         │           │          │
+>      ┌──┼──┐     ┌──┼──┐    (prune: 6>1, 7>1)
+>    pick2 3  ...  pick3 ...
+>     (3)  (2)     (1)
+>      │    │       (prune)
+>     pick2 prune
+>     (1)
+>      prune
+> 
+>     pick2 again from rem=3:
+>       → rem=1 → prune
+>     pick3 from rem=3:
+>       → rem=0 ✓ → [2, 2, 3]
+> 
+>   KEY: at "pick X" we recurse with start = i (NOT i+1),
+>        which keeps the same X available next level (reuse).
+>        Going only forward (no backwards picks) avoids order-permutations.
+> 
+>   Result: [[2,2,3], [7]]
+> ```
 
 > [!info]- 🔍 Dry Run: candidates=[2,3,6,7], target=7
 > ```text
@@ -482,6 +610,32 @@ Find all combos summing to target. Each number can be reused.
 ## P7: Combination Sum II
 
 **LC #40** · Medium · No reuse, with duplicates
+
+> [!example]- 📊 Visual: no-reuse (i+1) + same-level dup skip
+> ```text
+>   candidates = [1, 1, 2, 5, 6, 7, 10]  (sorted)   target = 8
+> 
+>                            (rem=8)
+>            ┌────────┬────────┬────────┬─── ...
+>          pick 1[0]  pick 1[1]✗  pick 2  pick 5  ...
+>            (7)      SKIP        (6)     (3)
+>                  same level                
+>                  dup '1'
+>                  
+>   At rem=7, start=1 (no reuse → i+1 from index 0 → start at 1):
+>            ┌────────┬────────┬────────┐
+>          pick 1[1]  pick 2   pick 5   pick 7
+>            (6)       (5)      (2)      (0) ✓ [1,7]
+>          (different lvl,
+>           NOT a skip)
+>   
+>   Two skip rules combined:
+>     (1) no reuse  →  pass i+1 in recursion
+>     (2) dup skip  →  if j > start AND candidates[j] == candidates[j-1] → skip
+>     (3) sort prune → if candidates[j] > rem → break
+> 
+>   Result: [[1,1,6], [1,2,5], [1,7], [2,6]]
+> ```
 
 > [!info]- 🔍 Dry Run: candidates=[10,1,2,7,6,1,5], target=8
 > ```text
@@ -552,6 +706,25 @@ Find all combos summing to target. Each number can be reused.
 
 `"23"` → `["ad","ae","af","bd","be","bf","cd","ce","cf"]`.
 
+> [!example]- 📊 Visual: Cartesian product via DFS
+> ```text
+>   digits = "23"
+>     2 → "abc"
+>     3 → "def"
+> 
+>                         [ ]
+>                 ┌────────┼────────┐
+>                 a        b        c        ← choose letter for digit '2'
+>                /|\      /|\      /|\
+>               d e f    d e f    d e f      ← choose letter for digit '3'
+>               | | |    | | |    | | |
+>             ad ae af  bd be bf  cd ce cf
+> 
+>   Depth = len(digits).
+>   Branching at depth d = |letters of digits[d]|.
+>   Total leaves = product of branch factors  =  3 × 3  = 9.
+> ```
+
 > [!info]- 🔍 Dry Run: digits="23"
 > ```text
 > Map: 2→"abc", 3→"def"
@@ -602,6 +775,32 @@ DFS on a grid; visit each cell at most once per path.
 ### Approach
 
 For each starting cell, DFS through the word. Mark visited by temporarily mutating the cell; restore on backtrack.
+
+> [!example]- 📊 Visual: trace the word along the grid
+> ```text
+>   word = "ABCCED"
+> 
+>   Board:                     Path (numbered = order of visits):
+>     A  B  C  E                  ①  ②  ③  .
+>     S  F  C  S                  .  .  ④  .
+>     A  D  E  E                  .  ⑥  ⑤  .
+> 
+>     ┌──────────────────────────────────┐
+>     │  A → B → C   → C   → E   → D     │
+>     │ (0,0)(0,1)(0,2)(1,2)(2,2)(2,1)   │
+>     │  ①   ②   ③    ④    ⑤    ⑥      │
+>     └──────────────────────────────────┘
+> 
+>   Mark each visited cell with '#' during recursion; restore on backtrack:
+> 
+>     #  #  #  E       ← in the middle of the search
+>     S  F  #  S
+>     A  #  #  E
+> 
+>   At each step: 4 neighbors (up/down/left/right) → DFS branch.
+>   Mismatched char or out-of-bounds → prune.
+>   i == len(word) → success.
+> ```
 
 > [!info]- 🔍 Dry Run: board=[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word="ABCCED"
 > ```text
@@ -667,6 +866,36 @@ Partition `s` so every piece is a palindrome; return all partitions.
 ### Approach
 
 For each cut point: if `s[i..j]` is a palindrome, include and recurse on `j+1`.
+
+> [!example]- 📊 Visual: cut-point decision tree
+> ```text
+>   s = "aab"
+> 
+>   At each i, try every j ≥ i; if s[i..j] is a palindrome, take it.
+> 
+>                             dfs(0)            s = "aab"
+>              ┌──────────────┴─────────────┐
+>          take "a"                      take "aa"
+>          (s[0:1] ✓)                    (s[0:2] ✓)
+>          dfs(1)                        dfs(2)
+>          ┌─────┴─────┐                 │
+>       take "a"   take "ab"           take "b"
+>       (s[1:2] ✓) (s[1:3] ✗ skip)     (s[2:3] ✓)
+>       dfs(2)                          dfs(3) ✓ → ["aa","b"]
+>          │
+>       take "b"
+>       (s[2:3] ✓)
+>       dfs(3) ✓ → ["a","a","b"]
+> 
+>   String laid out:    a   a   b
+>                       │   │   │
+>   Cut markers:    |   ▲   ▲   ▲   |       (between chars)
+>                   0   1   2   3
+>   A partition = choose a subset of cut markers; every piece between
+>   consecutive chosen cuts must be a palindrome.
+> 
+>   Result: [["a","a","b"], ["aa","b"]]
+> ```
 
 > [!info]- 🔍 Dry Run: s="aab"
 > ```text
@@ -851,6 +1080,39 @@ For each cut point: if `s[i..j]` is a palindrome, include and recurse on `j+1`.
 
 Insert 3 dots into `s` so each segment is 0..255 (no leading zeros).
 
+> [!example]- 📊 Visual: 4-level bounded segmentation tree
+> ```text
+>   s = "25525511135"   (len 11; need exactly 4 segments)
+> 
+>   At each level, take length 1, 2, or 3 chars (segment 0..255).
+> 
+>            dfs(start=0, parts=[])
+>      ┌─────────┬─────────┬─────────┐
+>   len=1 "2"  len=2 "25" len=3 "255"
+>     ↓          ↓           ↓
+>    ...        ...        dfs(start=3, parts=["255"])
+>                          ┌──────┬──────┬──────┐
+>                       "2"      "25"   "255"
+>                        ↓        ↓       ↓
+>                      ...      dfs(5, ["255","25"])
+>                                  ↓
+>                              ... (continue)
+> 
+>   Valid path found:
+>      "255" . "255" . "11"  . "135"
+>     [0..3) [3..6) [6..8) [8..11)   ← exactly fills s
+>     │      │      │       │
+>     part 1 part 2 part 3  part 4
+> 
+>   Pruning:
+>     • segment > 255  →  skip
+>     • leading '0' (and length > 1)  →  skip
+>     • when parts == 4: must have start == len(s); else fail
+>     • start + length > len(s)  →  break (no more chars)
+> 
+>   Result: ["255.255.11.135", "255.255.111.35"]
+> ```
+
 > [!info]- 🔍 Dry Run: s="25525511135"
 > ```text
 > dfs(start=0, parts=[]):
@@ -908,6 +1170,38 @@ Fill a 9×9 Sudoku grid in place. Standard rules (each row, col, 3×3 box has di
 ### 🧠 Pattern: DFS + Three Constraint Sets
 
 > Track used digits per row, per column, per 3×3 box. For each empty cell, try digits 1-9 that aren't in any of its row/col/box sets. Recurse.
+
+> [!example]- 📊 Visual: three constraint sets per cell
+> ```text
+>   For cell (i, j), the three sets it must avoid:
+> 
+>        col j
+>          │
+>    ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─       ┌─────┐         ┌─────┐
+>    . . X . . . . . .            │ . . │ . . .  │ . . │
+>    . . X . . . . . .            │ . . │ . . .  │ . . │
+>    X X * X X X X X X  ← row i   │ . * │ . . .  │ . . │  ← box (i//3, j//3)
+>    . . X . . . . . .            └─────┘         └─────┘
+>    . . X . . . . . .            (3x3 block
+>                                   containing *)
+> 
+>   For cell *:
+>     rows[i]  = digits already in row i
+>     cols[j]  = digits already in col j
+>     boxes[b] = digits already in the box b = (i//3)*3 + (j//3)
+> 
+>   Candidate digit d is valid ⟺ d ∉ rows[i] ∧ d ∉ cols[j] ∧ d ∉ boxes[b]
+> 
+>   DFS over the list of empty cells:
+>     for d in '1'..'9':
+>       if all three sets allow d:
+>         place d; add to 3 sets
+>         recurse on next empty cell
+>         if success → return
+>         else: remove from 3 sets; restore '.'  (backtrack)
+> 
+>   The three sets are the "ledger"; updates and rollbacks mirror exactly.
+> ```
 
 > [!info]- 🔍 Dry Run (conceptual; trace for one cell)
 > ```text

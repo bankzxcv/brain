@@ -164,6 +164,30 @@ Count connected groups of `'1'` in a 2D grid.
 
 Same DFS, return **size** as you go.
 
+> [!example]- 📊 Visual: DFS returning component size
+> ```text
+>   Grid (1=land, 0=water):
+>     · · █ ·
+>     · █ █ ·
+>     · █ · ·
+> 
+>   Start DFS at (1,1)=1. Each call returns 1 + sum of recursions:
+> 
+>           dfs(1,1) ──────┬──── dfs(2,1)=1   (land, all 4 nbrs 0/oob → 1)
+>             returns 4    ├──── dfs(0,1)=0   (water)
+>                          ├──── dfs(1,2)=2   (land → recurses to (0,2)=1)
+>                          └──── dfs(1,0)=0   (water)
+>             1 + 1 + 0 + 2 + 0 = 4
+> 
+>   Visual of the island (size = 4):
+>           █ ← (0,2)
+>           █ ← (1,2)
+>       █ █   ← (1,1), counted via dfs(1,1)
+>       █     ← (2,1)
+> 
+>   Scan continues but no more 1s → best = 4.
+> ```
+
 > [!info]- 🔍 Dry Run: grid=[[0,0,1,0],[0,1,1,0],[0,1,0,0]]
 > ```text
 > Visit (1,1): '1' → dfs returns size
@@ -207,6 +231,26 @@ Same DFS, return **size** as you go.
 Deep copy a connected undirected graph (each node has `val` and `neighbors[]`).
 
 ### 🧠 Pattern: DFS/BFS + Hash Map original → clone
+
+> [!example]- 📊 Visual: hash-map cloning
+> ```text
+>   Original:                Map (old → clone):       Clone:
+> 
+>     (1)──(2)               { 1 → 1',                (1')──(2')
+>      │    │                  2 → 2',                  │     │
+>      │    │                  3 → 3',                  │     │
+>     (4)──(3)                 4 → 4' }                (4')──(3')
+> 
+>   DFS visits each node ONCE (thanks to the map):
+> 
+>     dfs(1) creates 1', recurses to (2) and (4)
+>     dfs(2) creates 2', recurses to (1) HIT in map → use 1'
+>                       recurses to (3) create 3'
+>     dfs(3) recurses to (2) HIT and (4) create 4'
+>     dfs(4) recurses to (1) HIT and (3) HIT
+> 
+>   Map serves both as "have I visited" and "what's the clone".
+> ```
 
 > [!info]- 🔍 Dry Run: graph with 4 nodes: 1-2, 1-4, 2-3, 3-4 (square)
 > ```text
@@ -267,6 +311,30 @@ Fill each empty room with distance to nearest gate.
 ### 🧠 Pattern: Multi-Source BFS
 
 > Push ALL gates into the queue at distance 0. BFS expands outward layer by layer; each empty cell's distance = the first time it's visited.
+
+> [!example]- 📊 Visual: multi-source BFS waves
+> ```text
+>   Legend:  ★ gate (0)   █ wall (-1)   · empty (INF)
+> 
+>   Initial:                 Wave 1 (★ neighbors):
+>     · █ ★ ·                  · █ 0 1
+>     · · · █                  · · 1 █
+>     · █ · █                  · █ · █
+>     ★ █ · ·                  0 █ · ·
+> 
+>   Wave 2:                  Wave 3 (final):
+>     · █ 0 1                  3 █ 0 1
+>     2 2 1 █                  2 2 1 █
+>     1 █ 2 █                  1 █ 2 █
+>     0 █ · ·                  0 █ 3 4
+> 
+>   Both gates seed the queue at t=0. BFS expands one ring per iteration.
+>   Each cell takes its FIRST visit distance — guaranteed optimal.
+> 
+>      ★ → ring₁ → ring₂ → ring₃
+>      ↓     ↓        ↓       ↓
+>      0     1        2       3
+> ```
 
 > [!info]- 🔍 Dry Run: rooms=[[INF,-1,0,INF],[INF,INF,INF,-1],[INF,-1,INF,-1],[0,-1,INF,INF]]
 > ```text
@@ -462,6 +530,28 @@ Cells whose water can flow to BOTH oceans (touching N/W = Pacific; S/E = Atlanti
 > 
 > **Better:** BFS from ocean cells inward (against gravity — climb upward). Mark all reachable. Intersect the two sets.
 
+> [!example]- 📊 Visual: reverse-flow from each ocean
+> ```text
+>   Heights:               Pac touches (top+left):    Atl touches (bot+right):
+>     1 2 2 3 5              P · · · ·                  · · · · A
+>     3 2 3 4 4              P · · · ·                  · · · · A
+>     2 4 5 3 1              P · · · ·                  · · · · A
+>     6 7 1 4 5              P · · · ·                  · · · · A
+>     5 1 1 2 4              P P P P P                  A A A A A
+> 
+>   DFS from each border cell climbs UPHILL (next height ≥ current):
+> 
+>     Pac set ∪              Atl set ∪              Intersection (answer):
+>       P P · · ·              · · · · A              · · · · ✓
+>       P P · · ·              · · · ✓ ✓              · · · ✓ ✓
+>       P · · · ·              · · ✓ · A              · · ✓ · ·
+>       P P · · ·              ✓ ✓ · · A              ✓ ✓ · · ·
+>       P · · · ·              A A A A A              ✓ · · · ·
+> 
+>   Cells in BOTH sets = water flows to both oceans.
+>   Single pass per ocean → O(R·C) total instead of O((R·C)²).
+> ```
+
 > [!info]- 🔍 Dry Run (small example)
 > ```text
 > heights=[[1,2,2,3,5],
@@ -520,6 +610,27 @@ Capture 'O's surrounded by 'X'. Edge-touching 'O's are safe.
 ### Approach
 
 DFS from each border 'O', mark them as safe (temp char like '#'). Then sweep: '#' → 'O' (safe), 'O' → 'X' (captured).
+
+> [!example]- 📊 Visual: boundary flood marks safe regions
+> ```text
+>   Board (X=wall, O=region):     After Phase 1 (border 'O's → '#'):
+>     X X X X                         X X X X
+>     X O O X                         X O O X    ← inner O's untouched
+>     X X O X                         X X O X
+>     X O X X                         X # X X    ← border O at (3,1) → '#'
+> 
+>   Phase 2 sweep:
+>     · O at inner cells → flip to X (captured)
+>     · '#' anywhere      → restore to O (safe)
+> 
+>     X X X X
+>     X X X X
+>     X X X X
+>     X O X X
+> 
+>   Key idea: instead of asking "is this O surrounded?" (hard),
+>   ask "does this O touch the border?" (easy via DFS from edges).
+> ```
 
 > [!info]- 🔍 Dry Run: board=[["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
 > ```text
@@ -581,6 +692,31 @@ Shortest transformation `begin → end`, one letter at a time, each step in word
 > Each word = state. Neighbors = words differing by one char. BFS gives shortest.
 > 
 > **Optimization:** Build neighbor index lazily. For each position, replace with `*` → bucket of patterns. e.g. `hit` → `*it`, `h*t`, `hi*`.
+
+> [!example]- 📊 Visual: BFS over word state graph
+> ```text
+>   Pattern buckets (after preprocessing):
+>     h*t → {hit, hot}
+>     *ot → {hot, dot, lot}
+>     d*g → {dog}
+>     *og → {dog, log, cog}
+>     ...
+> 
+>   BFS layers from "hit" to "cog":
+> 
+>     Layer 1:                (hit)
+>                               │  (via h*t)
+>     Layer 2:                (hot)
+>                              /│\   (via *ot)
+>     Layer 3:           (dot) │ (lot)
+>                          │   │   │   (via do*, lo*)
+>     Layer 4:           (dog) │ (log)
+>                            \ │ /     (via *og)
+>     Layer 5:                (cog)  ← target found at depth 5
+> 
+>   Each layer = one transformation. BFS guarantees shortest.
+>   Total path length = 5: hit → hot → dot → dog → cog
+> ```
 
 > [!info]- 🔍 Dry Run: begin="hit", end="cog", wordList=["hot","dot","dog","lot","log","cog"]
 > ```text
@@ -666,6 +802,29 @@ Shortest transformation `begin → end`, one letter at a time, each step in word
 
 **LC #752** · Medium
 
+> [!example]- 📊 Visual: BFS over 4-wheel lock state space
+> ```text
+>   Each state = 4-digit string. Each wheel has 10 positions.
+>   From any state, 8 neighbors (4 wheels × ±1, with wrap-around).
+> 
+>   Start: "0000"      Target: "0202"      Deadends: blocked
+> 
+>   Layer 0:              "0000"
+>                       /  |   |  \ ... (8 neighbors)
+>   Layer 1:    "1000" "9000" "0100" "0900" "0010" "0090" "0001" "0009"
+> 
+>   Layer 2:    each of those branches to 8 more (minus seen/dead)
+>      ...
+>   Layer 6:    eventually reach "0202"   ← min depth = 6
+> 
+>   Wrap-around example: wheel 9 → 0 or 0 → 9.
+>   Deadends pruned BEFORE enqueuing so they don't poison the BFS.
+> 
+>     dead = {0201, 0101, 0102, 1212, 2002}
+> 
+>   Answer: 6 turns.
+> ```
+
 > [!info]- 🔍 Dry Run: deadends=["0201","0101","0102","1212","2002"], target="0202"
 > ```text
 > Start "0000"; can't be in deadends; target="0202"
@@ -715,6 +874,34 @@ Shortest transformation `begin → end`, one letter at a time, each step in word
 ## P10: Shortest Path in Binary Matrix
 
 **LC #1091** · Medium · 8-directional
+
+> [!example]- 📊 Visual: 8-direction BFS
+> ```text
+>   Grid (0=open, 1=blocked):    8 directions from any cell:
+>     · · ·                          ↖ ↑ ↗
+>     █ █ ·                          ← · →
+>     █ █ ·                          ↙ ↓ ↘
+> 
+>   BFS waves (distance from (0,0)):
+> 
+>     d=1: ●                       ●=start
+>          █ █ ·
+>          █ █ ·
+> 
+>     d=2: ● 2                     diagonals count as 1 step
+>          █ █ ·
+>          █ █ ·
+> 
+>     d=3: ● 2 3                   reaches (0,2) via right
+>          █ █ 3                   reaches (1,2) via diag from (0,1)→(1,2)? blocked
+>          █ █ ·                   (1,2) via (0,2)→(1,2) = 3
+> 
+>     d=4: ● 2 3                   target (2,2):
+>          █ █ 3                     from (1,2): 3 + 1 = 4
+>          █ █ 4                     no shorter path exists
+> 
+>   Answer: 4. Path: (0,0)→(0,1)→(0,2)→(1,2)→(2,2).
+> ```
 
 > [!info]- 🔍 Dry Run: grid=[[0,0,0],[1,1,0],[1,1,0]]
 > ```text
@@ -777,6 +964,29 @@ Distance to nearest 0 from each cell.
 ### Approach
 
 Multi-source BFS from all 0s. Initialize 1s to ∞; relax during BFS.
+
+> [!example]- 📊 Visual: multi-source BFS distance field
+> ```text
+>   Input:                Seed queue with all 0s (dist=0):
+>     0 0 0                 0 0 0
+>     0 1 0                 0 ∞ 0
+>     1 1 1                 ∞ ∞ ∞
+> 
+>   Wave 1 (relax neighbors of 0-cells):
+>     0 0 0
+>     0 1 0          (1,1) gets dist=1 (from (0,1) or (1,0) etc.)
+>     1 2 1          (2,0)=1, (2,2)=1 (from 0-cells above)
+>                    (2,1) takes dist=2 (from (1,1)=1 + 1) in next wave
+> 
+>   Wave 2:
+>     0 0 0
+>     0 1 0
+>     1 2 1          (2,1) finalized as 2
+> 
+>   ─────────────────────────────────────────
+>   Why multi-source? Per-cell BFS would be O((RC)²).
+>   Seeding all 0s simultaneously → each cell visited once. O(RC).
+> ```
 
 > [!info]- 🔍 Dry Run: mat=[[0,0,0],[0,1,0],[1,1,1]]
 > ```text
@@ -841,6 +1051,30 @@ Multi-source BFS from all 0s. Initialize 1s to ∞; relax during BFS.
 
 Can you visit all rooms starting from room 0 (each room contains keys to other rooms)?
 
+> [!example]- 📊 Visual: DFS reachability through key chain
+> ```text
+>   rooms = [[1], [2], [3], []]
+>   Each room i contains keys to rooms in rooms[i].
+> 
+>   Graph view:
+>     (0) ──key→ (1) ──key→ (2) ──key→ (3)
+> 
+>   DFS from room 0:
+> 
+>     start: seen={0}, stack=[0]
+>            ┌────────────────────────────┐
+>            │ visit 0 → grab key to 1    │
+>            │ visit 1 → grab key to 2    │
+>            │ visit 2 → grab key to 3    │
+>            │ visit 3 → no more keys     │
+>            └────────────────────────────┘
+> 
+>     final: seen = {0, 1, 2, 3} = all rooms → true ✓
+> 
+>   Counter-example: rooms=[[1,3],[3,0,1],[2],[0]]
+>     room 2 unreachable (no key points to 2) → seen ≠ all → false
+> ```
+
 > [!info]- 🔍 Dry Run: rooms=[[1],[2],[3],[]]
 > ```text
 > Start: seen={0}, stack=[0]
@@ -883,6 +1117,34 @@ Can you visit all rooms starting from room 0 (each room contains keys to other r
 ## P13: All Paths From Source to Target
 
 **LC #797** · Medium · DAG
+
+> [!example]- 📊 Visual: DFS enumerating all source→target paths
+> ```text
+>   DAG:           (0)
+>                  / \
+>               (1)   (2)
+>                 \   /
+>                  (3)   ← target
+> 
+>   DFS with backtracking:
+> 
+>     path=[0]
+>       ↓ try child 1
+>     path=[0,1]
+>       ↓ try child 3
+>     path=[0,1,3] ── target! emit copy → [[0,1,3]]
+>       ↑ pop 3
+>     path=[0,1]
+>       ↑ pop 1 (no more children)
+>     path=[0]
+>       ↓ try child 2
+>     path=[0,2]
+>       ↓ try child 3
+>     path=[0,2,3] ── target! emit copy → [[0,1,3], [0,2,3]]
+> 
+>   No visited set needed — DAG guarantees no revisits.
+>   "Pop after recurse" is the backtrack — restores state for sibling.
+> ```
 
 > [!info]- 🔍 Dry Run: graph=[[1,2],[3],[3],[]]  (node 0 → 1,2; 1→3; 2→3; 3=target)
 > ```text
@@ -934,6 +1196,31 @@ Can you visit all rooms starting from room 0 (each room contains keys to other r
 
 Adjacency matrix; count connected components.
 
+> [!example]- 📊 Visual: adjacency matrix → connected components
+> ```text
+>   isConnected =       Graph view:
+>     1 1 0               (0)──(1)        (2)
+>     1 1 0
+>     0 0 1
+> 
+>   DFS launches:
+> 
+>     i=0: not seen → seen={0}, dfs(0)
+>            dfs(0) explores j=1: connected, dfs(1)
+>            dfs(1) finds no new → return
+>          seen = {0, 1}              count = 1
+> 
+>     i=1: in seen → skip
+> 
+>     i=2: not seen → seen={0,1,2}, dfs(2)
+>            dfs(2) finds no connections
+>          count = 2
+> 
+>   Each DFS launch from an unseen node = +1 component.
+> 
+>   Provinces:  { {0,1}, {2} }  → 2 provinces
+> ```
+
 > [!info]- 🔍 Dry Run: isConnected=[[1,1,0],[1,1,0],[0,0,1]]
 > ```text
 > n=3; seen={}
@@ -982,6 +1269,27 @@ Adjacency matrix; count connected components.
 **LC #1254** · Medium
 
 Islands not touching the border.
+
+> [!example]- 📊 Visual: boundary-tainted DFS, then count
+> ```text
+>   Legend: 0 = land, 1 = water (per problem convention)
+> 
+>   Input (small example):           After Phase 1 (border land → water):
+>     1 1 1 1 1                       1 1 1 1 1
+>     1 0 0 1 0                       1 0 0 1 1    ← (1,4)=0 was border → erased
+>     1 1 0 1 1                       1 1 0 1 1
+>     1 0 1 1 1                       1 0 1 1 1
+>     1 1 1 1 1                       1 1 1 1 1
+> 
+>   Phase 1 walks all border cells; any land touching border floods → water.
+>   Phase 2 counts remaining land components (which must be fully interior).
+> 
+>   Components remaining:
+>     · only the central pocket {(1,1),(1,2),(2,2)} survives in this example
+>     → 1 closed island
+> 
+>   This is the "destroy negation, then count" pattern (cousin of P7).
+> ```
 
 > [!info]- 🔍 Dry Run: grid=[[1,1,1,1,1,1,1,0],[1,0,0,0,0,1,1,0],[1,0,1,0,1,1,1,0],[1,0,0,0,0,1,0,1],[1,1,1,1,1,1,1,0]]
 > ```text
@@ -1034,6 +1342,37 @@ A node is **safe** if every path leads to a terminal. Return all safe nodes (sor
 ### 🧠 Pattern: DFS with 3 Colors (White/Gray/Black)
 
 > White = unvisited. Gray = on current DFS path. Black = fully verified safe. If DFS hits a Gray node → there's a cycle → not safe. Else, all descendants are black → mark this black.
+
+> [!example]- 📊 Visual: 3-color DFS for safe-state detection
+> ```text
+>   Color states:  ○ WHITE (unvisited)   ◐ GRAY (on path)   ● BLACK (safe)
+> 
+>   Graph: 0→{1,2}, 1→{2,3}, 2→{5}, 3→{0}, 4→{5}, 5→{}, 6→{}
+> 
+>          (0) ⟲ (3)        ← cycle 0→1→3→0 detected
+>          / \   ↑
+>         ↓   ↓  |
+>        (1) (2)─(5)        ← 5 is terminal (●)
+>         ↘  ↗
+>        (3)
+> 
+>        (4) ──→ (5)●       ← 4 leads only to safe → safe
+>        (6) terminal       ← always safe
+> 
+>   DFS coloring walk:
+>     dfs(0): mark 0 ◐
+>       dfs(1): mark 1 ◐
+>         dfs(2): mark 2 ◐ → dfs(5)=●, mark 2 ●
+>         dfs(3): mark 3 ◐ → dfs(0)=◐ HIT GRAY → cycle!
+>                          → return False, 3 stays ◐ (unsafe)
+>         → 1 unsafe (still ◐)
+>       → 0 unsafe (still ◐)
+> 
+>     dfs(4): 4 ◐ → dfs(5)=● ✓ → mark 4 ●
+>     dfs(6): no edges → mark 6 ●
+> 
+>   Safe nodes (● BLACK): [2, 4, 5, 6]
+> ```
 
 > [!info]- 🔍 Dry Run: graph=[[1,2],[2,3],[5],[0],[5],[],[]]
 > ```text

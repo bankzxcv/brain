@@ -58,6 +58,36 @@ For each `x` in `nums1` (subset of `nums2`), find next greater element in `nums2
 
 > Walk `nums2`. While stack top < current → pop, record current as its NGE. Push current. Look up answers from a map.
 
+> [!example]- 📊 Visual: decreasing stack as "still waiting for bigger"
+> ```text
+>   nums2 = [1, 3, 4, 2]
+> 
+>   Stack holds values STILL WAITING for a bigger neighbor.
+>   When the new value is bigger than top, top has found its NGE — pop.
+> 
+>     x=1   push     stack (top→bot):  1
+>     x=3   3>1 pop 1 (nge[1]=3)
+>           push                       3
+>     x=4   4>3 pop 3 (nge[3]=4)
+>           push                       4
+>     x=2   2<4 no pop, push           2 ← top
+>                                      4
+> 
+>   Stack at end: [4, 2]   ← these never found NGE → nge[x] = -1
+> 
+>   Conceptual picture (bar heights with arrows showing "looking right"):
+> 
+>       4 ─────────┐
+>       3 ─────┐   │
+>       2 ─    │   │ ──┐
+>       1 ┐    │   │   │
+>         └→3  └→4 └→? └→?
+>          (1's   (3's  (4: none) (2: none)
+>           NGE)   NGE)
+> 
+>   nge map: {1:3, 3:4, 4:-1, 2:-1}    answers for nums1=[4,1,2]: [-1,3,-1]
+> ```
+
 > [!info]- 🔍 Dry Run: nums1=[4,1,2], nums2=[1,3,4,2]
 > ```text
 > Phase 1 — Build NGE map by scanning nums2 with a decreasing stack:
@@ -129,6 +159,37 @@ Same as P1 but the array wraps.
 ### 🧠 Pattern: Double the Array (Virtually)
 
 > Iterate `2n` indices, using `i % n`. Stack holds indices. Only set answer the first time (when index in `0..n-1`).
+
+> [!example]- 📊 Visual: virtual doubling lets elements "see around the bend"
+> ```text
+>   nums = [1, 2, 1]    n = 3
+> 
+>   Walk indices 0..2n-1 = 0..5, use nums[i % n]:
+> 
+>     real positions:       0   1   2  | 0   1   2
+>     i (loop):             0   1   2  | 3   4   5
+>     values:               1   2   1  | 1   2   1
+>                          ─────────── ───────────
+>                           ↑ first pass  ↑ second pass (wrap)
+> 
+>   "Virtually" we doubled the array:
+> 
+>     [1, 2, 1, 1, 2, 1]
+>      ^^^^^^^^
+>      original
+> 
+>   Only PUSH on first pass (i < n) — second pass just resolves.
+> 
+>   Trace:
+>     i=0 (1) push    st=[0]
+>     i=1 (2) > 1 → pop 0, out[0]=2; push 1.   st=[1]
+>     i=2 (1) < 2     push                     st=[1,2]
+>     i=3 (1) wrap — don't push, top=1 not < 1
+>     i=4 (2) > 1 → pop 2, out[2]=2           st=[1]
+>     i=5 (1) wrap — don't push.
+> 
+>   Final out = [2, -1, 2]    ← index 2 got its answer from the WRAP
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,2,1]
 > ```text
@@ -489,6 +550,38 @@ In a binary matrix, find the largest rectangle of all 1s.
 
 > Treat each row as the base of a histogram: `heights[c] += 1` if `matrix[r][c]=1` else `0`. Run LRH on the heights each row. Max across rows wins.
 
+> [!example]- 📊 Visual: each row builds a histogram from cells above
+> ```text
+>   matrix:        col   0 1 2 3 4
+>                  ────────────────
+>     row 0:             1 0 1 0 0
+>     row 1:             1 0 1 1 1
+>     row 2:             1 1 1 1 1
+>     row 3:             1 0 0 1 0
+> 
+>   Build "histogram" per row (height = consecutive 1s ending at this row):
+> 
+>     after row 0:  heights = [1, 0, 1, 0, 0]
+>     after row 1:  heights = [2, 0, 2, 1, 1]    (a '0' resets to 0)
+>     after row 2:  heights = [3, 1, 3, 2, 2]    ← best opportunity here
+>     after row 3:  heights = [4, 0, 0, 3, 0]
+> 
+>   Visualize row 2's histogram and the largest rectangle:
+> 
+>     col:           0   1   2   3   4
+>     height:        3   1   3   2   2
+> 
+>       3 │ █       █
+>       2 │ █       █   ▓   ▓     ← 2 × 3 = 6 rectangle
+>       1 │ █   █   █   ▓   ▓
+>       0 └─────────────────────
+>           0   1   2   3   4
+> 
+>   Best = 6 (across cols 2,3,4 at height 2).
+> 
+>   Reuse LRH (P4) on each row's heights array. O(rows × cols) total.
+> ```
+
 > [!info]- 🔍 Dry Run: matrix=[["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
 > ```text
 > Per-row heights (cumulative '1's column-wise, reset on '0'):
@@ -553,6 +646,36 @@ In a binary matrix, find the largest rectangle of all 1s.
 ### 🧠 Pattern: Decreasing Stack, Compute Water on Pop
 
 > Maintain decreasing stack of bar indices. When current `h[i]` > h[top], that bar is **right boundary** for the popped bar. New top is **left boundary**. Water above popped = `(min(h[left], h[i]) - h[popped]) * (i - left - 1)`.
+
+> [!example]- 📊 Visual: water trapped layer by layer between bars
+> ```text
+>   h = [0,1,0,2,1,0,1,3,2,1,2,1]
+> 
+>   3 │                       █
+>   2 │             █         █ █     █
+>   1 │     █       █ █     █ █ █ █   █ █
+>   0 │   █ █ █   █ █ █ █ █ █ █ █ █ █ █ █
+>     └─────────────────────────────────────
+>       0 1 2 3 4 5 6 7 8 9 10 11
+> 
+>   Mono-stack idea: when current bar h[i] is TALLER than top,
+>   the popped bar has both walls — left = new top, right = i.
+> 
+>   Water above popped bar:
+>      width  = i - left - 1
+>      height = min(h[left], h[i]) - h[popped]
+> 
+>   Visualize one "fill" event (popping index 2 with h=0):
+> 
+>       index:    1   2   3
+>       height:   1   0   2
+>                ┌─┐     ┌─┐
+>                │1│ ░░░ │2│   ← water depth = min(1,2)-0 = 1
+>                │ │ ░░░ │ │      width = 3-1-1 = 1
+>                └─┘ ░░░ └─┘      contribution = 1
+> 
+>   Total water = 6 (sum of all such layered fills).
+> ```
 
 > [!info]- 🔍 Dry Run: h=[0,1,0,2,1,0,1,3,2,1,2,1]
 > ```text
@@ -678,6 +801,39 @@ Sum of `min` over all subarrays.
 
 > For each `nums[i]`, count subarrays where `nums[i]` is the min. Contribution = `nums[i] * left_count * right_count`. Use mono stacks for previous-less and next-less indices.
 
+> [!example]- 📊 Visual: each element's "dominion" as the min
+> ```text
+>   nums = [3, 1, 2, 4]    idx: 0  1  2  3
+> 
+>   For each i, find boundaries where nums[i] is STRICTLY the min:
+>     left[i]  = # positions to the left where nums[i] dominates
+>     right[i] = # positions to the right where nums[i] dominates
+> 
+>     contribution = nums[i] * left[i] * right[i]
+> 
+>   ┌─────┬─────┬─────────────────────────────────┬──────┬───────┬─────┐
+>   │  i  │ val │  dominion range                 │ left │ right │ ctr │
+>   ├─────┼─────┼─────────────────────────────────┼──────┼───────┼─────┤
+>   │  0  │  3  │ [3]                             │  1   │   1   │  3  │
+>   │  1  │  1  │ [3,1,2,4]  (whole array!)       │  2   │   3   │  6  │
+>   │  2  │  2  │ [2,4]                           │  1   │   2   │  4  │
+>   │  3  │  4  │ [4]                             │  1   │   1   │  4  │
+>   └─────┴─────┴─────────────────────────────────┴──────┴───────┴─────┘
+> 
+>                            Sum of contributions = 3 + 6 + 4 + 4 = 17
+> 
+>   Visualizing 1's dominion (val=1 is the min of EVERY subarray containing it):
+> 
+>     subarray:      [3]   [3,1]  [3,1,2]  [3,1,2,4]
+>                          min=1  min=1    min=1
+>                    [1]   [1,2]  [1,2,4]
+>                    min=1 min=1  min=1
+>     → 6 subarrays where 1 is the min  ✓
+> 
+>   Mono stacks find left/right boundaries in O(n).
+>   Tie-break: strict < on one side, ≤ on the other (no double count).
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[3,1,2,4]
 > ```text
 > For each i, want:
@@ -773,6 +929,38 @@ Remove exactly k digits from `num` to form smallest possible number.
 
 > To stay smallest, when next digit is **less than** top, the top digit was a poor choice. Pop while possible (decrement k). At end, trim leading zeros.
 
+> [!example]- 📊 Visual: increasing-digit "skyline" wins
+> ```text
+>   To make the smallest number, the digit "skyline" should rise:
+>   each digit ≤ the next. A drop (e.g. 4→3) is a BAD digit on top.
+> 
+>   num = "1 4 3 2 2 1 9"     k = 3 (remove 3 digits)
+> 
+>   Walk through with an increasing stack; remove dips while k > 0:
+> 
+>     '1'  push                       [1]            k=3
+>     '4'  4 > 1, push                [1,4]          k=3
+>     '3'  3 < 4 → pop '4'            [1]            k=2
+>          push '3'                   [1,3]
+>     '2'  2 < 3 → pop '3'            [1]            k=1
+>          push '2'                   [1,2]
+>     '2'  push (not strictly less)   [1,2,2]        k=1
+>     '1'  1 < 2 → pop '2'            [1,2]          k=0
+>          (k=0, stop popping) push   [1,2,1]
+>     '9'  push                       [1,2,1,9]
+> 
+>   Final digits: "1219"   (k=0 fully used → no trim).
+> 
+>   Compare skylines:
+> 
+>     before:   1 4 3 2 2 1 9         after: 1 2 1 9
+>                 ╲ ╲ ╲                       ╲   ╱
+>                  drops bad                   small valley
+> 
+>   If k > 0 still at end, chop k digits from the END (descending tail).
+>   Strip leading zeros at the very end.
+> ```
+
 > [!info]- 🔍 Dry Run: num="1432219", k=3
 > ```text
 > Setup:
@@ -857,6 +1045,42 @@ Remove exactly k digits from `num` to form smallest possible number.
 ### 🧠 Pattern: Stack of (price, span)
 
 > When popping, **absorb** the popped span into the current. Stack stays decreasing.
+
+> [!example]- 📊 Visual: span absorbs all popped smaller days
+> ```text
+>   Stream: 100, 80, 60, 70, 60, 75, 85
+> 
+>   Decreasing stack of (price, span_already_absorbed).
+>   New price absorbs all spans of prices ≤ itself, then pushes one frame.
+> 
+>     next(100)       stack: (100, 1)            return 1
+> 
+>     next(80)        stack: (100,1) (80, 1)     return 1
+> 
+>     next(60)        stack: (100,1)(80,1)(60,1) return 1
+> 
+>     next(70)        70 ≥ 60 → pop, absorb +1
+>                     stack: (100,1)(80,1)(70,2) return 2
+> 
+>     next(60)        stack: (100,1)(80,1)(70,2)(60,1)  return 1
+> 
+>     next(75)        75 ≥ 60 → pop, span=1+1=2
+>                     75 ≥ 70 → pop, span=2+2=4
+>                     stack: (100,1)(80,1)(75,4)        return 4
+> 
+>     next(85)        85 ≥ 75 → pop, span=1+4=5
+>                     85 ≥ 80 → pop, span=5+1=6
+>                     stack: (100,1)(85,6)              return 6
+> 
+>   Visual of span 6 (today swallowed 5 prior days ≤ 85):
+> 
+>     prices:  100  80  60  70  60  75  85
+>     idx:      0   1   2   3   4   5   6
+>                  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+>                  └────── span = 6 ─────┘   (includes today)
+> 
+>   Each price gets pushed once, popped at most once → amortized O(1).
+> ```
 
 > [!info]- 🔍 Dry Run: calls next(100), next(80), next(60), next(70), next(60), next(75), next(85)
 > ```text
@@ -950,6 +1174,38 @@ Cars at positions heading to `target`. A faster car catching a slower one **flee
 ### 🧠 Pattern: Sort by Position, Stack of Arrival Times
 
 > Sort cars by position **descending** (closer to target first). Compute each car's arrival time. Walk through and maintain a stack of arrival times: a slower (later) car ahead means current car joins that fleet (skip). Stack size = number of fleets.
+
+> [!example]- 📊 Visual: cars on a number line, fleets along the road
+> ```text
+>   target = 12.  cars (pos, speed) → arrival time = (12-pos)/speed
+> 
+>     pos:   0    3    5         8    10        12
+>            │    │    │         │    │         │ target
+>            ●    ●    ●         ●    ●     →   │
+>          t=12  t=3  t=7       t=1  t=1
+>          (s=1)(s=3)(s=1)     (s=4)(s=2)
+> 
+>   Sort by position DESCENDING (leader first):
+> 
+>     pos=10 (t=1)  ──┐
+>     pos= 8 (t=1)  ──┤  same arrival, but #8 is faster behind #10
+>     pos= 5 (t=7)  ──┤  slow, far back of #8 → makes new fleet
+>     pos= 3 (t=3)  ──┤  faster than #5 ahead → catches up, joins
+>     pos= 0 (t=12) ──┘  super slow → makes its own fleet
+> 
+>   Walk leader→last; stack of arrival times:
+> 
+>     stack: [1.0]            (car 10)
+>            [1.0]            (car 8 catches: 1.0 not > 1.0)
+>            [1.0, 7.0]       (car 5: new fleet, 7 > 1)
+>            [1.0, 7.0]       (car 3: 3 not > 7, joins fleet ahead)
+>            [1.0, 7.0, 12.0] (car 0: 12 > 7, new fleet)
+> 
+>   Answer = stack size = 3 fleets.
+> 
+>   Rule: a new fleet starts iff the car's arrival time is STRICTLY
+>         greater than the leader fleet's time (it can't catch up).
+> ```
 
 > [!info]- 🔍 Dry Run: target=12, position=[10,8,0,5,3], speed=[2,4,1,1,3]
 > ```text

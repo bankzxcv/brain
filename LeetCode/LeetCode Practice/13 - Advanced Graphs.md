@@ -59,6 +59,34 @@ Can you finish all courses given prerequisites?
 
 > Build adjacency + in-degree. Queue all nodes with `indeg == 0`. Pop one, decrement neighbors' indeg, enqueue when they hit 0. If all nodes popped → no cycle. Else → cycle.
 
+> [!example]- 📊 Visual: Kahn's algorithm on a DAG
+> ```text
+>   Edges (prereq → course):  0 → 1 → 2 → 3
+> 
+>   Indegree per node:
+>     [0]  [1]  [2]  [3]
+>      0    1    1    1
+> 
+>   Kahn's pops indeg==0 nodes in waves:
+> 
+>     wave 1:   q=[0]   pop 0 → indeg[1]=0 → enq 1
+>     wave 2:   q=[1]   pop 1 → indeg[2]=0 → enq 2
+>     wave 3:   q=[2]   pop 2 → indeg[3]=0 → enq 3
+>     wave 4:   q=[3]   pop 3
+> 
+>   Order popped: [0, 1, 2, 3]   (one valid linearization)
+> 
+>   ─────────────────────────────────────────
+>   Cycle case: edges = 0 → 1, 1 → 0
+> 
+>             ┌────→─────┐
+>           (0)         (1)
+>             └──←──────┘
+> 
+>     indeg = [1, 1]  — no zero-indeg node to start!
+>     queue stays empty → done < n → cycle detected → return false
+> ```
+
 > [!info]- 🔍 Dry Run: numCourses=4, prerequisites=[[1,0],[2,1],[3,2]]
 > ```text
 > Edge meaning: [a, b] means must take b before a → edge b → a
@@ -135,6 +163,30 @@ Can you finish all courses given prerequisites?
 
 Return one valid order (empty if impossible).
 
+> [!example]- 📊 Visual: branching DAG with shared sink
+> ```text
+>   Edges:                 DAG:           Indegrees:
+>     0 → 1                       (0)           0: 0
+>     0 → 2                      /   \          1: 1
+>     1 → 3                   (1)   (2)         2: 1
+>     2 → 3                      \   /          3: 2
+>                                 (3)
+> 
+>   Kahn's waves:
+> 
+>     wave 1:   q=[0]            pop 0   → indeg[1]=0, indeg[2]=0
+>                                          enq 1, enq 2
+>     wave 2:   q=[1, 2]         pop 1   → indeg[3]=1 (not 0)
+>                                pop 2   → indeg[3]=0 → enq 3
+>     wave 3:   q=[3]            pop 3
+> 
+>   Output: [0, 1, 2, 3]
+> 
+>   ─────────────────────────────────────────
+>   Note: order within a wave depends on queue order.
+>   [0, 2, 1, 3] is also valid (different push order).
+> ```
+
 > [!info]- 🔍 Dry Run: numCourses=4, prerequisites=[[1,0],[2,0],[3,1],[3,2]]
 > ```text
 > Edges:
@@ -196,6 +248,32 @@ Return one valid order (empty if impossible).
 ## P3: Alien Dictionary
 
 **LC #269** · **Hard**
+
+> [!example]- 📊 Visual: extract ordering edges from adjacent word pairs
+> ```text
+>   words = ["wrt", "wrf", "er", "ett", "rftt"]
+> 
+>   Compare adjacent pairs, find FIRST differing char:
+> 
+>     wrt vs wrf      → t comes before f       edge: t → f
+>     wrf vs er       → w comes before e       edge: w → e
+>     er  vs ett      → r comes before t       edge: r → t
+>     ett vs rftt     → e comes before r       edge: e → r
+> 
+>   Constraint DAG:
+> 
+>         (w) → (e) → (r) → (t) → (f)
+> 
+>   Indegrees: w=0, e=1, r=1, t=1, f=1
+> 
+>   Kahn's pops in order: w, e, r, t, f
+> 
+>   Answer: "wertf"
+> 
+>   ─────────────────────────────────────────
+>   Prefix anomaly: words = ["abc", "ab"]
+>     "ab" is a prefix of "abc" but appears LATER → impossible → ""
+> ```
 
 > [!info]- 🔍 Dry Run: words=["wrt","wrf","er","ett","rftt"]
 > ```text
@@ -268,6 +346,33 @@ Return one valid order (empty if impossible).
 
 **LC #310** · Medium
 
+> [!example]- 📊 Visual: peel leaves to find tree centroid(s)
+> ```text
+>   Tree (n=6):
+>                (0)
+>                 │
+>          (1)───(3)───(2)
+>                 │
+>                (4)
+>                 │
+>                (5)
+> 
+>   Round 0:  leaves (deg=1) = {0, 1, 2, 5}    remaining = 6
+> 
+>   Peel round 1: remove {0, 1, 2, 5}
+>                                    │
+>                                   (3)───(4)         ← new leaves
+>                                    │
+>                                  
+>             remaining = 6 - 4 = 2 → stop (≤ 2 left)
+> 
+>   Centroids: {3, 4}   ← roots that minimize tree height
+> 
+>   ─────────────────────────────────────────
+>   Intuition: longest path in tree has ≤2 midpoints. Those are
+>   the centers. Peeling layer-by-layer converges on them.
+> ```
+
 > [!info]- 🔍 Dry Run: n=6, edges=[[0,3],[1,3],[2,3],[4,3],[5,4]]
 > ```text
 > Graph (undirected):
@@ -335,6 +440,33 @@ Return one valid order (empty if impossible).
 
 **LC #743** · Medium · Dijkstra
 
+> [!example]- 📊 Visual: Dijkstra heap evolution
+> ```text
+>   Weighted graph (k=2 = source):
+> 
+>            (1)        (4)
+>            ↑           ↑
+>           1│           │1
+>            │           │
+>           (2) ──1──→ (3)
+> 
+>   Dijkstra from node 2:
+> 
+>     step │ heap (sorted)        │ pop      │ dist updates
+>     ─────┼──────────────────────┼──────────┼────────────────
+>      0   │ [(0,2)]               │ (0, 2)   │ dist[2]=0
+>      1   │ [(1,1), (1,3)]        │ (1, 1)   │ dist[1]=1
+>      2   │ [(1,3)]               │ (1, 3)   │ dist[3]=1
+>      3   │ [(2,4)]               │ (2, 4)   │ dist[4]=2
+> 
+>   Final dist table:
+>     dist[1]=1   dist[2]=0   dist[3]=1   dist[4]=2
+> 
+>   Answer = max(dist values) = 2   (time for signal to reach all)
+> 
+>   "Lazy deletion": when popping a node already in dist, skip it.
+> ```
+
 > [!info]- 🔍 Dry Run: times=[[2,1,1],[2,3,1],[3,4,1]], n=4, k=2
 > ```text
 > Graph: 2 → 1 (w=1), 2 → 3 (w=1), 3 → 4 (w=1)
@@ -392,6 +524,31 @@ Return one valid order (empty if impossible).
 **LC #1631** · Medium
 
 ### 🧠 Pattern: Dijkstra Where "Distance" = Path's Maximum Edge
+
+> [!example]- 📊 Visual: Dijkstra with max-combiner on a grid
+> ```text
+>   heights:                      Best "effort" to reach each cell:
+>     1  2  2                       0  1  1
+>     3  8  2                       2  6  1     (initial relaxation)
+>     5  3  5                       ∞  ∞  ∞
+> 
+>   "Effort" of a path = MAX |diff| of any step on path.
+>   Dijkstra with cost combiner: nd = max(d_so_far, |h_next - h_here|)
+> 
+>   Heap snapshot for the bottom-right corner:
+> 
+>     pop (0, 0,0)  effort 0
+>     push (2,1,0), (1,0,1)
+>     pop (1, 0,1)  push (1,0,2), (6,1,1)
+>     pop (1, 0,2)  push (1,1,2)
+>     pop (1, 1,2)  push (3,2,2)
+>     pop (2, 1,0)  push (2,2,0)
+>     pop (2, 2,0)  push (2,2,1)
+>     pop (2, 2,1)  push (2,2,2)   ← better than 3 → updates dist[2,2]=2
+>     pop (2, 2,2)  TARGET → return 2
+> 
+>   Answer: 2   (path 1→2→2→2→3 with max diff = 2 at the last step)
+> ```
 
 > [!info]- 🔍 Dry Run: heights=[[1,2,2],[3,8,2],[5,3,5]]
 > ```text
@@ -463,6 +620,33 @@ Return one valid order (empty if impossible).
 
 Same as P6 — Dijkstra with `max` as the combiner.
 
+> [!example]- 📊 Visual: rising water reveals lowest "tide" to traverse
+> ```text
+>   grid (elevation = time-to-submerge):
+>     0  2
+>     1  3
+> 
+>   You can step from a cell to neighbor when water level ≥ max(both elevs).
+>   We want the MIN time t such that a path 0,0 → N-1,N-1 exists.
+> 
+>   Dijkstra with t = max(t_so_far, grid[next]):
+> 
+>     start (0,0,t=0)
+>       ↓               ↘
+>     (1,0,t=1)        (0,1,t=2)
+>       ↓                 ↓
+>     (1,1,t=3)        (1,1,t=3)
+> 
+>   Heap order of finalization:  (0,0)→(1,0)→(0,1)→(1,1) at t=3
+> 
+>   ─────────────────────────────────────────
+>   Mental model — water level rises 0,1,2,3,...
+>     t=0:  ▓ . . .       only (0,0) reachable
+>     t=1:  ▓ ▓ . .       (1,0) joins
+>     t=2:  ▓ ▓ ▓ .       (0,1) joins
+>     t=3:  ▓ ▓ ▓ ▓       target reachable → answer = 3
+> ```
+
 > [!info]- 🔍 Dry Run: grid=[[0,2],[1,3]]
 > ```text
 > Start at (0,0) elevation 0. Target (1,1).
@@ -512,6 +696,39 @@ Same as P6 — Dijkstra with `max` as the combiner.
 **LC #787** · Medium
 
 ### 🧠 Pattern: Bellman-Ford with K+1 Relaxation Rounds
+
+> [!example]- 📊 Visual: Bellman-Ford rounds with snapshot
+> ```text
+>   Graph:
+>         100        100
+>     (0) ────→ (1) ────→ (2)
+>      │                    ↑
+>      └──────500───────────┘
+> 
+>   k=1 stops means at most 2 edges allowed.
+>   Run k+1 = 2 relaxation rounds.
+> 
+>   prices array evolution:
+> 
+>     init:           [ 0,  ∞,  ∞ ]
+> 
+>     ─── Round 1 ─── (snapshot = init)
+>       edge 0→1 (100):  snap[0]+100 = 100 < ∞   → prices[1] = 100
+>       edge 1→2 (100):  snap[1] = ∞              → no update
+>       edge 0→2 (500):  snap[0]+500 = 500 < ∞   → prices[2] = 500
+>     prices:         [ 0, 100, 500 ]
+> 
+>     ─── Round 2 ─── (snapshot = [0,100,500])
+>       edge 0→1 (100):  snap[0]+100 = 100, not < 100  → no
+>       edge 1→2 (100):  snap[1]+100 = 200 < 500       → prices[2] = 200
+>       edge 0→2 (500):  no improvement
+>     prices:         [ 0, 100, 200 ]
+> 
+>   Why snapshot? Without it, edge 0→1 in this round and edge 1→2
+>   could BOTH apply in one round → 2 hops in 1 round → over-relaxed.
+> 
+>   Answer: prices[2] = 200
+> ```
 
 > [!info]- 🔍 Dry Run: n=3, flights=[[0,1,100],[1,2,100],[0,2,500]], src=0, dst=2, k=1
 > ```text
@@ -563,6 +780,39 @@ Same as P6 — Dijkstra with `max` as the combiner.
 **LC #323** · Medium
 
 ### 🧠 Pattern: Union-Find (DSU)
+
+> [!example]- 📊 Visual: DSU forest evolution
+> ```text
+>   n=5, edges = [(0,1), (1,2), (3,4)]
+> 
+>   Initial forest (each its own root):
+>     0   1   2   3   4
+>     ●   ●   ●   ●   ●
+> 
+>   After union(0,1):  (point 0's root → 1)
+>         1
+>         │       2   3   4
+>         0       ●   ●   ●
+> 
+>   After union(1,2):  (point 1's root → 2)
+>             2
+>             │           3   4
+>             1           ●   ●
+>             │
+>             0
+> 
+>   After union(3,4):  (point 3's root → 4)
+>             2               4
+>             │               │
+>             1               3
+>             │
+>             0
+> 
+>   Roots remaining: {2, 4} → 2 connected components ✓
+> 
+>   count starts at n=5, decrements on each successful union.
+>   5 → 4 → 3 → 2 = answer.
+> ```
 
 > [!info]- 🔍 Dry Run: n=5, edges=[[0,1],[1,2],[3,4]]
 > ```text
@@ -620,6 +870,39 @@ Same as P6 — Dijkstra with `max` as the combiner.
 
 **LC #261** · Medium
 
+> [!example]- 📊 Visual: tree = connected + acyclic
+> ```text
+>   Valid tree: n=5, edges = (0,1),(0,2),(0,3),(1,4)
+> 
+>          (4)
+>           │
+>          (1)
+>           │
+>          (0) ── (2)
+>           │
+>          (3)
+> 
+>   Check: |edges| = 4 == n-1 = 4 ✓
+>   DSU sweep — every union joins two DIFFERENT components → no cycle.
+>   Result: true
+> 
+>   ─────────────────────────────────────────
+>   Invalid (cycle): n=5, edges = (0,1),(1,2),(2,3),(1,3),(1,4)
+>     |edges| = 5 ≠ n-1=4 → reject immediately
+> 
+>          (4)
+>           │
+>          (1) ── (2)
+>          /\      │
+>        (0) (3) ──┘     ← extra edge closes cycle 1-2-3-1
+> 
+>   ─────────────────────────────────────────
+>   Invalid (disconnected): n=4, edges = (0,1),(2,3)
+>     |edges|=2 ≠ n-1=3 → reject
+> 
+>     (0)─(1)    (2)─(3)    ← two components
+> ```
+
 > [!info]- 🔍 Dry Run: n=5, edges=[[0,1],[0,2],[0,3],[1,4]]
 > ```text
 > Check: len(edges)=4 == n-1=4 ✓
@@ -665,6 +948,32 @@ Same as P6 — Dijkstra with `max` as the combiner.
 
 **LC #684** · Medium
 
+> [!example]- 📊 Visual: DSU spots the cycle-closing edge
+> ```text
+>   edges = [(1,2), (1,3), (2,3)]
+> 
+>   Process edges in order; on each, find roots of both endpoints:
+> 
+>     ─── (1,2) ───              parents: 1→2
+>       find(1)=1, find(2)=2     forest:    2
+>       different → union          │
+>                                  1     3
+> 
+>     ─── (1,3) ───              parents: 2→3
+>       find(1)=2, find(3)=3     forest:        3
+>       different → union                       │
+>                                                2
+>                                                │
+>                                                1
+> 
+>     ─── (2,3) ───              find(2)=3, find(3)=3
+>       SAME root!               → adding this edge would create a cycle
+>                                → return [2, 3]   ✓
+> 
+>   The first edge that connects two nodes already in the SAME tree
+>   is the redundant one.
+> ```
+
 > [!info]- 🔍 Dry Run: edges=[[1,2],[1,3],[2,3]]
 > ```text
 > n = 3, parent = [0,1,2,3]   (1-indexed for convenience)
@@ -699,6 +1008,44 @@ Same as P6 — Dijkstra with `max` as the combiner.
 ## P12: Min Cost to Connect All Points
 
 **LC #1584** · Medium · MST
+
+> [!example]- 📊 Visual: Prim's MST grows one edge at a time
+> ```text
+>   Points:  0=(0,0)  1=(2,2)  2=(3,10)  3=(5,2)  4=(7,0)
+> 
+>   All pairwise Manhattan distances (relevant subset):
+>     0─1: 4    0─3: 7    0─4: 7
+>     1─2: 9    1─3: 3    1─4: 7
+>     2─3: 10   3─4: 4
+> 
+>   Prim from node 0 (heap of candidate edges, pop cheapest):
+> 
+>     in_mst = {0}        total = 0
+>       push edges from 0: (4,1)(13,2)(7,3)(7,4)
+> 
+>     pop (4,1) → MST adds 0═══1   total = 4
+>       push edges from 1: (9,2)(3,3)(7,4)
+> 
+>     pop (3,3) → MST adds 1═══3   total = 7
+>       push edges from 3: (10,2)(4,4)
+> 
+>     pop (4,4) → MST adds 3═══4   total = 11
+>       push edges from 4: (14,2)
+> 
+>     pop (7,3) → already in MST, skip
+>     pop (7,4) → already in MST, skip
+>     pop (9,2) → MST adds 1═══2   total = 20
+> 
+>   Final MST (double lines):
+> 
+>     (2)
+>      ║ 9
+>     (1)═══4═══(0)
+>      ║ 3
+>     (3)═══4═══(4)
+> 
+>   Total cost = 20.
+> ```
 
 > [!info]- 🔍 Dry Run: points=[[0,0],[2,2],[3,10],[5,2],[7,0]]
 > ```text

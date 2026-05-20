@@ -47,6 +47,25 @@ status: in-progress
 
 **LC #55** · Medium
 
+> [!example]- 📊 Visual: furthest reachable index
+> ```text
+>   nums = [2, 3, 1, 1, 4]    can we reach the end?
+>   idx     0  1  2  3  4
+> 
+>   At each i, track furthest_reach = max(furthest, i + nums[i]):
+> 
+>     i=0  ⇨   reach max = 0+2 = 2
+>          ▼─────▶
+>          0 1 2 3 4
+> 
+>     i=1  ⇨   reach max = max(2, 1+3) = 4
+>            ▼───────▶
+>          0 1 2 3 4   ← can already reach the end!
+> 
+>   Stop check: if i > furthest_reach at any step → STUCK → return false.
+>   We're fine here because furthest stays ≥ i throughout.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[2,3,1,1,4]
 > ```text
 > furthest = 0
@@ -89,6 +108,31 @@ status: in-progress
 ## P2: Jump Game II
 
 **LC #45** · Medium
+
+> [!example]- 📊 Visual: BFS levels of reach
+> ```text
+>   nums = [2, 3, 1, 1, 4]    min jumps from idx 0 → last idx?
+>   idx     0  1  2  3  4
+> 
+>   Think of "levels" — how far you can reach with k jumps:
+> 
+>     Level 0 (0 jumps): {0}
+>          [0]
+>           └── nums[0]=2 → can reach idx 1, 2
+> 
+>     Level 1 (1 jump):  {1, 2}     cur_end = 2
+>          ┌────┐
+>          0  [1 2]
+>              ├── nums[1]=3 → reach up to idx 4
+>              └── nums[2]=1 → reach up to idx 3
+>          farthest = 4
+> 
+>     Level 2 (2 jumps): {3, 4}     cur_end = 4  ← contains last idx!
+>          0  1 2 [3 4]
+> 
+>   Each time i hits cur_end we "expand" to farthest → jumps++.
+>   Answer: 2 jumps   path: 0 → 1 → 4
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[2,3,1,1,4]
 > ```text
@@ -141,6 +185,33 @@ status: in-progress
 
 **LC #53** · Medium
 
+> [!example]- 📊 Visual: Kadane — restart whenever running sum goes negative
+> ```text
+>   nums  = [-2,  1, -3,  4, -1,  2,  1, -5,  4]
+>   idx     0    1   2   3   4   5   6   7   8
+> 
+>   Walk left→right tracking cur (best ending HERE) and best (overall max):
+> 
+>     i=0  cur=-2          best=-2
+>     i=1  cur<0 ⇒ RESET   cur =  1     best = 1
+>     i=2  extend          cur = -2     best = 1
+>     i=3  cur<0 ⇒ RESET   cur =  4     best = 4
+>     i=4  extend          cur =  3     best = 4
+>     i=5  extend          cur =  5     best = 5
+>     i=6  extend          cur =  6     best = 6    ◀ peak
+>     i=7  extend          cur =  1     best = 6
+>     i=8  extend          cur =  5     best = 6
+> 
+>   Best subarray: nums[3..6] = [4, -1, 2, 1]   sum = 6
+> 
+>           ┌──────────────┐
+>     -2  1 -3 │ 4 -1  2  1 │ -5  4
+>           └──────────────┘
+> 
+>   Intuition: a negative prefix can never help any future suffix,
+>   so drop it and start fresh.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[-2,1,-3,4,-1,2,1,-5,4]
 > ```text
 > cur = best = -2
@@ -174,6 +245,33 @@ status: in-progress
 ## P4: Gas Station
 
 **LC #134** · Medium
+
+> [!example]- 📊 Visual: net tank along the circuit
+> ```text
+>   gas  = [1, 2, 3, 4, 5]      cost = [3, 4, 5, 1, 2]
+>   diff = [-2,-2,-2, 3, 3]     total = 0 ⇒ a solution exists
+> 
+>   Cumulative tank if we start at station 0:
+> 
+>     after 0:  -2  ▼
+>     after 1:  -4  ▼▼
+>     after 2:  -6  ▼▼▼    ← lowest dip
+>     after 3:  -3
+>     after 4:   0
+> 
+>             tank
+>            +3 ┤                              ╭──
+>             0 ┤────●──────────────────●──────╯
+>            -2 ┤────╲────●
+>            -4 ┤         ╲────●
+>            -6 ┤              ╲──────────────  ← min reached AT end of station 2
+>                  0   1    2    3    4
+> 
+>   Greedy: every time tank goes negative, the start must be AFTER that point.
+>   "Earliest restart" → start = i + 1 = 3
+> 
+>   Verify from 3:   +3, +6, +4, +2, 0  (never goes below 0) ✓
+> ```
 
 > [!info]- 🔍 Dry Run: gas=[1,2,3,4,5], cost=[3,4,5,1,2]
 > ```text
@@ -214,6 +312,31 @@ status: in-progress
 ## P5: Hand of Straights
 
 **LC #846** · Medium
+
+> [!example]- 📊 Visual: smallest-available anchors consecutive runs
+> ```text>
+>   hand = [1,2,3,6,2,3,4,7,8]    groupSize = 3
+>   Counter:  1×1  2×2  3×2  4×1  6×1  7×1  8×1
+> 
+>   Sorted keys: 1 2 3 4 6 7 8
+> 
+>   Take smallest = 1 → MUST start a group [1,2,3]:
+>       1 2 3 4 6 7 8
+>       █─█─█           (cnt 1→0, 2→1, 3→1)
+> 
+>   Take smallest with cnt>0 = 2 → MUST start [2,3,4]:
+>       1 2 3 4 6 7 8
+>         █─█─█         (cnt 2→0, 3→0, 4→0)
+> 
+>   Take smallest with cnt>0 = 6 → MUST start [6,7,8]:
+>       1 2 3 4 6 7 8
+>               █─█─█   (cnt 6→0, 7→0, 8→0)
+> 
+>   All buckets emptied → true.
+> 
+>   Why "smallest first" is forced: if smallest x exists, no smaller value
+>   is available to anchor it, so x MUST be the leftmost of its group.
+> ```
 
 > [!info]- 🔍 Dry Run: hand=[1,2,3,6,2,3,4,7,8], groupSize=3
 > ```text
@@ -271,6 +394,32 @@ status: in-progress
 
 **LC #1899** · Medium
 
+> [!example]- 📊 Visual: componentwise filter + max
+> ```text>
+>   target = (2, 7, 5)
+> 
+>   triplet     pos0  pos1  pos2   verdict
+>   ─────────────────────────────────────────────────
+>   (2, 5, 3)    2     5     3     all ≤ target  ✓ keep
+>   (1, 8, 4)    1    [8]    4     8 > 7  ✗ TOXIC (drop)
+>   (1, 7, 5)    1     7     5     all ≤ target  ✓ keep
+> 
+>   Componentwise MAX of kept rows = candidate result:
+> 
+>       (2, 5, 3)
+>     ⊔ (1, 7, 5)
+>     ─────────
+>       (2, 7, 5)  == target  ✓
+> 
+>   Track which positions have already matched target exactly:
+>       good[0]=T  (from (2,5,3))
+>       good[1]=T  (from (1,7,5))
+>       good[2]=T  (from (1,7,5))
+> 
+>   Why drop "toxic" triplets? Their oversize component would poison the max
+>   forever — and componentwise max only goes up.
+> ```
+
 > [!info]- 🔍 Dry Run: triplets=[[2,5,3],[1,8,4],[1,7,5]], target=[2,7,5]
 > ```text
 > good = [False, False, False]   (target hit at each position)
@@ -317,6 +466,37 @@ status: in-progress
 ## P7: Partition Labels
 
 **LC #763** · Medium
+
+> [!example]- 📊 Visual: expand window to last-occurrence
+> ```text
+>   s = a b a b c b a c a d e f e g d e h i j h k l i j
+>       0 1 2 3 4 5 6 7 8 9 ...                        23
+> 
+>   last[c]:  a:8  b:5  c:7  d:14  e:15  f:11  g:13
+>             h:19 i:22 j:23  k:20 l:21
+> 
+>   Walk i; end = max(end, last[s[i]]):
+> 
+>     i=0 'a'  end=8
+>     i=1..7   end stays 8 (b,c all have last ≤ 8)
+>     i=8 'a'  i == end → CUT here → part "ababcbaca" (size 9)
+> 
+>     i=9 'd'  end=14
+>     i=10 'e' end=15
+>     i=11..14 end stays 15
+>     i=15 'e' i == end → CUT → part "defegde" (size 7)
+> 
+>     i=16 'h' end=19
+>     i=17 'i' end=22
+>     i=18 'j' end=23
+>     i=23 'j' i == end → CUT → part "hijhklij" (size 8)
+> 
+>   Partitions:
+>   │ a b a b c b a c a │ d e f e g d e │ h i j h k l i j │
+>   └─────── 9 ────────┘└──── 7 ───────┘└──── 8 ────────┘
+> 
+>   Answer: [9, 7, 8]
+> ```
 
 > [!info]- 🔍 Dry Run: s="ababcbacadefegdehijhklij"
 > ```text
@@ -375,6 +555,35 @@ status: in-progress
 
 **LC #678** · Medium
 
+> [!example]- 📊 Visual: track range [lo, hi] of possible open-counts
+> ```text
+>   s = ( * ) )
+> 
+>   Treat '*' as could-be '('  '0'  or  ')'.
+>   lo = "min open count assuming '*' = ')'"   (or skip)
+>   hi = "max open count assuming '*' = '('"
+> 
+>     char    '('    '*'    ')'    ')'
+>     lo:  0 → 1  →  0  →  -1  → clamp 0
+>     hi:  0 → 1  →  2  →   1  →  0
+> 
+>   Visualize the feasible-open band:
+> 
+>        hi  ─┐       ╭─╮
+>             │  ╭────╯ │
+>             │  │      ╰─╮
+>        lo  ─┴──┴────────╯─
+>             (   *    )   )
+> 
+>   Rules:
+>     - If hi < 0 mid-scan → impossible (too many ')')  return false
+>     - lo is clamped at 0 (can't have negative open count)
+>     - At end, lo == 0 means a valid assignment exists.
+> 
+>   Here lo ends at 0 → answer true.  e.g. treat '*' as '(' → "(()))"... wait,
+>   actually treat '*' as '(' gives "(()" + ")" + ")" = "(())". ✓
+> ```
+
 > [!info]- 🔍 Dry Run: s="(*))"
 > ```text
 > lo = hi = 0
@@ -428,6 +637,29 @@ status: in-progress
 
 **LC #122** · Easy
 
+> [!example]- 📊 Visual: sum positive adjacent diffs = sum of all up-runs
+> ```text
+>   prices = [7, 1, 5, 3, 6, 4]
+> 
+>          7 ●
+>            ╲
+>            ╲                6 ●
+>             ╲     5 ●       ╱  ╲
+>              ╲   ╱   ╲     ╱   ╲ 4 ●
+>               ╲ ╱     ╲ 3 ●     ●
+>            1 ●
+>            day 0   1   2   3   4   5
+> 
+>   Diffs (next - prev):    -6  +4  -2  +3  -2
+>   Keep only positives:        +4      +3        = 7
+> 
+>   Why this works:
+>     Any multi-day rise  d0 → d1 → d2 → d3   (all up)
+>     can be split into back-to-back day trades:
+>       buy d0, sell d3  ==  (d1-d0) + (d2-d1) + (d3-d2)
+>     Pocket every up-step; never pay for down-steps.
+> ```
+
 > [!info]- 🔍 Dry Run: prices=[7,1,5,3,6,4]
 > ```text
 > Sum of positive adjacent diffs:
@@ -455,6 +687,34 @@ status: in-progress
 ## P10: Boats to Save People
 
 **LC #881** · Medium
+
+> [!example]- 📊 Visual: pair lightest ↔ heaviest
+> ```text
+>   people sorted = [1, 2, 2, 3]      limit = 3
+>                    l        r
+> 
+>   Step 1:  l=0 (1), r=3 (3)   1+3 = 4 > 3
+>            → heaviest goes ALONE.   [3]
+>            r--                       boats = 1
+> 
+>   Step 2:  l=0 (1), r=2 (2)   1+2 = 3 ≤ 3
+>            → pair them.       [1,2]
+>            l++, r--                  boats = 2
+> 
+>   Step 3:  l=1 (2), r=1 (2)   same person, take alone.   [2]
+>            r--                       boats = 3
+> 
+>           l=1 > r=0 → done
+> 
+>   Visual layout of boats:
+>     boat A:  [        3 ]     (limit 3, exactly fits)
+>     boat B:  [ 1    2   ]     (1+2=3)
+>     boat C:  [    2     ]     (lone)
+> 
+>   Why pair lightest with heaviest?
+>     If heaviest can ride with ANY remaining person, it's the lightest one.
+>     If it can't ride with the lightest, it can't ride with anyone → alone.
+> ```
 
 > [!info]- 🔍 Dry Run: people=[3,2,2,1], limit=3
 > ```text
@@ -516,6 +776,41 @@ Give candies to children with ratings: every child gets at least 1; higher-rated
 ### 🧠 Pattern: Two-Pass Greedy (Left-to-Right + Right-to-Left)
 
 > Each constraint involves only one neighbor. Solve left-neighbor and right-neighbor constraints independently with two sweeps, then take max.
+
+> [!example]- 📊 Visual: two-pass max (left-pass + right-pass)
+> ```text
+>   ratings = [1, 3, 4, 5, 2]
+>   idx         0  1  2  3  4
+> 
+>   Left-to-right pass (only fixes "i > i-1"):
+>     start  : 1 1 1 1 1
+>     i=1 3>1 → c[1]=c[0]+1=2
+>     i=2 4>3 → c[2]=c[1]+1=3
+>     i=3 5>4 → c[3]=c[2]+1=4
+>     i=4 2>5? no
+>     L =      [1, 2, 3, 4, 1]
+> 
+>   Right-to-left pass (only fixes "i > i+1"):
+>     start  : 1 1 1 1 1
+>     i=3 5>2 → c[3]=c[4]+1=2
+>     i=2 4>5? no
+>     i=1 3>4? no
+>     i=0 1>3? no
+>     R =      [1, 1, 1, 2, 1]
+> 
+>   Final = max(L, R) element-wise:
+>     max:    [1, 2, 3, 4, 1]
+> 
+>   Bar view:
+>     L:  ▁ ▂ ▃ ▄ ▁
+>     R:  ▁ ▁ ▁ ▂ ▁
+>     ─── max ─────
+>         ▁ ▂ ▃ ▄ ▁     sum = 11
+> 
+>   Why two passes? Each pass enforces ONE neighbor constraint.
+>   Taking the max satisfies BOTH simultaneously (any constraint asks ≥ X;
+>   the max is ≥ both Xs).
+> ```
 
 > [!info]- 🔍 Dry Run: ratings=[1,0,2]
 > ```text

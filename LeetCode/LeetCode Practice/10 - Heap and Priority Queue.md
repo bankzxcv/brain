@@ -52,6 +52,28 @@ status: in-progress
 
 > Push each element; if heap exceeds K, pop the smallest. After all, heap top = Kth largest.
 
+> [!example]- 📊 Visual: bounded min-heap of size K
+> ```text
+>   Min-heap of size K = 2 keeps the TOP-2 largest values seen so far.
+>   The heap's MINIMUM is the smallest of the top-K → the k-th largest.
+> 
+>   Stream:  3, 2, 1, 5, 6, 4    k = 2
+> 
+>     after 3:   [3]
+>     after 2:   [2, 3]              size = k ✓
+>     after 1:   push → [1,2,3] → pop 1 (over) → [2, 3]
+>     after 5:   push → [2,3,5] → pop 2         → [3, 5]
+>     after 6:   push → [3,5,6] → pop 3         → [5, 6]
+>     after 4:   push → [4,5,6] → pop 4         → [5, 6]
+> 
+>   Heap-as-tree at end:
+>            5          ← min  → THIS is the answer (2nd largest)
+>             \
+>              6
+> 
+>   Invariant: heap holds exactly the top-K seen; root = the cutoff value.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[3,2,1,5,6,4], k=2
 > ```text
 > Setup:
@@ -106,6 +128,38 @@ status: in-progress
 ### Approach
 
 Heap of size K, key = `-distSquared` (max-heap of distances), pop when oversize.
+
+> [!example]- 📊 Visual: max-heap of distances, evict the farthest
+> ```text
+>   Points & dist² to origin:
+>     (1,3)   d² = 10
+>     (-2,2)  d² =  8
+>     (5,8)   d² = 89        ← far away, will be evicted
+>     (0,1)   d² =  1        ← closest
+> 
+>   Max-heap of size K=2 keyed by dist² (Python: push -d²):
+> 
+>     push (1,3)/10  →   [10]
+>     push (-2,2)/8  →     10
+>                          /
+>                         8                  size = K ✓
+> 
+>     push (5,8)/89  →     89                size = 3 > K → pop root (89, farthest)
+>                         /  \
+>                        8   10
+>                    →    10
+>                          /
+>                         8
+> 
+>     push (0,1)/1   →     10                pop root (10)
+>                         /  \
+>                        8    1
+>                    →    8
+>                          /
+>                         1
+> 
+>   Final heap = the K CLOSEST points; root is the farthest of those kept.
+> ```
 
 > [!info]- 🔍 Dry Run: points=[[1,3],[-2,2],[5,8],[0,1]], k=2
 > ```text
@@ -162,6 +216,33 @@ Heap of size K, key = `-distSquared` (max-heap of distances), pop when oversize.
 
 Count with hash map; min-heap of size K on `(freq, val)`.
 
+> [!example]- 📊 Visual: min-heap of (freq, val) keeps top-K frequencies
+> ```text
+>   nums = [1,1,1,2,2,3]   k = 2
+> 
+>   Counter:   1 → 3
+>              2 → 2
+>              3 → 1
+> 
+>   Min-heap of size K=2, key = freq:
+> 
+>     push (3,1):     [(3,1)]
+> 
+>     push (2,2):       (2,2)              size = K ✓
+>                         \
+>                          (3,1)
+> 
+>     push (1,3):       (1,3)              size = 3 > K → pop root
+>                       /    \
+>                     (2,2) (3,1)
+>                  → pop (1,3) (smallest freq)
+>                  →   (2,2)
+>                         \
+>                          (3,1)
+> 
+>   Heap contents = top-K most frequent. Extract values: {1, 2}.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,1,1,2,2,3], k=2
 > ```text
 > Phase 1 — count: {1:3, 2:2, 3:1}
@@ -198,6 +279,37 @@ Count with hash map; min-heap of size K on `(freq, val)`.
 ### Approach
 
 Max-heap; repeatedly pop top two, push difference, until ≤ 1 left.
+
+> [!example]- 📊 Visual: max-heap loop, smash the two biggest
+> ```text
+>   stones = [2, 7, 4, 1, 8, 1]    (max-heap conceptually)
+> 
+>      8                Iter 1: pop 8, pop 7 → push 8-7 = 1
+>     / \                                  
+>    7   4              
+>   / \ /                  4
+>   2 1 1                 / \
+>                        2   1        (heap = {4,2,1,1,1})
+>                       / \
+>                       1  1
+> 
+>   Iter 2: pop 4, pop 2 → push 4-2 = 2
+>      2
+>     / \
+>    1   1            (heap = {2,1,1,1})
+>    /
+>   1
+> 
+>   Iter 3: pop 2, pop 1 → push 2-1 = 1
+>      1
+>     / \             (heap = {1,1,1})
+>    1   1
+> 
+>   Iter 4: pop 1, pop 1 → equal → both destroyed, nothing pushed
+>      1               (heap = {1})
+> 
+>   ≤ 1 stone left → answer = 1.
+> ```
 
 > [!info]- 🔍 Dry Run: stones=[2,7,4,1,8,1]
 > ```text
@@ -259,6 +371,39 @@ Max-heap; repeatedly pop top two, push difference, until ≤ 1 left.
 ### Approach
 
 Maintain min-heap of size K. `add(x)`: push, evict if oversize. Top is current Kth-largest.
+
+> [!example]- 📊 Visual: streaming bounded min-heap
+> ```text
+>   k = 3, initial = [4, 5, 8, 2]
+> 
+>   After processing initial (evict when size > k):
+> 
+>          4         ← root = current 3rd-largest
+>         / \
+>        5   8
+> 
+>   add(3):   push 3 → [3,4,5,8] → pop 3 (over K) →     4
+>                                                       / \
+>                                                       5  8        kth = 4
+> 
+>   add(5):   push 5 → [4,5,5,8] → pop 4 →              5
+>                                                       / \
+>                                                       5  8        kth = 5
+> 
+>   add(10):  push 10 → [5,5,8,10] → pop 5 →            5
+>                                                       / \
+>                                                       8  10       kth = 5
+> 
+>   add(9):   push 9 → [5,8,9,10] → pop 5 →             8
+>                                                       / \
+>                                                       9  10       kth = 8
+> 
+>   add(4):   push 4 → [4,8,9,10] → pop 4 →             8
+>                                                       / \
+>                                                       9  10       kth = 8
+> 
+>   The heap "remembers" the top-K of EVERYTHING ever seen.
+> ```
 
 > [!info]- 🔍 Dry Run: k=3, initial=[4,5,8,2], add(3), add(5), add(10), add(9), add(4)
 > ```text
@@ -434,6 +579,30 @@ n-CPU scheduling: same-task cooldown `n`. Min CPU intervals to finish.
 
 > Always run the task with the highest remaining count. After running, push it into a cooldown queue with `time + n + 1`. Before each tick, return any cooled-down tasks to the heap.
 
+> [!example]- 📊 Visual: max-heap of ready tasks + cooldown queue
+> ```text
+>   tasks = ["A","A","A","B","B","B"]   n = 2 (cooldown gap)
+> 
+>     ┌──────────────┐         ┌────────────────────────┐
+>     │  MAX-HEAP    │ ──run──▶│  COOLDOWN QUEUE        │
+>     │  ready tasks │         │  (count, available_at) │
+>     └──────────────┘         └────────────────────────┘
+>           ▲                              │
+>           │   after n+1 ticks            │
+>           └──────────────────────────────┘
+> 
+>   Timeline (each col = 1 CPU tick):
+> 
+>     t:   1   2   3   4   5   6   7   8
+>     run: A   B  idle A   B  idle A   B
+>          └─── n=2 gap ──┘
+>              └─── n=2 gap ──┘
+> 
+>   Heap holds ready tasks (most frequent on top).
+>   When you pick task X, it goes to queue with timestamp = t + n.
+>   At time t == queue.front.timestamp, release back into heap.
+> ```
+
 > [!info]- 🔍 Dry Run: tasks=["A","A","A","B","B","B"], n=2
 > ```text
 > count: {A:3, B:3}
@@ -521,6 +690,34 @@ Rearrange so no two adjacent chars are equal.
 
 > Pop the two most frequent (different) chars. Append both. Decrement counts; push back if non-zero.
 
+> [!example]- 📊 Visual: pop-two-different to break up the majority
+> ```text
+>   s = "aaabc"   counts = {a:3, b:1, c:1}
+> 
+>   Max-heap (by count):
+>          (3,'a')
+>          /     \
+>      (1,'b')  (1,'c')
+> 
+>   Iter 1: pop two distinct → 'a' and 'b' → append both
+>             out = "ab"
+>             decrement → push back (2,'a'); 'b' becomes 0, don't re-push
+>          (2,'a')
+>             \
+>            (1,'c')
+> 
+>   Iter 2: pop two → 'a' and 'c' → append
+>             out = "abac"
+>             (1,'a') re-pushed; 'c' dropped
+>          (1,'a')
+> 
+>   Tail (only one element left): append directly
+>             out = "abaca"
+> 
+>   Adjacent chars never equal because we always interleave the two largest.
+>   Feasibility: maxCount ≤ ⌈n/2⌉ → otherwise impossible.
+> ```
+
 > [!info]- 🔍 Dry Run: s="aab"
 > ```text
 > counts = {a:2, b:1}
@@ -582,6 +779,28 @@ Rearrange so no two adjacent chars are equal.
 
 Count, then sort by count desc (or `heapq.nlargest`).
 
+> [!example]- 📊 Visual: bucket by frequency
+> ```text
+>   s = "tree"        counts = {t:1, r:1, e:2}
+> 
+>   Buckets (index = frequency):
+> 
+>     freq 0:  ─────
+>     freq 1:  [ 't', 'r' ]
+>     freq 2:  [ 'e' ]
+>     freq 3:  ─────
+> 
+>   Walk buckets HIGH → LOW, appending char × freq:
+> 
+>     freq 2 → "ee"
+>     freq 1 → "t" + "r"
+>     
+>     out = "ee" + "t" + "r"  = "eetr"
+> 
+>   Alternative: max-heap of (count, char), pop all and write count copies.
+>   Either is O(n + k log k); buckets are O(n).
+> ```
+
 > [!info]- 🔍 Dry Run: s="tree"
 > ```text
 > Counter("tree") = {'t': 1, 'r': 1, 'e': 2}
@@ -617,6 +836,32 @@ Min rooms needed for given intervals.
 ### 🧠 Pattern: Sort by Start + Min-Heap of End Times
 
 > Sort intervals by start. For each, if heap top's end ≤ current start → reuse (pop). Otherwise → new room (push). Final heap size = rooms used.
+
+> [!example]- 📊 Visual: heap = currently occupied rooms (by end time)
+> ```text
+>   intervals = [[0,30], [5,10], [15,20]]
+> 
+>   Time axis:
+>     0─────────30                      meeting A
+>          5──10                         meeting B
+>                15──20                  meeting C
+> 
+>   Process by start time, min-heap of END TIMES = occupied rooms:
+> 
+>   [0,30):  heap empty → push 30
+>            heap = [30]                                     rooms: 1
+> 
+>   [5,10):  top = 30,  30 > 5 → overlap, need NEW room
+>            push 10
+>            heap = [10, 30]                                 rooms: 2
+> 
+>   [15,20): top = 10,  10 ≤ 15 → reuse this room → pop 10
+>            push 20
+>            heap = [20, 30]                                 rooms: 2
+> 
+>   Answer: heap size at the end = 2 rooms.
+>   Heap top = the room that frees up next; compare against next start.
+> ```
 
 > [!info]- 🔍 Dry Run: intervals=[[0,30],[5,10],[15,20]]
 > ```text
@@ -664,6 +909,32 @@ Each course `(duration, lastDay)`. Max courses you can complete in order of `las
 ### 🧠 Pattern: Greedy + Max-Heap Replacement
 
 > Sort by `lastDay` (deadlines first). Try every course; if it fits, take it. If overflows, **drop** the longest course taken so far (max-heap on durations) — only if doing so frees enough time.
+
+> [!example]- 📊 Visual: greedy take-then-swap-out the longest
+> ```text
+>   Sort by deadline. Maintain max-heap of durations TAKEN.
+>   Idea: always take the course; if it pushes time past deadline,
+>         drop the longest course taken so far.
+> 
+>   courses (by deadline): (100,200) (1000,1250) (200,1300) (2000,3200)
+> 
+>   Step 1: take (100,200)     heap = [100]            time = 100
+>   Step 2: take (1000,1250)   heap = [1000, 100]      time = 1100
+>   Step 3: take (200,1300)    heap = [1000, 200, 100] time = 1300
+>   Step 4: take (2000,3200)   heap = [2000,1000,200,100] time = 3300
+>           3300 > 3200 → POP LONGEST = 2000 → time = 1300
+>           heap = [1000, 200, 100]
+> 
+>   Max-heap (taken so far):
+> 
+>         1000  ◀── longest, ready to be evicted if needed
+>         /  \
+>       200  100
+> 
+>   Final count = heap size = 3 courses taken.
+>   "Swap a worse choice out" works because evicting the longest
+>   reduces total time the most while preserving the count.
+> ```
 
 > [!info]- 🔍 Dry Run: courses=[[100,200],[200,1300],[1000,1250],[2000,3200]]
 > ```text
@@ -719,6 +990,36 @@ Pick at most k projects to maximize capital. Each project requires `capital[i]`;
 ### 🧠 Pattern: Two Structures — Min-Heap by Capital, Max-Heap by Profit
 
 > Sort projects by required capital. Push affordable projects (by current capital) into a max-heap on profit. Pick the top, add profit, repeat k times.
+
+> [!example]- 📊 Visual: two structures — sorted-by-capital + max-heap-by-profit
+> ```text
+>   k = 2, w = 0
+>   projects (sorted by capital req):
+>     (cap=0, profit=1)
+>     (cap=1, profit=2)
+>     (cap=1, profit=3)
+> 
+>   ┌─────────────────────────┐         ┌──────────────────────┐
+>   │  SORTED LIST (by cap)   │ ──pull──▶│  MAX-HEAP (by profit)│
+>   │  affordable → eligible  │  when    │  pick top each round │
+>   │                         │  cap ≤ w │                      │
+>   └─────────────────────────┘         └──────────────────────┘
+> 
+>   Round 1 (w=0):
+>     pull all with cap ≤ 0 → push profit 1 to heap
+>     heap = [1]
+>     pop top = 1  →  w = 0 + 1 = 1
+> 
+>   Round 2 (w=1):
+>     pull all with cap ≤ 1 → push profits 2, 3
+>     heap:    3
+>             /
+>            2
+>     pop top = 3 →  w = 1 + 3 = 4
+> 
+>   Final w = 4.
+>   Two-structure pattern: one for ELIGIBILITY, one for VALUE.
+> ```
 
 > [!info]- 🔍 Dry Run: k=2, w=0, profits=[1,2,3], capital=[0,1,1]
 > ```text

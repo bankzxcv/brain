@@ -43,6 +43,30 @@ status: in-progress
 
 **LC #62** · Medium
 
+> [!example]- 📊 Visual: grid path counts (Pascal-like)
+> ```text
+>   m = 3,  n = 3      paths from top-left to bottom-right; move only right or down.
+> 
+>   dp[i][j] = paths to (i,j) = dp[i-1][j] + dp[i][j-1]
+> 
+>             j=0   j=1   j=2
+>      i=0 │   1     1     1
+>          │   │     ▲     ▲
+>          │   ▼     │     │
+>      i=1 │   1 ──► 2 ──► 3
+>          │   │     │     ▲
+>          │   ▼     ▼     │
+>      i=2 │   1 ──► 3 ──► 6   ★ answer
+> 
+>   Each interior cell pulls from UP and LEFT:
+>          up
+>           │
+>           ▼
+>     left ─► cell      cell = up + left
+> 
+>   Top row and left column are forced to 1 (only one way along the edge).
+> ```
+
 > [!info]- 🔍 Dry Run: m=3, n=3
 > ```text
 > dp[i][j] = paths to reach (i,j); init all 1.
@@ -82,6 +106,28 @@ status: in-progress
 ## P2: Unique Paths II
 
 **LC #63** · Medium · Obstacles
+
+> [!example]- 📊 Visual: obstacle zeroes out flow
+> ```text
+>   grid (1 = obstacle):
+>           0  0  0
+>           0  1  0       ← obstacle at center
+>           0  0  0
+> 
+>   dp[i][j] = paths to (i,j); set to 0 at obstacles.
+> 
+>             j=0   j=1   j=2
+>      i=0 │   1     1     1
+>          │   ▼     ▼     ▼
+>      i=1 │   1 ──►[X]──► 1       ← obstacle: dp[1][1]=0
+>          │   │     │     ▲           dp[1][2] = dp[0][2] + 0 = 1
+>          │   ▼     ▼     │
+>      i=2 │   1 ──► 1 ──► 2   ★    dp[2][1] = 0 + 1 = 1
+>                                    dp[2][2] = 1 + 1 = 2
+> 
+>   Edge column/row also zero out once an obstacle blocks them.
+>   Same recurrence: dp[i][j] = dp[i-1][j] + dp[i][j-1]  (or 0 if blocked).
+> ```
 
 > [!info]- 🔍 Dry Run: grid=[[0,0,0],[0,1,0],[0,0,0]]
 > ```text
@@ -129,6 +175,30 @@ status: in-progress
 
 **LC #64** · Medium
 
+> [!example]- 📊 Visual: cumulative min path
+> ```text
+>   grid (cost of each cell):
+>           1  3  1
+>           1  5  1
+>           4  2  1
+> 
+>   dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])
+> 
+>             j=0   j=1   j=2
+>      i=0 │   1     4     5            ← prefix-sum along top row
+>          │   │     │     │
+>          │   ▼     ▼     ▼
+>      i=1 │   2     7     6            dp[1][1]=5+min(4,2)=7
+>          │   │     │     │
+>          │   ▼     ▼     ▼
+>      i=2 │   6     8     7   ★       dp[2][2]=1+min(6,8)=7
+> 
+>   Best path (cost 7):  1 → 3 → 1 → 1 → 1
+>                        (1,1)(1,2)(1,3) →down→ (2,3) →down→ (3,3)
+> 
+>   Same skeleton as P1, but PICK the cheaper predecessor instead of summing.
+> ```
+
 > [!info]- 🔍 Dry Run: grid=[[1,3,1],[1,5,1],[4,2,1]]
 > ```text
 > In-place update (overwrite grid as DP table):
@@ -175,6 +245,29 @@ status: in-progress
 
 **LC #1143** · Medium
 
+> [!example]- 📊 Visual: 2D DP table for LCS
+> ```text
+>   text1 = "abcde"
+>   text2 = "ace"
+> 
+>            ""  a   c   e
+>      ""    0   0   0   0
+>       a    0  ┌1┐  1   1       Match at (a,a): dp[1][1] = dp[0][0]+1 = 1
+>              └─┘
+>       b    0   1   1   1       No match: dp[2][2] = max(up=1, left=1) = 1
+>       c    0   1  ┌2┐  2       Match (c,c): dp[3][2] = dp[2][1]+1 = 2
+>              └─┘
+>       d    0   1   2   2
+>       e    0   1   2  ┌3┐      Match (e,e): dp[5][3] = dp[4][2]+1 = 3 ✓
+>                       └─┘
+> 
+>   At each cell:
+>     if chars match  →  diagonal predecessor + 1
+>     else            →  max(up, left)
+> 
+>   Answer = bottom-right cell = 3 (LCS = "ace")
+> ```
+
 > [!info]- 🔍 Dry Run: text1="abcde", text2="ace"
 > ```text
 > dp[i][j] = LCS of text1[:i] and text2[:j]
@@ -220,6 +313,30 @@ status: in-progress
 ## P5: Edit Distance
 
 **LC #72** · Medium
+
+> [!example]- 📊 Visual: edit distance table
+> ```text
+>   word1 = "horse" → word2 = "ros"
+> 
+>            ""  r   o   s
+>      ""    0   1   2   3       insert j chars
+>       h    1   1   2   3
+>       o    2   2  ←1→  2       match o=o: take diagonal
+>       r    3   2   2   2
+>       s    4   3   3  ←2→
+>       e    5   4   4   3
+> 
+>   At (i,j) where chars DIFFER:
+>     dp[i][j] = 1 + min(
+>                    dp[i-1][j-1],   ← REPLACE
+>                    dp[i-1][j],     ← DELETE from word1
+>                    dp[i][j-1]      ← INSERT into word1
+>                  )
+> 
+>   Match → just take the diagonal (no op cost).
+> 
+>   Path of 3 ops: horse → rorse (replace h→r) → rose (delete r) → ros (delete e)
+> ```
 
 > [!info]- 🔍 Dry Run: word1="horse", word2="ros"
 > ```text
@@ -271,6 +388,34 @@ status: in-progress
 **LC #5** · Medium
 
 ### 🧠 Pattern: Expand Around Center (Beats DP!)
+
+> [!example]- 📊 Visual: expand around each center
+> ```text
+>   s = "b a b a d"
+>        0 1 2 3 4
+> 
+>   For each position i, try BOTH centers:
+> 
+>     ODD  (single-char center):           EVEN (two-char center):
+>       ...  X  ...                          ...  X X  ...
+>            ▲                                    ▲ ▲
+>          center                              center pair
+> 
+>   2·n − 1 total centers (n single + n−1 between-pair).
+> 
+>   Step at i=2 ('b'):    expand(2,2)  l=r=2: match
+>                                       l=1 r=3: 'a'='a' match
+>                                       l=0 r=4: 'b' vs 'd'  ✗  stop
+>                         palindrome s[1..3] = "aba"   length 3
+> 
+>     ┌───────────────┐
+>     │  b a b a d    │
+>     │    └─┬─┘      │   ← "aba" wins (length 3)
+>     │      i        │
+>     └───────────────┘
+> 
+>   Track best (start, end). O(n²) time, O(1) extra space — beats the n² DP table.
+> ```
 
 > [!info]- 🔍 Dry Run: s="babad"
 > ```text
@@ -331,6 +476,32 @@ status: in-progress
 
 **LC #516** · Medium
 
+> [!example]- 📊 Visual: substring (i,j) table — iterate by length
+> ```text
+>   s = "b b b a b"
+>        0 1 2 3 4
+> 
+>   dp[i][j] = LPS in s[i..j] (inclusive). Lower triangle unused.
+> 
+>            j=0  j=1  j=2  j=3  j=4
+>     i=0 │   1    2    3    3    4 ★   ← answer dp[0][n-1]
+>     i=1 │        1    2    2    3
+>     i=2 │             1    1    3
+>     i=3 │                  1    1
+>     i=4 │                       1
+> 
+>   Recurrence at (i, j):
+>     if s[i] == s[j]:
+>         dp[i][j] = dp[i+1][j-1] + 2          (shrink window from both sides)
+>     else:
+>         dp[i][j] = max( dp[i+1][j],  dp[i][j-1] )
+>                          drop s[i]    drop s[j]
+> 
+>   Iterate by SUBSTRING LENGTH (smallest first) so dp[i+1][j-1] is ready.
+> 
+>   Best subseq for "bbbab" = "bbbb"  (drop the 'a').
+> ```
+
 > [!info]- 🔍 Dry Run: s="bbbab"
 > ```text
 > dp[i][j] = LPS in s[i..j] (inclusive)
@@ -386,6 +557,35 @@ status: in-progress
 
 **LC #115** · **Hard**
 
+> [!example]- 📊 Visual: count subseq matches (sum of two predecessors)
+> ```text
+>   s = "rabbbit"     t = "rabbit"
+> 
+>   dp[i][j] = # subsequences of s[:i] equal to t[:j]
+> 
+>            ""  r  a  b  b  i  t
+>       ""    1  0  0  0  0  0  0       empty t always matches once
+>        r    1  1  0  0  0  0  0
+>        a    1  1  1  0  0  0  0
+>        b    1  1  1  1  0  0  0
+>        b    1  1  1  2  1  0  0
+>        b    1  1  1  3  3  0  0
+>        i    1  1  1  3  3  3  0
+>        t    1  1  1  3  3  3  3 ★
+> 
+>   Recurrence at (i, j):
+> 
+>     if s[i-1] == t[j-1]:
+>          dp[i][j] = dp[i-1][j-1]   +   dp[i-1][j]
+>                      ▲                    ▲
+>                      use this char       skip this char
+>                      to match t[j-1]     of s
+>     else:
+>          dp[i][j] = dp[i-1][j]      (only option: skip s[i-1])
+> 
+>   The 3 ways pick 2 of the 3 'b's in "rabbbit": {bb_}, {b_b}, {_bb}.
+> ```
+
 > [!info]- 🔍 Dry Run: s="rabbbit", t="rabbit"
 > ```text
 > dp[i][j] = #subseqs of s[:i] equal to t[:j]
@@ -430,6 +630,36 @@ status: in-progress
 ## P9: Interleaving String
 
 **LC #97** · Medium
+
+> [!example]- 📊 Visual: boolean grid — i+j = position in s3
+> ```text
+>   s1 = "aabcc"   s2 = "dbbca"   s3 = "aadbbcbcac"
+> 
+>   dp[i][j] = can s3[:i+j] be formed by interleaving s1[:i] and s2[:j]?
+> 
+>            ""(j=0) d   b   b   c   a
+>     ""(i=0)   T    F   F   F   F   F
+>      a        T    F   .   .   .   .
+>      a        T    T   .   .   .   .
+>      b        F    T   T   .   .   .
+>      c        F    .   T   T   .   .
+>      c        F    .   .   T   T   .
+>                                       T ★ dp[m][n]
+> 
+>   At each (i, j) the s3 index being matched is k = i + j − 1.
+> 
+>   Transitions (boolean OR):
+> 
+>             s1[i-1] == s3[k]
+>           ┌───────────────────► dp[i][j] |= dp[i-1][j]    (came from "took a char of s1")
+>           │
+>     (i,j)
+>           │
+>           └───────────────────► dp[i][j] |= dp[i][j-1]    (came from "took a char of s2")
+>             s2[j-1] == s3[k]
+> 
+>   Walking from (0,0) to (m,n) along TRUE cells = a valid interleaving.
+> ```
 
 > [!info]- 🔍 Dry Run: s1="aabcc", s2="dbbca", s3="aadbbcbcac"
 > ```text
@@ -476,6 +706,32 @@ status: in-progress
 ## P10: Maximal Square
 
 **LC #221** · Medium
+
+> [!example]- 📊 Visual: square anchored at bottom-right = 1 + min(3 corners)
+> ```text
+>   matrix:            dp side lengths:
+>     1 0 1 0 0          1 0 1 0 0
+>     1 0 1 1 1          1 0 1 1 1
+>     1 1 1 1 1          1 1 1 2★1    ← best square (side 2)
+>     1 0 0 1 0          1 0 0 1 0
+> 
+>   For a cell with '1':
+>     dp[i][j] = 1 + min( dp[i-1][j-1],   dp[i-1][j],   dp[i][j-1] )
+>                          ▲                ▲             ▲
+>                          diag-up-left     up            left
+> 
+>   Why MIN of 3 neighbors?
+>     A k×k square anchored at (i,j) needs (k-1)×(k-1) squares at all three
+>     predecessors. The smallest of them caps how big our new square can grow.
+> 
+>             ┌───┬───┐
+>             │UL │ U │
+>             ├───┼───┤
+>             │ L │ ★ │  ← min(UL, U, L) + 1 = side at ★
+>             └───┴───┘
+> 
+>   Answer = (best dp value)²   →   2² = 4
+> ```
 
 > [!info]- 🔍 Dry Run: matrix=[["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
 > ```text
@@ -537,6 +793,30 @@ status: in-progress
 
 **LC #188** · **Hard**
 
+> [!example]- 📊 Visual: state × time = (txn count) × (day)
+> ```text
+>   k = 2 transactions   prices = [2, 4, 1]
+> 
+>   dp[t][i] = max profit using ≤ t transactions over prices[:i+1]
+> 
+>            i=0   i=1   i=2
+>           p=2   p=4   p=1
+>     t=0 │   0     0     0           ← zero txns → zero profit
+>     t=1 │   0     2     2           buy@2 sell@4 = 2
+>     t=2 │   0     2     2 ★         (extra txn unhelpful here)
+> 
+>   Recurrence at (t, i):
+>     dp[t][i] = max( dp[t][i-1],                      ← do NOTHING today
+>                     prices[i] + max_diff )           ← SELL today (close txn)
+> 
+>     max_diff = max over j < i of  ( dp[t-1][j] − prices[j] )
+>              "best previous capital after (t-1) txns, minus the buy price"
+> 
+>   Maintain max_diff incrementally → O(k·n) instead of O(k·n²).
+> 
+>   Edge case: if k ≥ n/2, no constraint left → sum all positive day-deltas.
+> ```
+
 > [!info]- 🔍 Dry Run: k=2, prices=[2,4,1]
 > ```text
 > dp[t][i] = max profit with ≤ t transactions, using prices[:i+1]
@@ -586,6 +866,38 @@ status: in-progress
 ## P12: Burst Balloons
 
 **LC #312** · **Hard** · **Interval DP**
+
+> [!example]- 📊 Visual: interval DP — pick "last balloon to burst"
+> ```text
+>   nums = [3, 1, 5, 8]
+>   Pad with sentinel 1s:   a = [1, 3, 1, 5, 8, 1]
+>                                 ▲              ▲
+>                              boundary       boundary
+>   Indices:                   0  1  2  3  4  5
+> 
+>   dp[l][r] = max coins from bursting ALL balloons STRICTLY between indices l and r.
+>             (l and r themselves are kept alive as "walls")
+> 
+>   Key trick: fix the LAST balloon to burst in the interval (l, r) = index k.
+>     When k bursts last, its neighbors are STILL a[l] and a[r] (everyone else gone).
+> 
+>     dp[l][r] = max over k in (l, r) of  a[l]·a[k]·a[r] + dp[l][k] + dp[k][r]
+>                                          ▲                ▲          ▲
+>                                       gain from k      left sub     right sub
+>                                       bursting last    interval     interval
+> 
+>   Build by INTERVAL LENGTH (small → large):
+> 
+>     length=2 (one balloon inside):
+>       dp[0][2] = 1·3·1 = 3
+>       dp[1][3] = 3·1·5 = 15
+>       dp[2][4] = 1·5·8 = 40
+>       dp[3][5] = 5·8·1 = 40
+> 
+>     ... grow up to dp[0][n-1] = full interval.
+> 
+>   Final dp[0][5] = 167   (order: 1 → 5 → 3 → 8)
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[3,1,5,8]
 > ```text

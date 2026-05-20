@@ -54,6 +54,41 @@ Ignore non-alphanumerics and case; is it a palindrome?
 1. **Clean string + reverse compare** · O(n)/O(n). Easy but allocates.
 2. **Two pointers in place — FINAL** · O(n)/O(1).
 
+> [!example]- 📊 Visual: opposite pointers converging
+> ```text
+>   s = "A man, a plan, a canal: Panama"
+> 
+>   Logical view (after lowercasing & ignoring non-alphanumerics):
+>      "amanaplanacanalpanama"
+>       0 1 2 3 4 5 6 7 8 9 ...
+> 
+>   Pointers walk INWARD and compare at each step:
+> 
+>         ┌─────────────────────────────────────────┐
+>         │ a m a n a p l a n a c a n a l p a n a m a │
+>         └─────────────────────────────────────────┘
+>           ↑                                       ↑
+>           l                                       r
+>           a ──────────── compare ─────────────── a   ✓
+> 
+>     after a few steps:
+>                     ┌─────────────┐
+>           ... ... a │ n a l p a n │ a m a
+>                     └─────────────┘
+>                     ↑           ↑
+>                     l           r
+> 
+>     when l >= r:                  end. No mismatch → palindrome.
+> 
+>   On a real string, filler chars are SKIPPED, not compared:
+> 
+>      "A   m a n ,   a   p l a n ..."
+>       ↑   ↑  on space/comma we advance the pointer past them
+>       l→
+> 
+>   Cost: each char visited at most once by l or by r → O(n), O(1) space.
+> ```
+
 > [!info]- 🔍 Dry Run: s="A man, a plan, a canal: Panama"
 > ```text
 > Setup:
@@ -133,6 +168,43 @@ Palindrome if you may **delete at most one** char.
 
 1. **Try every deletion** · O(n²). TLE.
 2. **One mismatch → two slice checks — FINAL** · O(n)/O(1).
+
+> [!example]- 📊 Visual: branch on first mismatch
+> ```text
+>   s = "a b c a"
+>        0 1 2 3
+> 
+>   Walk inward as in P1:
+> 
+>      [ a , b , c , a ]
+>        ↑           ↑
+>        l           r        a == a ✓ → l++, r--
+> 
+>          [ b , c ]
+>            ↑   ↑
+>            l   r            b vs c  ✗ MISMATCH
+> 
+>   With one allowed deletion, branch into TWO checks:
+> 
+>     ┌────────────────────┐         ┌────────────────────┐
+>     │ Option A: skip l   │         │ Option B: skip r   │
+>     │   check s[l+1..r]  │         │   check s[l..r-1]  │
+>     │     = "c"          │         │     = "b"          │
+>     │   palindrome? YES  │         │   palindrome? YES  │
+>     └────────────────────┘         └────────────────────┘
+>                         ↓                       ↓
+>                          ───── OR ─────
+>                                 ↓
+>                              return TRUE
+> 
+>   Each helper is O(n); we run at most 2 of them → O(n) total.
+> 
+>   Counter-example:  s = "abc"
+>     mismatch at (l=0,r=2)
+>       Option A: is_pal("bc")  → FALSE
+>       Option B: is_pal("ab")  → FALSE
+>     return FALSE
+> ```
 
 > [!info]- 🔍 Dry Run: s="abca"
 > ```text
@@ -221,6 +293,39 @@ Return 1-indexed positions of two numbers summing to target.
 2. **Binary search for complement** · O(n log n)/O(1) — overkill.
 3. **Opposite pointers — FINAL** · O(n)/O(1).
 
+> [!example]- 📊 Visual: sorted array + opposite pointers
+> ```text
+>   Sorted nums:    ┌────┬────┬────┬────┐    target = 9
+>                   │  2 │  7 │ 11 │ 15 │
+>                   └────┴────┴────┴────┘
+>                     ↑              ↑
+>                     l              r
+> 
+>   Number line (sorted = monotonic):
+> 
+>      small ─── 2 ── 7 ── 11 ── 15 ─── large
+>                ↑                ↑
+>                l                r
+> 
+>   Decision tree per step (sum = nums[l] + nums[r]):
+> 
+>             ┌──────────────────────────────┐
+>     sum  >  │  too big  → r--   (shrink high)│
+>             │                              │
+>     sum  <  │  too small → l++  (grow low)  │
+>             │                              │
+>     sum  =  │  HIT → return [l+1, r+1]      │
+>             └──────────────────────────────┘
+> 
+>   Trace:  l=0 r=3  sum=2+15=17 > 9 → r--
+>           l=0 r=2  sum=2+11=13 > 9 → r--
+>           l=0 r=1  sum=2+ 7 = 9 ✓ → return [1, 2]
+> 
+>   Why no missed pair? On each step we discard EXACTLY ONE row/column of
+>   the implicit n×n sum matrix — but never the row/column containing the
+>   answer. Each pointer moves at most n steps → O(n).
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[2,7,11,15], target=9
 > ```text
 > Setup:
@@ -291,6 +396,35 @@ Find all unique triplets summing to 0.
 1. **3 nested loops + dedup set** · O(n³). Slow.
 2. **For each pair, hash for 3rd** · O(n²)/O(n). Works.
 3. **Sort + two pointers — FINAL** · O(n²)/O(1).
+
+> [!example]- 📊 Visual: fix one, 2-sum the rest
+> ```text
+>   nums (sorted):  [-4, -1, -1, 0, 1, 2]
+>                     0   1   2  3  4  5
+> 
+>   Outer loop fixes i. Inner two-pointer scans nums[i+1 .. n-1]:
+> 
+>          ┌────┬────┬────┬───┬───┬───┐
+>     i=1: │ -4 │░-1░│ -1 │ 0 │ 1 │ 2 │      target for inner = -nums[i] = 1
+>          └────┴────┴────┴───┴───┴───┘
+>                 ▲    ↑           ↑
+>                fix   l           r
+> 
+>     l=2 r=5  -1+2 = 1 ✓ MATCH → push [-1,-1,2]
+>              skip dups on both sides, then l++, r--
+>     l=3 r=4   0+1 = 1 ✓ MATCH → push [-1, 0,1]
+>              l++ r-- → cross → stop inner
+> 
+>   Dedup discipline (CRUCIAL):
+>     • outer: if nums[i] == nums[i-1] → continue
+>     • on match: while nums[l]==nums[l+1] → l++; while nums[r]==nums[r-1] → r--
+> 
+>   Why sort?
+>     • makes two-pointer work (monotonic sums)
+>     • makes dedup easy (duplicates are adjacent)
+> 
+>   Total work:  O(n log n) sort  +  O(n) inner × n outer  =  O(n²).
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[-1,0,1,2,-1,-4]
 > ```text
@@ -397,6 +531,44 @@ Return sum of triplet closest to `target`.
 ### Approach (one-liner)
 
 Sort. For each `i`, two-pointer on rest. Update `best` if `|target - s| < |target - best|`. Move pointer based on `s < target`.
+
+> [!example]- 📊 Visual: minimize |target − sum| on a number line
+> ```text
+>   target = 1.  We're hunting on the number line for the closest triplet sum.
+> 
+>      ─────────────────────●─────────────────────  number line
+>                         target=1
+> 
+>      candidate sums (from various triplets):
+> 
+>      ── -4 ─── -3 ─── -1 ── 0 ── 1 ── 2 ── 3 ──── ...
+>            ●     ●      ●         ●    ●
+>            sum=-4 sum=-3 sum=-1   ?    sum=2     ← distance to target
+>            dist=5 dist=4 dist=2        dist=1   ★ best
+> 
+>   Update rule:
+>      best ← s    iff   |target − s|  <  |target − best|
+> 
+>   Pointer movement (same as 3Sum, no equality stop):
+>      if s < target:  l++   (try larger)
+>      if s > target:  r--   (try smaller)
+>      if s = target:  return immediately — can't beat 0 distance
+> 
+>   Visualisation of one outer step:
+> 
+>      sorted: [-4, -1, 1, 2]      i=0 (nums[i]=-4)
+>               i  l        r
+> 
+>        l=1 r=3:  -4 + (-1) + 2 = -3       update best
+>        l=2 r=3:  -4 +   1  + 2 = -1       closer, update best
+>        l=3 r=3:  stop
+> 
+>      i=1 (nums[i]=-1)
+>        l=2 r=3:  -1 + 1 + 2 = 2           |1-2|=1 closer, best=2
+>        l=3 r=3:  stop
+> 
+>      answer = 2.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[-1,2,1,-4], target=1
 > ```text
@@ -796,6 +968,41 @@ Mutate sorted `nums` so first k positions hold unique values.
 1. **Build new array** · O(n)/O(n). Violates in-place.
 2. **Write pointer — FINAL** · O(n)/O(1).
 
+> [!example]- 📊 Visual: slow writes, fast reads
+> ```text
+>   Sorted in:  [1, 1, 2, 3, 3]
+>                0  1  2  3  4
+> 
+>   Two pointers walk the SAME direction:
+> 
+>      ┌─────────────── reading region ───────────────┐
+>      │   ┌───┐  ┌───┐  ┌───┐  ┌───┐  ┌───┐          │
+>      │   │ 1 │  │ 1 │  │ 2 │  │ 3 │  │ 3 │          │
+>      │   └───┘  └───┘  └───┘  └───┘  └───┘          │
+>      │     0     1      2      3      4              │
+>      └────────────────────────────────────────────────┘
+>             ↑                           ↑
+>           slow                         fast
+>          (next                       (cursor)
+>          unique slot)
+> 
+>   Rule (sorted!): nums[fast] != nums[fast-1]  →  write at slow, slow++
+>                   else                          →  skip
+> 
+>   Evolution:
+> 
+>     fast=1  same as prev  skip          nums: [1,1,2,3,3]  slow=1
+>     fast=2  new (2)       write @1      nums: [1,2,2,3,3]  slow=2
+>     fast=3  new (3)       write @2      nums: [1,2,3,3,3]  slow=3
+>     fast=4  same as prev  skip          nums: [1,2,3,3,3]  slow=3
+> 
+>   ┌──── kept ────┐
+>   │  [1, 2, 3]   │  garbage [...]   ← slow = 3 = new length
+>   └──────────────┘
+> 
+>   slow always trails fast: slow ≤ fast. We never overwrite unread data.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,1,2,3,3]
 > ```text
 > Setup:
@@ -869,6 +1076,41 @@ Move all zeroes to end; keep relative order of non-zeroes.
 ### Approach
 
 Two-pass: walk `fast`, copy non-zero to `slow`, increment slow. After loop, fill `slow..end` with zeros. (Or one-pass with swap.)
+
+> [!example]- 📊 Visual: partition non-zeros to the front
+> ```text
+>   nums:  [ 0 , 1 , 0 , 3 , 12 ]
+>            0   1   2   3    4
+> 
+>   Pass 1 — copy non-zeros to the front (preserving order):
+> 
+>      ┌──── front (non-zeros) ────┐┌──── tail (junk, will overwrite) ────┐
+>      │                            ││                                     │
+>      └────────────────────────────┘└─────────────────────────────────────┘
+>          ↑                              ↑
+>        slow                           fast
+>      (write here)                  (reading cursor)
+> 
+>     fast=0 x=0   skip
+>     fast=1 x=1   nums[slow=0] = 1 → [1,1,0,3,12]  slow=1
+>     fast=2 x=0   skip
+>     fast=3 x=3   nums[slow=1] = 3 → [1,3,0,3,12]  slow=2
+>     fast=4 x=12  nums[slow=2] = 12→ [1,3,12,3,12] slow=3
+> 
+>   After pass 1:
+>      ┌────────────────────┐
+>      │  1   3   12 │  ?   ?   ← positions ≥ slow are garbage
+>      └────────────────────┘
+>            non-zeros      tail to zero out
+> 
+>   Pass 2 — zero-fill positions [slow..n):
+> 
+>      ┌─────────────────────┐
+>      │  1   3   12   0   0 │   ← done
+>      └─────────────────────┘
+> 
+>   Order of non-zeros is preserved because we COPY in scan order.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[0,1,0,3,12]
 > ```text
@@ -1063,6 +1305,39 @@ Detect if a linked list has a cycle.
 1. **Hash set of visited nodes** · O(n)/O(n).
 2. **Floyd — FINAL** · O(n)/O(1).
 
+> [!example]- 📊 Visual: tortoise and hare on the rho shape
+> ```text
+>   A cyclic linked list looks like the Greek letter ρ:
+> 
+>         1 ──▶ 2 ──▶ 3 ──▶ 4 ──▶ 5
+>                ▲                  │
+>                └──────────────────┘
+>                 (5.next loops back to 2)
+> 
+>      tail (no cycle):  •──•──•   ←  fast hits null  → no cycle
+>      rho (with cycle): same, plus a closed loop.
+> 
+>   Two pointers, two speeds:
+> 
+>      slow ── moves 1 step
+>      fast ── moves 2 steps
+> 
+>   In a cycle, the GAP between fast and slow shrinks by 1 each tick.
+>   So eventually gap = 0  →  they collide.
+> 
+>   Snapshot during traversal:
+> 
+>      tick 0:   slow=1   fast=1                       •
+>      tick 1:   slow=2   fast=3                       │
+>      tick 2:   slow=3   fast=5                       │ both in loop
+>      tick 3:   slow=4   fast=3   (3 because 5→2→3)   │
+>      tick 4:   slow=5   fast=5   ←  COLLISION ✓      ▼
+> 
+>   If there's NO cycle, fast (or fast.next) hits null first → return false.
+> 
+>   Why O(1) space? Just two pointers — no visited set needed.
+> ```
+
 > [!info]- 🔍 Dry Run: 1 → 2 → 3 → 4 → 5 → (back to 2)
 > ```text
 > Setup:
@@ -1135,6 +1410,46 @@ Return middle node. If two middles, return the second.
 ### 🧠 Pattern: Fast/Slow → slow ends at middle
 
 > Fast moves 2x. When fast hits end, slow is at the middle.
+
+> [!example]- 📊 Visual: speed-2 pointer pins the middle
+> ```text
+>   Linked list:    1 ──▶ 2 ──▶ 3 ──▶ 4 ──▶ 5 ──▶ null
+> 
+>   When fast traverses 2n nodes, slow traverses n nodes
+>   ⇒ slow is at the HALFWAY mark.
+> 
+>   Odd length (5):
+> 
+>      step 0:  slow=1   fast=1                  
+>               ▼                                    
+>               1 ─ 2 ─ 3 ─ 4 ─ 5                   
+>               ▲                                    
+> 
+>      step 1:  slow=2   fast=3                  
+>                   ▼      ▼                          
+>               1 ─ 2 ─ 3 ─ 4 ─ 5                   
+> 
+>      step 2:  slow=3   fast=5                  
+>                       ▼          ▼                  
+>               1 ─ 2 ─ 3 ─ 4 ─ 5                   
+> 
+>      fast.next = null → STOP. slow at node 3 (the middle). ✓
+> 
+>   Even length (4):
+> 
+>      step 0:  slow=1   fast=1
+>      step 1:  slow=2   fast=3
+>      step 2:  slow=3   fast=null
+>                       ▼
+>               1 ─ 2 ─ 3 ─ 4
+> 
+>      STOP. slow=3 = "second middle" (problem spec).
+> 
+>   Same skeleton as cycle detection — fast/slow is a Swiss-army knife:
+>     • cycle detection
+>     • midpoint
+>     • nth-from-end (gap-pointer variant)
+> ```
 
 > [!info]- 🔍 Dry Run: 1 → 2 → 3 → 4 → 5
 > ```text

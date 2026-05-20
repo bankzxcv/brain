@@ -154,6 +154,41 @@ Reverse a singly linked list.
 
 > Dummy avoids special-casing the head. Walk both lists, append the smaller; advance.
 
+> [!example]- 📊 Visual: dummy + tail interleave
+> ```text
+>   l1:   [ 1 ] → [ 2 ] → [ 4 ] → null
+>   l2:   [ 1 ] → [ 3 ] → [ 4 ] → null
+> 
+>   dummy → null         tail
+>     ↑                    ↑
+>   dummy                dummy
+> 
+>   Pick smaller head; append to tail.next; advance that list.
+> 
+>   Step 1: l1.val(1) <= l2.val(1) → take l1
+>     dummy → [1] → null
+>                ↑
+>              tail
+>     l1 = [2] → [4]
+> 
+>   Step 2: l1.val(2) > l2.val(1) → take l2
+>     dummy → [1] → [1] → null
+>                       ↑
+>                     tail
+> 
+>   Step 3: 2 <= 3 → take l1
+>     dummy → [1] → [1] → [2] → null
+>                              ↑
+>                            tail
+> 
+>   ... continue until one list empties ...
+> 
+>   Splice leftover tail (whichever list still has nodes):
+>     dummy → 1 → 1 → 2 → 3 → 4 → 4 → null
+> 
+>   Return dummy.next  (skips the sentinel)
+> ```
+
 > [!info]- 🔍 Dry Run: l1=1→2→4, l2=1→3→4
 > ```text
 > Setup:
@@ -244,6 +279,32 @@ Reverse a singly linked list.
 **LC #141** · Easy
 
 (See [[02 - Two Pointers]] P11 for the full discussion of Floyd's tortoise & hare.)
+
+> [!example]- 📊 Visual: tortoise and hare on a ρ-shape
+> ```text
+>   List with a cycle (shape resembles the Greek letter ρ "rho"):
+> 
+>     head → [3] → [2] → [0] → [-4]
+>                   ↑           │
+>                   └───────────┘   ← back-edge forms the loop
+> 
+>   slow steps 1×, fast steps 2×. Trace from head:
+> 
+>     t=0:  slow=3,  fast=3
+>     t=1:  slow=2,  fast=0
+>     t=2:  slow=0,  fast=2     (fast wrapped around once)
+>     t=3:  slow=-4, fast=-4    ← MEET inside the cycle ✅
+> 
+>   If there were no cycle, fast (or fast.next) would hit null:
+> 
+>     head → [1] → [2] → [3] → null
+>                                ↑
+>                            fast eventually here → return False
+> 
+>   Mental model:
+>     • On a circular track, the faster runner laps the slower one.
+>     • On a straight road, the faster runner just exits the road.
+> ```
 
 > [!success]- Python
 > ```python
@@ -474,6 +535,37 @@ Two lists represent reversed integers. Add and return as linked list.
 
 Walk both, sum digits + carry, append.
 
+> [!example]- 📊 Visual: digit-by-digit with carry
+> ```text
+>   Numbers stored REVERSED (least-significant digit first):
+> 
+>     l1:  [ 2 ] → [ 4 ] → [ 3 ]      represents  342
+>     l2:  [ 5 ] → [ 6 ] → [ 4 ]      represents  465
+> 
+>   Column-add like grade school, but starting from the left
+>   (because LSB is on the left here):
+> 
+>         2   4   3
+>       + 5   6   4
+>       ─────────────
+>     carry → propagates right ──►
+> 
+>     col 0:  2 + 5 + 0 = 7    digit=7  carry=0
+>     col 1:  4 + 6 + 0 = 10   digit=0  carry=1
+>     col 2:  3 + 4 + 1 = 8    digit=8  carry=0
+> 
+>   Build result via dummy + tail (one node per column):
+> 
+>     dummy → [7]
+>     dummy → [7] → [0]
+>     dummy → [7] → [0] → [8]      represents 807  ✅
+> 
+>   Edge cases shown by the carry rail:
+>     • Lists of UNEQUAL length: missing digit treated as 0.
+>     • Final carry: e.g. 5 + 5 → [0] → [1]  (extra node!).
+>       Loop condition: `while l1 or l2 or carry`.
+> ```
+
 > [!info]- 🔍 Dry Run: l1=2→4→3 (=342), l2=5→6→4 (=465); expected 807 → 7→0→8
 > ```text
 > Setup:
@@ -550,6 +642,46 @@ Each node has `next` AND `random`. Deep copy.
 ### 🧠 Pattern: Hash Map old→new
 
 > Pass 1: clone each node, map `old → new`. Pass 2: wire next/random via the map.
+
+> [!example]- 📊 Visual: clone + rewire via old→new map
+> ```text
+>   Original list with `next` (straight) and `random` (curved) pointers:
+> 
+>          ┌──────── random ────────┐
+>          │                        ▼
+>     [ A:7 ] ──next──► [ B:13 ] ──next──► [ C:11 ] ──► null
+>          ▲                                   │
+>          └────────── random ─────────────────┘
+>          B.random = A
+>          C.random = B
+>          A.random = null
+> 
+>   ─ Pass 1: clone each node (values only, no pointers yet) ─
+> 
+>     map:  A ──► A'(7)
+>           B ──► B'(13)
+>           C ──► C'(11)
+> 
+>     Cloned nodes initially disconnected:
+> 
+>           [A':7]      [B':13]      [C':11]
+> 
+>   ─ Pass 2: wire next & random by LOOKING UP in the map ─
+> 
+>     For each old node p:
+>       map[p].next   = map[p.next]    (or null)
+>       map[p].random = map[p.random]  (or null)
+> 
+>          ┌──────── random ────────┐
+>          │                        ▼
+>     [A':7 ] ──next──► [B':13] ──next──► [C':11] ──► null
+>          ▲                                   │
+>          └────────── random ─────────────────┘
+> 
+>   Why this works:
+>     The hash map gives O(1) lookup from any OLD node to its CLONE,
+>     so wiring random pointers (which can jump anywhere) is trivial.
+> ```
 
 > [!info]- 🔍 Dry Run: Original A(7)→B(13)→C(11) with B.random=A, C.random=B
 > ```text
@@ -752,6 +884,45 @@ Reverse every k consecutive nodes; leave remainder if < k.
 ### 🧠 Pattern: Reverse-Between with Anchor
 
 > Use a dummy. For each group: find the group's last node; if not enough, stop. Reverse the group between anchor and group-end. Move anchor to (originally) first node of the group (now last).
+
+> [!example]- 📊 Visual: reverse one k-group between anchors
+> ```text
+>   List with k=3:
+> 
+>     dummy → [1] → [2] → [3] → [4] → [5] → [6] → [7] → null
+>       ↑     └──── group ────┘ └──── group ────┘  └ leftover
+>     anchor
+>     (groupPrev)
+> 
+>   ─ Step A: identify the group's last node (kth) ─
+> 
+>     dummy → [1] → [2] → [3] → [4] → [5] → ...
+>       ↑                  ↑      ↑
+>     anchor              kth    groupNext = kth.next
+> 
+>   ─ Step B: reverse only the segment [groupPrev.next .. kth] ─
+> 
+>     Reverse using 3-pointer dance bounded by groupNext on the right.
+>     Before:  anchor → 1 → 2 → 3 → 4 ...
+>     After :  anchor → 3 → 2 → 1 → 4 ...
+> 
+>       dummy → [3] → [2] → [1] → [4] → [5] → [6] → [7] → null
+>         ↑                  ↑
+>      old anchor       new anchor (tmp = old groupPrev.next)
+> 
+>   ─ Step C: slide anchor to the new tail of just-reversed group ─
+> 
+>     Now the next round starts here:
+> 
+>       dummy → 3 → 2 → 1 → [4] → [5] → [6] → [7] → null
+>                        ↑    └────── next group ──┘
+>                      anchor
+> 
+>   ─ Step D: if fewer than k nodes remain, STOP (leave as-is) ─
+> 
+>     Final (k=3, input 1..7):  3 → 2 → 1 → 6 → 5 → 4 → 7
+>                                                     ↑ leftover untouched
+> ```
 
 > [!info]- 🔍 Dry Run: 1→2→3→4→5, k=2
 > ```text
@@ -998,6 +1169,41 @@ Remove all nodes with `val == target`.
 
 Dummy + walk; skip matches.
 
+> [!example]- 📊 Visual: dummy + skip-over filter (val=6)
+> ```text
+>   Input (remove all 6s):
+> 
+>     dummy → [1] → [2] → [6] → [3] → [4] → [5] → [6] → null
+>       ↑           target ✗                       target ✗
+>       p
+> 
+>   Walk with `p`; check p.next.val:
+>     • If match → splice it out: p.next = p.next.next   (p STAYS)
+>     • Else      → advance: p = p.next
+> 
+>   ─ Snapshot when p reaches node(2), p.next = [6] ─
+> 
+>     dummy → 1 → [2] → ╳[6]╳ → [3] → 4 → 5 → 6 → null
+>                  ↑      │
+>                  p      └──► p.next = p.next.next  (skip the 6)
+> 
+>     Result: dummy → 1 → 2 → 3 → 4 → 5 → 6 → null
+>                          ↑
+>                          p stays here — recheck new p.next
+> 
+>   ─ Snapshot when p reaches node(5), p.next = [6] ─
+> 
+>     ... → [5] → ╳[6]╳ → null   →   ... → [5] → null
+>            ↑
+>            p
+> 
+>   Why DUMMY matters:
+>     If the head itself is the target (e.g. head=6→1→2),
+>     the dummy lets us treat it uniformly — no special case.
+> 
+>   Final: dummy.next = 1 → 2 → 3 → 4 → 5 → null
+> ```
+
 > [!info]- 🔍 Dry Run: 1→2→6→3→4→5→6, val=6
 > ```text
 > dummy → 1 → 2 → 6 → 3 → 4 → 5 → 6
@@ -1067,6 +1273,46 @@ Dummy + walk; skip matches.
 ### Approach
 
 Find midpoint, reverse second half, compare.
+
+> [!example]- 📊 Visual: fold the list and compare halves
+> ```text
+>   Input:    [1] → [2] → [2] → [1] → null
+> 
+>   ─ Step 1: find midpoint (fast/slow) ─
+> 
+>     head             slow
+>      ↓                ↓
+>     [1] → [2] → [2] → [1] → null
+>                                ↑
+>                              fast (or fast.next) is null
+> 
+>   ─ Step 2: reverse from slow onward ─
+> 
+>     Before:  head → 1 → 2          ;          slow → 2 → 1 → null
+>     After :  head → 1 → 2 → null   ;          prev → 1 → 2 → null
+> 
+>   ─ Step 3: fold and compare ─
+> 
+>          a (forward)                  b (reversed second half)
+>          ↓                            ↓
+>         [1] → [2] → null            [1] → [2] → null
+> 
+>     Compare position by position:
+> 
+>         a.val:  1   2
+>                 ║   ║      ← matches
+>         b.val:  1   2
+> 
+>     All match while b is non-null → PALINDROME ✅
+> 
+>   Counter-example (1→2→3→4):
+>     after split/reverse: a=1→2, b=4→3
+>         1 vs 4 → MISMATCH → not a palindrome
+> 
+>   Odd-length lists (1→2→3→2→1):
+>     slow lands on the MIDDLE node (3). The middle is symmetric to
+>     itself and we just stop when b runs out — no special-casing.
+> ```
 
 > [!info]- 🔍 Dry Run: 1 → 2 → 2 → 1
 > ```text
@@ -1141,6 +1387,46 @@ Find midpoint, reverse second half, compare.
 
 > When pointer A finishes, jump to head of B. When B finishes, jump to head of A. They traverse `m+n` total; if intersection exists, they meet there. Else, both reach `null` simultaneously.
 
+> [!example]- 📊 Visual: switch heads to equalize path length
+> ```text
+>   Two lists that merge into one shared tail:
+> 
+>     A:  [1] → [9] → [1] ──┐
+>                            ▼
+>                           [X] → [Y] → [Z] → null
+>                            ▲
+>     B:        [3] ────────┘
+> 
+>     lenA = 6,  lenB = 4,  shared tail length = 3
+>     intersection node = X
+> 
+>   ─ Strategy: pointer p walks A then B; pointer q walks B then A ─
+> 
+>     Combined path each traverses: lenA + lenB = 10 steps total.
+>     If an intersection exists, they sync up at X.
+> 
+>   ─ Step trace ─
+> 
+>     t=0:  p=A0(1)   q=B0(3)
+>     t=1:  p=A1(9)   q=X
+>     t=2:  p=A2(1)   q=Y
+>     t=3:  p=X       q=Z
+>     t=4:  p=Y       q=null → q jumps to A0(1)
+>     t=5:  p=Z       q=A1(9)
+>     t=6:  p=null → p jumps to B0(3);   q=A2(1)
+>     t=7:  p=X       q=X         ← MATCH ✅
+> 
+>   Why it works (visual proof):
+> 
+>     p walks:  [A: 1,9,1,X,Y,Z]  then  [B: 3,X,Y,Z]  → meets at X
+>     q walks:  [B: 3,X,Y,Z]      then  [A: 1,9,1,X,Y,Z] → meets at X
+> 
+>     Both paths have length lenA + lenB. The trailing common
+>     segment lines up — they land on the SAME node simultaneously.
+> 
+>   No intersection? Both pointers become null at the same step → return null.
+> ```
+
 > [!info]- 🔍 Dry Run: A=[1,9,1,X,Y,Z], B=[3,X,Y,Z] (X,Y,Z are shared)
 > ```text
 > Lengths: A=6 nodes (1,9,1,X,Y,Z), B=4 nodes (3,X,Y,Z). Intersection at X.
@@ -1198,6 +1484,54 @@ Find midpoint, reverse second half, compare.
 1. **Merge two at a time, k-1 times** · O(Nk).
 2. **Divide & conquer pairs** · O(N log k).
 3. **Min-heap — FINAL** · O(N log k)/O(k).
+
+> [!example]- 📊 Visual: k lists feeding a min-heap
+> ```text
+>   k sorted input lists (drawn vertically by their heads):
+> 
+>     list 0:  [ 1 ] → [ 4 ] → [ 5 ] → null
+>     list 1:  [ 1 ] → [ 3 ] → [ 4 ] → null
+>     list 2:  [ 2 ] → [ 6 ] → null
+> 
+>   ─ Seed: push EACH list's head into a min-heap ─
+> 
+>                ┌─────────────────────────────┐
+>                │  min-heap (key = node.val)  │
+>                │                             │
+>                │            (1, list0)       │  ← root = smallest
+>                │           /        \        │
+>                │     (1, list1)  (2, list2)  │
+>                └─────────────────────────────┘
+> 
+>   ─ Repeat: pop min, append to result, push popped.next ─
+> 
+>     pop (1,list0) → result: dummy → 1
+>     push list0.next = 4
+>     heap = { (1,list1), (2,list2), (4,list0) }
+> 
+>     pop (1,list1) → result: dummy → 1 → 1
+>     push list1.next = 3
+>     heap = { (2,list2), (4,list0), (3,list1) }
+> 
+>     pop (2,list2) → result: ... → 2 ;  push 6
+>     pop (3,list1) → result: ... → 3 ;  push 4
+>     pop (4,list0) → result: ... → 4 ;  push 5
+>     pop (4,list1) → result: ... → 4 ;  (list1 exhausted)
+>     pop (5,list0) → result: ... → 5 ;  (list0 exhausted)
+>     pop (6,list2) → result: ... → 6 ;  (list2 exhausted)
+> 
+>   ─ Final ─
+> 
+>     dummy → 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6 → null
+> 
+>   Complexity:
+>     • Each of N total nodes is pushed/popped once.
+>     • Heap holds ≤ k entries → push/pop is O(log k).
+>     • Total: O(N log k) time, O(k) space.
+> 
+>   Tie-breaker tip (Python): heap entries are (val, idx, node).
+>   The `idx` prevents Python from comparing ListNode objects on val ties.
+> ```
 
 > [!info]- 🔍 Dry Run: lists=[[1,4,5],[1,3,4],[2,6]]
 > ```text

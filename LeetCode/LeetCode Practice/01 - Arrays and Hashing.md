@@ -173,6 +173,29 @@ Return `true` if any value appears at least twice in `nums`.
 2. **Hash set — FINAL** · O(n)/O(n). Add each element; bail on first re-insertion.
 3. **One-liner:** `len(set(nums)) < len(nums)` — clean but allocates the full set.
 
+> [!example]- 📊 Visual: scan + grow a "seen" set
+> ```text
+>   nums = [ 1 , 2 , 3 , 1 ]
+>           ┌───┬───┬───┬───┐
+>           │ 1 │ 2 │ 3 │ 1 │
+>           └───┴───┴───┴───┘
+>             ↑
+>             i — walk left-to-right
+> 
+>   For each x, ask the set:  "have I seen you?"
+>   If yes → bail with TRUE. Otherwise add x and keep walking.
+> 
+>     i=0  x=1   seen={ }              add → seen={1}
+>     i=1  x=2   seen={1}              add → seen={1,2}
+>     i=2  x=3   seen={1,2}            add → seen={1,2,3}
+>     i=3  x=1   seen={1,2,3}  ← HIT!  return TRUE
+> 
+>   ┌────────────────────────────────────────┐
+>   │ Each element passes through the set    │
+>   │ exactly once. Bail on first collision. │
+>   └────────────────────────────────────────┘
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,2,3,1]
 > ```text
 > Setup:
@@ -250,6 +273,36 @@ Return `true` if `t` is an anagram of `s`.
 1. **Sort both, compare** · O(n log n)/O(n). One-liner; OK for small inputs.
 2. **Two hash maps** · O(n)/O(n). Build both, compare.
 3. **One array of length 26 — FINAL** · O(n)/O(1). Increment for `s`, decrement for `t`; all zero ⇒ anagram.
+
+> [!example]- 📊 Visual: balance scale of letter counts
+> ```text
+>   s = "anagram"      t = "nagaram"
+> 
+>   For each i in parallel:  cnt[s[i]]++   cnt[t[i]]--
+> 
+>      ┌──────────────────────────────┐
+>      │   +1 from s        -1 from t │
+>      └──────────────────────────────┘
+> 
+>   index in cnt[26]:  a  b  c  d ... g ... m  n ...
+> 
+>   After all 7 chars processed:
+> 
+>            a   g   m   n   r        (other letters = 0)
+>           ┌───┬───┬───┬───┬───┐
+>     cnt = │ 0 │ 0 │ 0 │ 0 │ 0 │ ← every slot is zero
+>           └───┴───┴───┴───┴───┘
+> 
+>   Anagram iff ALL counters land on zero (perfect balance).
+> 
+>           s side  ████████        t side  ████████
+>                  +a +n +a +g +r +a +m   −n −a −g −a −r −a −m
+>                                                       
+>           ╔══════════════════ EQUAL ══════════════════╗
+>           ║   every +1 on the left is cancelled by    ║
+>           ║   exactly one −1 on the right             ║
+>           ╚════════════════════════════════════════════╝
+> ```
 
 > [!info]- 🔍 Dry Run: s="anagram", t="nagaram"
 > ```text
@@ -337,6 +390,32 @@ Group strings that are anagrams of each other.
 2. **Sort each word as key — FINAL (clear)** · O(n · k log k)/O(n·k). Default to this in interview.
 3. **Count tuple as key** · O(n · k)/O(n·k). Faster for long words but more code.
 
+> [!example]- 📊 Visual: canonical key buckets
+> ```text
+>   strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+> 
+>   STEP 1 — Canonicalize each word (sort its letters):
+> 
+>      "eat" ─sort→ "aet"          "ate" ─sort→ "aet"
+>      "tea" ─sort→ "aet"          "nat" ─sort→ "ant"
+>      "tan" ─sort→ "ant"          "bat" ─sort→ "abt"
+> 
+>   STEP 2 — Drop each word into the bucket named by its key:
+> 
+>          ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+>   key →  │    "aet"     │   │    "ant"     │   │    "abt"     │
+>          ├──────────────┤   ├──────────────┤   ├──────────────┤
+>          │ eat          │   │ tan          │   │ bat          │
+>          │ tea          │   │ nat          │   │              │
+>          │ ate          │   │              │   │              │
+>          └──────────────┘   └──────────────┘   └──────────────┘
+> 
+>   STEP 3 — Output = list of bucket contents.
+> 
+>   Insight: equivalent things share a canonical key. The map turns
+>   "are these two anagrams?" (pairwise) into "do they hash the same?" (O(1)).
+> ```
+
 > [!info]- 🔍 Dry Run: strs=["eat","tea","tan","ate","nat","bat"]
 > ```text
 > Setup:
@@ -420,6 +499,38 @@ Return the k most frequent elements.
 1. **Sort by frequency** · O(n log n). Trivial — count then sort. Acceptable but not optimal.
 2. **Heap of size k** · O(n log k). Classic interview answer. Use a min-heap.
 3. **Bucket sort — FINAL** · O(n)/O(n). Index = frequency, value = list of nums with that freq. Walk buckets high→low.
+
+> [!example]- 📊 Visual: buckets indexed by frequency
+> ```text
+>   nums = [1,1,1, 2,2, 3]    k = 2
+> 
+>   Phase A — count map:
+>      ┌─────┬─────┬─────┐
+>      │  1  │  2  │  3  │   value
+>      ├─────┼─────┼─────┤
+>      │  3  │  2  │  1  │   frequency
+>      └─────┴─────┴─────┘
+> 
+>   Phase B — re-index by frequency (freq ≤ n always):
+> 
+>     freq:   0    1    2    3    4    5    6
+>            ┌──┬────┬────┬────┬──┬──┬──┐
+>   buckets: │  │ 3  │ 2  │ 1  │  │  │  │
+>            └──┴────┴────┴────┴──┴──┴──┘
+>             └─ no number has freq 0  ─┘
+> 
+>   Phase C — walk RIGHT → LEFT, collect until we have k:
+> 
+>             ┌──┬────┬────┬░░░┬──┬──┬──┐
+>             │  │ 3  │ 2  │░1░│  │  │  │
+>             └──┴────┴────┴░░░┴──┴──┴──┘
+>                       ←──── start here (freq=3) take 1
+>                  ←──── then freq=2 take 2 → have k=2, STOP
+> 
+>   ✓ result = [1, 2]
+> 
+>   Bucket sort works because freq ≤ n, so the index space is bounded.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,1,1,2,2,3], k=2
 > ```text
@@ -512,6 +623,42 @@ Return `out[i] = product of all nums except nums[i]`.
 3. **Prefix + suffix arrays** · O(n)/O(n). Clear but uses 2 extra arrays.
 4. **Two passes, O(1) extra — FINAL** · O(n)/O(1) (output not counted). First pass fills `out[i] = prefix product`; second pass multiplies suffix on the fly.
 
+> [!example]- 📊 Visual: prefix × suffix sandwich
+> ```text
+>   nums  =   [  1  ,  2  ,  3  ,  4  ]
+>               0     1     2     3
+> 
+>   prefix[i]  = product of EVERYTHING LEFT of i
+>   suffix[i]  = product of EVERYTHING RIGHT of i
+>   out[i]     = prefix[i]  ×  suffix[i]
+> 
+>       ┌─────────── nums ───────────┐
+>       │  1     2     3     4       │
+>       └────────────────────────────┘
+>          ▲              ▲
+>          │              │
+>     ┌────┴────┐    ┌────┴────┐
+>     │ prefix  │    │ suffix  │
+>     │ sweep → │    │ ← sweep │
+>     └─────────┘    └─────────┘
+> 
+>   prefix (LTR pass):      suffix (RTL pass, running r):
+>     i=0: 1                  i=3: 1
+>     i=1: 1                  i=2: 4
+>     i=2: 1·2=2              i=1: 4·3=12
+>     i=3: 2·3=6              i=0: 12·2=24
+> 
+>   Stack them:
+>              i=0    i=1    i=2    i=3
+>   prefix:     1      1      2      6
+>   suffix:    24     12      4      1
+>   out:       ───────────────────────
+>              24  ·  12  ·   8  ·   6
+> 
+>   Trick: do it in TWO sweeps with the OUTPUT ARRAY ITSELF holding the
+>   prefix; then a single running `r` accumulates the suffix on the way back.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,2,3,4]
 > ```text
 > Pass 1 — Left-to-right, fill out[i] = product of nums[0..i-1]:
@@ -597,6 +744,34 @@ Design `encode(list[str]) -> str` and `decode(str) -> list[str]` that round-trip
 1. **Single char delimiter (e.g. `,`)** — breaks if data contains `,`.
 2. **Escape the delimiter** — possible but messy; nested escapes get ugly.
 3. **Length-prefix — FINAL** · O(n) both ways. `"4#word3#cat"` ⇒ ["word","cat"].
+
+> [!example]- 📊 Visual: length-prefix frame format
+> ```text
+>   Wire format = a sequence of FRAMES.  Each frame:
+> 
+>       ┌─────────┬───┬──────────────────┐
+>       │ length  │ # │     payload      │   ← payload is EXACTLY `length` chars
+>       └─────────┴───┴──────────────────┘
+>           ascii digits     raw bytes (may contain '#')
+> 
+>   ["leet", "code", "#hi"]   →   "4#leet4#code3##hi"
+> 
+>     ┌────┬─┬──────┐┌────┬─┬──────┐┌────┬─┬──────┐
+>     │ 4  │#│ leet ││ 4  │#│ code ││ 3  │#│ #hi  │
+>     └────┴─┴──────┘└────┴─┴──────┘└────┴─┴──────┘
+>      hdr  d  body   hdr  d  body   hdr  d  body
+> 
+>   Decode cursor:
+>      "4#leet4#code3##hi"
+>       │└┘└──┘
+>       │ │  └─ slice payload (4 chars)
+>       │ └─── delimiter '#'
+>       └───── read digits until '#'
+> 
+>   Why this beats escaping:
+>     The parser TRUSTS the length — it grabs exactly that many chars
+>     and never re-interprets them. The '#' inside payload is just data.
+> ```
 
 > [!info]- 🔍 Dry Run: encode(["leet","code","#hi"]) then decode
 > ```text
@@ -687,6 +862,34 @@ Length of the longest streak of consecutive integers in `nums` (unsorted).
 1. **Sort, scan adjacent** · O(n log n). Acceptable; not O(n).
 2. **Naive hash set, extend from every num** · O(n²) worst case (`[1..n]` extended from 1).
 3. **Hash set + start filter — FINAL** · O(n)/O(n). Only start a streak from `x` where `x-1 ∉ set`.
+
+> [!example]- 📊 Visual: only "true starts" launch a walk
+> ```text
+>   nums = [100, 4, 200, 1, 3, 2]    →   set = {1,2,3,4,100,200}
+> 
+>   On the integer number line:
+> 
+>      ··· 1   2   3   4 ··· 100 ··· 200 ···
+>          ●───●───●───●     ●       ●
+>          ↑               ↑       ↑
+>          start          start   start    (x where x−1 is NOT in set)
+> 
+>      4 is in the set but 3 is too, so 4 is NOT a start.
+>      2 is in the set but 1 is too, so 2 is NOT a start.
+>      3 is in the set but 2 is too, so 3 is NOT a start.
+> 
+>   From each true start, walk forward until the chain breaks:
+> 
+>      start=1   :  1 → 2 → 3 → 4 → (5∉set) STOP   length 4   ✓
+>      start=100 :  100 → (101∉set) STOP             length 1
+>      start=200 :  200 → (201∉set) STOP             length 1
+> 
+>   Why is this O(n)? Each value is visited at most TWICE:
+>     once as the "is x-1 in set?" check, and
+>     once during exactly one streak walk.
+> 
+>   Total work bounded by 2n → O(n).
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[100,4,200,1,3,2]
 > ```text
@@ -784,6 +987,41 @@ Count subarrays whose sum equals `k`.
 2. **Prefix sum array, then pair search** · O(n²). Still pair search.
 3. **Prefix sum + hash count — FINAL** · O(n)/O(n). Map `{prefix → count_of_occurrences}`.
 
+> [!example]- 📊 Visual: prefix-sum difference identity
+> ```text
+>   nums    = [ 1 , 1 , 1 ]              k = 2
+>   index     0   1   2
+> 
+>   prefix sums (P[j] = sum of nums[0..j-1], P[0]=0):
+> 
+>             ┌────┬────┬────┬────┐
+>      P =    │ 0  │ 1  │ 2  │ 3  │
+>             └────┴────┴────┴────┘
+>               P0   P1   P2   P3
+> 
+>   A subarray nums[i..j-1] sums to k  ⇔  P[j] − P[i] = k
+>                                     ⇔  P[i] = P[j] − k
+> 
+>   So as we sweep j → for each P[j], ask the map:
+>       "how many earlier prefixes equal P[j] − k?"
+> 
+>           P[j]    P[j]−k    matches in map     +=
+>            0        −2           0              0
+>            1        −1           0              0
+>            2         0           1 (the P0)     1   ← subarray [0..1]
+>            3         1           1 (the P1)     1   ← subarray [1..2]
+> 
+>                                  total = 2 ✓
+> 
+>   Negatives are fine here — we don't rely on monotonic growth,
+>   just on counting equal prefixes.
+> 
+>   ┌───────────────────────────────────────────────┐
+>   │ KEY: seed the map with {0: 1} so that a       │
+>   │ prefix that ITSELF equals k counts as a hit.  │
+>   └───────────────────────────────────────────────┘
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,1,1], k=2
 > ```text
 > Setup:
@@ -871,6 +1109,37 @@ Return `true` if there's a subarray of size ≥ 2 with sum divisible by `k`.
 1. **Brute force** · O(n²).
 2. **Prefix sum mod k — FINAL** · O(n)/O(n). Track first index where each remainder appeared; if same remainder seen ≥ 2 steps later → answer.
 
+> [!example]- 📊 Visual: same remainder ⇒ k divides the gap
+> ```text
+>   nums = [23, 2, 4, 6, 7]    k = 6
+> 
+>   prefix sums:        prefix mod 6:
+> 
+>     P0 = 0               r0 = 0
+>     P1 = 23              r1 = 5
+>     P2 = 25              r2 = 1
+>     P3 = 29              r3 = 5  ← SAME as r1
+>     P4 = 35              r4 = 5
+>     P5 = 42              r5 = 0
+> 
+>   Why same remainder matters:
+>      P3 ≡ P1 (mod k)   ⇒   P3 − P1 = nums[1..2] sum
+>                       ⇒   that sum is divisible by k
+> 
+>     ┌──────────────────────────────────────────┐
+>     │ index    0     1     2     3     4       │
+>     │ nums    23     2     4     6     7       │
+>     │ remain   ─    [5]    1    [5]    5    0  │
+>     │              ↑      ↑                    │
+>     │           first    again — gap is 2 ≥ 2  │
+>     │           seen     ✓ return true         │
+>     └──────────────────────────────────────────┘
+> 
+>   Subarray witness: nums[1..2] = [2, 4],  sum = 6,  6 % 6 = 0.
+> 
+>   We store ONLY the first index per remainder — that maximises the gap.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[23,2,4,6,7], k=6
 > ```text
 > Setup:
@@ -957,6 +1226,37 @@ Many `sumRange(i, j)` queries on a fixed array. Optimize for many calls.
 1. **Recompute each query** · O(n) per call. Fine for few queries, terrible for many.
 2. **Prefix array — FINAL** · Build in O(n), each query O(1).
 
+> [!example]- 📊 Visual: prefix array with sentinel
+> ```text
+>   nums:        ┌────┬────┬────┬────┬────┬────┐
+>                │ -2 │  0 │  3 │ -5 │  2 │ -1 │
+>                └────┴────┴────┴────┴────┴────┘
+>                  0    1    2    3    4    5
+> 
+>   prefix:    ┌────┬────┬────┬────┬────┬────┬────┐
+>              │  0 │ -2 │ -2 │  1 │ -4 │ -2 │ -3 │
+>              └────┴────┴────┴────┴────┴────┴────┘
+>                P0   P1   P2   P3   P4   P5   P6
+> 
+>   prefix[j] = nums[0] + nums[1] + ... + nums[j-1]
+>     ↑                          ↑
+>     sentinel 0 at index 0      so prefix[i] gives "sum of FIRST i elements"
+> 
+>   Range query sumRange(i, j) :
+> 
+>      sum( nums[i..j] )  =  prefix[j+1]  −  prefix[i]
+> 
+>                          ┌────────────────┐
+>      nums[2..5]:  3, -5, │ 2,  -1         │
+>                          └────────────────┘
+>                          P6 − P2 = -3 − (-2) = -1 ✓
+> 
+>      ╔═══════════════════════════════════╗
+>      ║ Build once: O(n).                 ║
+>      ║ Each query: O(1) — just one diff. ║
+>      ╚═══════════════════════════════════╝
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[-2, 0, 3, -5, 2, -1]
 > ```text
 > Build phase (constructor):
@@ -1037,6 +1337,39 @@ Return the largest sum of any contiguous subarray.
 1. **Brute force** · O(n²). Try every subarray.
 2. **Divide and conquer** · O(n log n). Elegant but more code.
 3. **Kadane's — FINAL** · O(n)/O(1).
+
+> [!example]- 📊 Visual: extend vs restart at each step
+> ```text
+>   nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+>            0  1   2  3   4  5  6   7  8
+> 
+>   At index i, only TWO options for best subarray ending here:
+> 
+>     ┌──────────────────────┐        ┌──────────────────────┐
+>     │  A. extend previous  │        │  B. restart at i     │
+>     │     cur + nums[i]    │   vs   │     nums[i]          │
+>     └──────────────────────┘        └──────────────────────┘
+>                              max of these → new `cur`
+> 
+>   Walk:           extend    restart    cur     best
+>     i=0 x=-2       —          —         -2       -2
+>     i=1 x= 1      -2+1=-1     1   →     1        1
+>     i=2 x=-3      1-3=-2     -3   →    -2        1
+>     i=3 x= 4     -2+4=2      4   →     4        4
+>     i=4 x=-1      4-1=3     -1   →     3        4
+>     i=5 x= 2      3+2=5      2   →     5        5
+>     i=6 x= 1      5+1=6      1   →     6        6  ←★
+>     i=7 x=-5      6-5=1     -5   →     1        6
+>     i=8 x= 4      1+4=5      4   →     5        6
+> 
+>   Best subarray ends at i=6, value chain [4, -1, 2, 1] = 6.
+> 
+>     ┌───┬───┬───┬───┬───┬───┬───┬───┬───┐
+>     │-2 │ 1 │-3 │░4░│░-1│░2░│░1░│-5 │ 4 │  ← winning slice highlighted
+>     └───┴───┴───┴───┴───┴───┴───┴───┴───┘
+>                  ▲           ▲
+>                start       end
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[-2,1,-3,4,-1,2,1,-5,4]
 > ```text
@@ -1128,6 +1461,39 @@ Return all elements appearing **twice**. No extra space.
 1. **Hash set** · O(n)/O(n). Trivial but violates the space constraint.
 2. **Sort + scan** · O(n log n) — mutates the array.
 3. **Sign marking — FINAL** · O(n)/O(1).
+
+> [!example]- 📊 Visual: array used as its own hash table
+> ```text
+>   Values are in 1..n, so index (v-1) is a SLOT for value v.
+>   To record "I've seen v", flip the SIGN of nums[v-1].
+> 
+>   nums = [4, 3, 2, 7, 8, 2, 3, 1]    (n = 8)
+> 
+>          slot 0  1  2  3  4  5  6  7    ← these are indices = value-1
+>                ↑  ↑  ↑  ↑  ↑  ↑  ↑  ↑
+>          for v= 1  2  3  4  5  6  7  8
+> 
+>   The MAGNITUDE |nums[i]| is the actual stored value;
+>   the SIGN is one bit of metadata = "value (i+1) seen?"
+> 
+>   Visiting v ⇒ look at slot (|v|−1):
+> 
+>      slot[|v|−1]  positive  → "not yet seen"  → flip to negative
+>      slot[|v|−1]  negative  → "seen before!"  → record v as duplicate
+> 
+>   Final sweep through nums=[4,3,2,7,8,2,3,1]:
+> 
+>      visiting 4 → slot 3 (was 7) → flip → -7
+>      visiting 3 → slot 2 (was 2) → flip → -2
+>      visiting 2 → slot 1 (was 3) → flip → -3
+>      visiting 7 → slot 6 (was 3) → flip → -3   ← but read |3|, magnitude
+>      visiting 8 → slot 7 (was 1) → flip → -1
+>      visiting 2 → slot 1 is -3 < 0 → DUPLICATE: out += [2]
+>      visiting 3 → slot 2 is -2 < 0 → DUPLICATE: out += [3]
+>      visiting 1 → slot 0 (was 4) → flip → -4
+> 
+>      out = [2, 3]   in O(1) extra space.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[4,3,2,7,8,2,3,1]
 > ```text
@@ -1235,6 +1601,41 @@ Find smallest missing positive integer.
 2. **Sort** · O(n log n).
 3. **Cyclic sort — FINAL** · O(n)/O(1). Each swap places one number into its home slot; O(n) total swaps.
 
+> [!example]- 📊 Visual: place each v into slot v−1
+> ```text
+>   Answer lives in [1, n+1]. The array has n cells; place each
+>   value v into cell v−1, so cells become "labeled boxes".
+> 
+>   nums = [3, 4, -1, 1]   (n=4, slots labeled 1..4)
+> 
+>          slot:    1     2     3     4
+>                 ┌────┬────┬────┬────┐
+>                 │ 3  │ 4  │ -1 │ 1  │
+>                 └────┴────┴────┴────┘
+>                  ?    ?     ✗    ?      ← negative/out-of-range OK to ignore
+> 
+>   Cyclic placement (swap v home until each cell is its label or junk):
+> 
+>     [3,4,-1,1] swap(0,2)→ [-1,4,3,1]
+>     [-1 in cell 1] junk, leave it.    advance.
+>     [4,3,1 ...] swap(1,3) →            [-1, 1, 3, 4]
+>     [1 in cell 2] swap(1,0) →          [ 1,-1, 3, 4]
+>     [-1 in cell 2] junk, leave.        advance.
+>     [3 in cell 3] HOME ✓.  [4 in cell 4] HOME ✓.
+> 
+>   Final after placement:
+>          slot:    1     2     3     4
+>                 ┌────┬────┬────┬────┐
+>                 │ 1  │ -1 │ 3  │ 4  │
+>                 └────┴────┴────┴────┘
+>                   ✓    ✗    ✓    ✓
+>                        ↑
+>                        first cell whose value ≠ label
+>                        → answer = label = 2
+> 
+>   If every slot matches its label, the answer is n+1 (e.g., [1,2,3] → 4).
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[3,4,-1,1], n=4
 > ```text
 > Phase 1 — Place each value v at index v-1:
@@ -1332,6 +1733,37 @@ Given four arrays of length n, count tuples `(i,j,k,l)` with `A[i]+B[j]+C[k]+D[l
 2. **3 nested + hash on 4th** · O(n³) — still slow.
 3. **Hash both pairs — FINAL** · O(n²)/O(n²).
 
+> [!example]- 📊 Visual: meet-in-the-middle pair split
+> ```text
+>   Goal:  A[i] + B[j] + C[k] + D[l] = 0
+>          └──── LEFT ────┘   └──── RIGHT ────┘
+>                ab                   cd
+> 
+>   Naive: 4 nested loops = n⁴.   At n=200, that's 1.6×10⁹ → TLE.
+> 
+>   Trick: split into two halves and store one side in a hash:
+> 
+>      ┌─────────────────┐                ┌─────────────────┐
+>      │  build  ab_cnt  │                │  for each c+d:  │
+>      │  for every pair │   ◀──lookup──  │  need = −(c+d)  │
+>      │   (A[i], B[j])  │                │  total += ab[need] │
+>      └─────────────────┘                └─────────────────┘
+>          n² entries                            n² queries
+> 
+>   Example with A=[1,2], B=[-2,-1], C=[-1,2], D=[0,2]:
+> 
+>      Build:                   Lookup (each += ab[−(c+d)]):
+>      ┌───────┬───┐            c+d = -1  → need = 1 → ab[1]=1 → +1
+>      │  sum  │ # │            c+d =  1  → need = -1 → ab[-1]=1 → +1
+>      ├───────┼───┤            c+d =  2  → need = -2 → ab[-2]=0
+>      │  -1   │ 1 │            c+d =  4  → need = -4 → ab[-4]=0
+>      │   0   │ 2 │                                    ─────────
+>      │   1   │ 1 │                                    total = 2 ✓
+>      └───────┴───┘
+> 
+>   n⁴ → n² in TIME at the cost of n² SPACE — classic tradeoff.
+> ```
+
 > [!info]- 🔍 Dry Run: A=[1,2], B=[-2,-1], C=[-1,2], D=[0,2]
 > ```text
 > Phase 1 — Build ab_count (all A[i]+B[j] sums):
@@ -1401,6 +1833,44 @@ Given four arrays of length n, count tuples `(i,j,k,l)` with `A[i]+B[j]+C[k]+D[l
 1. **Array only** · remove = O(n) (shift). Random = O(1).
 2. **Hash set only** · random = O(n) (must iterate to pick).
 3. **Hash map + array, swap-with-last — FINAL** · all O(1).
+
+> [!example]- 📊 Visual: array + index map, swap-with-last delete
+> ```text
+>   Two data structures kept in sync:
+> 
+>     arr (dense storage):       idx (val → position in arr):
+>     ┌───┬───┬───┬───┐          ┌──────────────┐
+>     │ 1 │ 2 │ 3 │ 4 │          │ 1 → 0        │
+>     └───┴───┴───┴───┘          │ 2 → 1        │
+>       0   1   2   3            │ 3 → 2        │
+>                                │ 4 → 3        │
+>                                └──────────────┘
+> 
+>   getRandom()  →  arr[ rand(0, len) ]                  O(1)
+>   insert(v)    →  append to arr; record idx[v]         O(1)
+> 
+>   remove(v)   ← the only tricky one. Goal: keep arr DENSE.
+> 
+>     remove(2):  position of 2 is i=1; last = arr[-1] = 4
+> 
+>     STEP A: write last over the hole
+>        ┌───┬───┬───┬───┐
+>        │ 1 │░4░│ 3 │ 4 │
+>        └───┴───┴───┴───┘
+> 
+>     STEP B: update idx for the value that moved
+>        idx[4] = 1     (4 now lives at slot 1)
+> 
+>     STEP C: pop the tail
+>        ┌───┬───┬───┐
+>        │ 1 │ 4 │ 3 │
+>        └───┴───┴───┘
+> 
+>     STEP D: delete idx[2]
+> 
+>   ▲ No shifting → O(1). The map says "where's value v?"
+>     The array says "value at position i". Together: all ops O(1).
+> ```
 
 > [!info]- 🔍 Dry Run: insert(1), insert(2), insert(3), remove(2)
 > ```text
@@ -1534,6 +2004,51 @@ Find the longest substring that appears at least twice in `s` (return any one).
 1. **Brute force** · O(n² · L) — for every pair of starting positions, compare. Way too slow.
 2. **Suffix array + LCP** · O(n log n). Powerful but heavy to code under interview pressure.
 3. **Binary search + Rabin-Karp — FINAL** · O(n log n) average. Cleanest interview answer.
+
+> [!example]- 📊 Visual: binary search on L + rolling hash
+> ```text
+>   Property exploited:
+>      if some duplicate of length L exists,
+>      then duplicates of EVERY length < L also exist (their prefixes).
+>      ⇒ has_dup(L) is monotonic in L — binary searchable.
+> 
+>      L:      1   2   3   4   5
+>      dup?:   T   T   T   F   F        ←  find rightmost T
+>                      ↑
+>                   answer
+> 
+>   Inside has_dup(L): slide a length-L window and hash it.
+> 
+>      s = b a n a n a
+>          0 1 2 3 4 5
+> 
+>      L=3 windows:
+>        ┌─────────┐
+>        │ b a n │ a n a    hash H1   →  seen = {H1: 0}
+>        └─────────┘
+>           ┌─────────┐
+>        b  │ a n a │ n a   hash H2   →  seen = {H1, H2}
+>           └─────────┘
+>              ┌─────────┐
+>        b  a  │ n a n │ a  hash H3   →  seen = {H1, H2, H3}
+>              └─────────┘
+>                 ┌─────────┐
+>        b  a  n │ a n a │  hash H2   ←  COLLISION!
+>                 └─────────┘
+> 
+>   Rolling hash slides in O(1) per step:
+> 
+>         h' = (h · BASE − s[i−1]·BASE^L + s[i+L−1])  mod MOD
+> 
+>   ⚠ Verify on collision: hash equality can be a false positive.
+>     After a hit, compare the actual substrings (still amortised O(n log n)).
+> 
+>   ╔══════════════════════════════════════════════╗
+>   ║ outer: O(log n) binary-search iterations     ║
+>   ║ inner: O(n) rolling hash per L               ║
+>   ║ total: O(n log n) average                    ║
+>   ╚══════════════════════════════════════════════╝
+> ```
 
 > [!info]- 🔍 Dry Run: s="banana"
 > ```text

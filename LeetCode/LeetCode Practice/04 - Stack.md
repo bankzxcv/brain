@@ -52,6 +52,42 @@ status: in-progress
 
 > Push every open bracket. On a close, the top **must** be its matching open. Empty stack at end = valid.
 
+> [!example]- 📊 Visual: bracket matching stack
+> ```text
+>   s = "([{}])"
+> 
+>   Push opens, pop on close (must match expected):
+> 
+>     '(' →  push           stack: ┌─┐
+>                                  │(│
+>                                  └─┘
+>     '[' →  push           stack: ┌─┐
+>                                  │[│
+>                                  │(│
+>                                  └─┘
+>     '{' →  push                  ┌─┐
+>                                  │{│
+>                                  │[│
+>                                  │(│
+>                                  └─┘
+>     '}' →  pop, must = '{' ✓     ┌─┐
+>                                  │[│
+>                                  │(│
+>                                  └─┘
+>     ']' →  pop, must = '[' ✓     ┌─┐
+>                                  │(│
+>                                  └─┘
+>     ')' →  pop, must = '(' ✓     └─┘  (empty)
+> 
+>   Stack empty at end → valid ✓
+> 
+>   Counter:  s = "(]"
+>     push '(' →  ┌─┐
+>                 │(│
+>                 └─┘
+>     ']' expects '[' but pop = '(' ✗  →  invalid
+> ```
+
 > [!info]- 🔍 Dry Run: s="([{}])"
 > ```text
 > Setup:
@@ -142,6 +178,33 @@ Stack with O(1) `push`, `pop`, `top`, `getMin`.
 1. **Scan for min each `getMin`** · O(n) per call. Violates requirement.
 2. **Pair (value, min-so-far) on one stack — FINAL** · O(1)/O(n).
 
+> [!example]- 📊 Visual: paired stack frames carry running min
+> ```text
+>   Each stack frame stores (value, min-so-far at this level):
+> 
+>   After push(-2), push(0), push(-3):
+> 
+>      top  →  ┌──────────────┐
+>              │ val=-3 min=-3│   ← getMin = top.min
+>              ├──────────────┤
+>              │ val= 0 min=-2│
+>              ├──────────────┤
+>              │ val=-2 min=-2│
+>              └──────────────┘
+> 
+>   pop()  removes the top frame  →  the OLD min reappears
+>   automatically (carried by lower frame). No scanning needed.
+> 
+>   After pop():
+>              ┌──────────────┐
+>              │ val= 0 min=-2│   ← getMin = -2 again
+>              ├──────────────┤
+>              │ val=-2 min=-2│
+>              └──────────────┘
+> 
+>   Invariant: frame.min = min(frame.val, frame_below.min)
+> ```
+
 > [!info]- 🔍 Dry Run: push(-2), push(0), push(-3), getMin, pop, top, getMin
 > ```text
 > Stack stores (value, running_min) pairs.
@@ -214,6 +277,43 @@ Eval postfix expression like `["2","1","+","3","*"]`.
 ### 🧠 Pattern: Operand Stack
 
 > Number → push. Operator → pop two operands (right first!), apply, push result.
+
+> [!example]- 📊 Visual: operand stack evaluating postfix
+> ```text
+>   tokens = ["2", "1", "+", "3", "*"]   (means (2+1)*3)
+> 
+>   Numbers pile up; operators consume the TOP TWO.
+> 
+>     "2"  push       ┌─┐
+>                     │2│
+>                     └─┘
+> 
+>     "1"  push       ┌─┐
+>                     │1│
+>                     │2│
+>                     └─┘
+> 
+>     "+"  pop b=1, pop a=2, push a+b=3
+>                     ┌─┐
+>                     │3│
+>                     └─┘
+> 
+>     "3"  push       ┌─┐
+>                     │3│
+>                     │3│
+>                     └─┘
+> 
+>     "*"  pop b=3, pop a=3, push 3*3=9
+>                     ┌─┐
+>                     │9│
+>                     └─┘
+> 
+>   Final stack has one value: the answer.
+> 
+>   ORDER MATTERS:  a op b   (pop b FIRST, then a)
+>     "6 2 /"  →  pop b=2, pop a=6, compute 6/2 = 3  ✓
+>                 (not 2/6)
+> ```
 
 > [!info]- 🔍 Dry Run: tokens=["2","1","+","3","*"]
 > ```text
@@ -303,6 +403,32 @@ Generate all valid combinations of `n` pairs of parens.
 
 > Track `open` and `close` used so far. You may add `(` if `open < n`, and `)` if `close < open`. The recursion stack IS the stack.
 
+> [!example]- 📊 Visual: recursion tree (n=3)
+> ```text
+>   Constraints:  open ≤ n          (don't exceed budget)
+>                 close ≤ open      (never close before open)
+> 
+>   Tree of choices for n=3 (each level adds 1 char):
+> 
+>                     ""
+>                    /
+>                  "("                      (close<open blocks ')')
+>                  / \
+>               "((" "()"                   ← open<n
+>                /\    \
+>            "(((" "(()" "()("
+>             /     /\     /\
+>          "((()" "(())" "(()(" "()((" "()()" 
+>             ...continuing to length 2n=6...
+> 
+>     "((()))", "(()())", "(())()", "()(())", "()()()"   ← 5 leaves
+> 
+>   Each leaf = one valid string. Catalan(3) = 5.
+> 
+>   Left branch (add '('): always tries first; right branch (add ')'):
+>   only when close < open. Invalid prefixes like ")(" never start.
+> ```
+
 > [!info]- 🔍 Dry Run: n=2
 > ```text
 > dfs(cur, open, close):
@@ -368,6 +494,40 @@ Build FIFO queue with two LIFO stacks. Amortized O(1) per op.
 ### 🧠 Pattern: Input Stack + Output Stack
 
 > Push → `in`. Pop/Peek → if `out` empty, transfer all from `in` (reverses order). Each element moves at most twice → amortized O(1).
+
+> [!example]- 📊 Visual: two stacks, one reversal
+> ```text
+>   Stack `in` (push side)         Stack `out` (pop side)
+>   ─────────────────              ─────────────────────
+> 
+>   After push(1), push(2), push(3):
+> 
+>     in:   ┌─┐                      out:  (empty)
+>           │3│ ← top
+>           │2│
+>           │1│
+>           └─┘
+> 
+>   pop() — `out` empty, so DRAIN `in` into `out`
+>   (each pop+push reverses the order):
+> 
+>     in:   (empty)                  out:  ┌─┐
+>                                          │1│ ← top  (FIFO front!)
+>                                          │2│
+>                                          │3│
+>                                          └─┘
+> 
+>   Now pop returns 1 (the FIRST one pushed). ✓
+> 
+>   Next push(4) goes to `in` (don't disturb `out`):
+> 
+>     in:   ┌─┐                      out:  ┌─┐
+>           │4│                            │2│
+>           └─┘                            │3│
+>                                          └─┘
+> 
+>   Each element flips sides at most once → amortized O(1).
+> ```
 
 > [!info]- 🔍 Dry Run: push(1), push(2), pop, push(3), pop
 > ```text
@@ -444,6 +604,39 @@ Build LIFO with FIFO queue(s).
 
 > Single queue. On `push(x)`: enqueue x, then rotate (deq → enq) `size-1` times so x ends up front. O(n) push, O(1) pop.
 
+> [!example]- 📊 Visual: rotate-on-push so newest is at the front
+> ```text
+>   Queue (FIFO: front on LEFT, back on RIGHT):
+> 
+>   push(1):
+>     enqueue → [1]
+>     rotate 0 times → [1]            ← stack top = 1
+> 
+>   push(2):
+>     enqueue → [1, 2]
+>     rotate 1 time:
+>       dequeue 1, enqueue → [2, 1]   ← stack top = 2
+> 
+>   push(3):
+>     enqueue → [2, 1, 3]
+>     rotate 2 times:
+>       deq 2, enq → [1, 3, 2]
+>       deq 1, enq → [3, 2, 1]        ← stack top = 3
+> 
+>   Visually after 3 pushes:
+> 
+>      front                    back
+>       ↓                        ↓
+>      ┌───┬───┬───┐
+>      │ 3 │ 2 │ 1 │   ← LIFO order from front!
+>      └───┴───┴───┘
+> 
+>   pop() = dequeue front = 3 (last pushed)  ✓
+>   top() = peek front = 3                   ✓
+> 
+>   Cost shifted: push is O(n), but pop/top are O(1).
+> ```
+
 > [!info]- 🔍 Dry Run: push(1), push(2), push(3), pop, top
 > ```text
 > Setup:
@@ -516,6 +709,39 @@ Asteroids moving + or − direction; collisions destroy smaller, both if equal. 
 ### 🧠 Pattern: Stack with Pairwise Resolution
 
 > Push asteroid. While stack top is positive AND incoming negative AND incoming bigger → pop. If equal-and-opposite → pop top and skip incoming.
+
+> [!example]- 📊 Visual: collision happens only when +→ meets ←−
+> ```text
+>   Direction by sign:   +ve = moving RIGHT →    -ve = moving LEFT ←
+> 
+>   Collision condition:  stack top is +ve  AND  incoming is -ve
+>   (Same sign or opposite-but-diverging: no collision possible.)
+> 
+>   Example: [5, 10, -5]
+> 
+>      pos →   5+   10+        and    -5←  incoming
+>             ┌─┐  ┌──┐               ┌──┐
+>             │5│  │10│               │-5│
+>             └─┘  └──┘               └──┘
+> 
+>     stack: [5, 10]    incoming -5
+>     top=10 (+), incoming=-5 (←) → COLLISION
+>     |10| > |5| → incoming destroyed; stack unchanged.
+>     stack: [5, 10]  ✓
+> 
+>   Three collision outcomes when top(+) meets incoming(-):
+> 
+>     ┌──────────────────────┬────────────────────────────┐
+>     │ |top| < |incoming|   │ pop top, KEEP looping      │
+>     │ |top| = |incoming|   │ pop top, drop incoming     │
+>     │ |top| > |incoming|   │ drop incoming, keep top    │
+>     └──────────────────────┴────────────────────────────┘
+> 
+>   Patterns that NEVER collide on push:
+>     [+, +, +]   all moving same direction →
+>     [-, -, -]   all moving same direction ←
+>     [-, +]      diverging
+> ```
 
 > [!info]- 🔍 Dry Run: asteroids=[5, 10, -5]
 > ```text
@@ -594,6 +820,46 @@ Asteroids moving + or − direction; collisions destroy smaller, both if equal. 
 ### 🧠 Pattern: Two Stacks (Count + Current String)
 
 > On `[`: push current count and current string, reset both. On `]`: pop previous string and count; new current = prev + count × current.
+
+> [!example]- 📊 Visual: two parallel stacks save outer context
+> ```text
+>   s = "3[a2[c]]"
+> 
+>   Two stacks: counts (numbers) and strs (strings-so-far).
+>   On '[' we SNAPSHOT the outer context, then start fresh.
+>   On ']' we POP and combine:  cur = popped_str + cur * popped_k
+> 
+>   Trace at each '[' depth:
+> 
+>     before "3[":
+>       counts: [ ]            strs: [ ]            cur=""    k=3
+> 
+>     after  "3[":                              ← saved snapshot
+>       counts: ┌─┐            strs: ┌──┐
+>               │3│                  │""│       cur=""    k=0
+>               └─┘                  └──┘
+> 
+>     after  "3[a2[":          (inner level starts)
+>       counts: ┌─┐            strs: ┌──┐
+>               │2│ ← top            │"a"│ ← top
+>               │3│                  │""│       cur=""    k=0
+>               └─┘                  └──┘
+> 
+>     after  "3[a2[c":                          (push 'c' into cur)
+>       counts: same           strs: same       cur="c"
+> 
+>     after  "3[a2[c]":  pop  prev_k=2, prev_s="a"
+>       cur = "a" + "c"*2 = "acc"
+>       counts: ┌─┐            strs: ┌──┐
+>               │3│                  │""│       cur="acc"
+>               └─┘                  └──┘
+> 
+>     after  "3[a2[c]]": pop  prev_k=3, prev_s=""
+>       cur = "" + "acc"*3 = "accaccacc"
+>       counts: [ ]            strs: [ ]
+> 
+>   Like a CALL STACK: each '[' is a function call, each ']' a return.
+> ```
 
 > [!info]- 🔍 Dry Run: s="3[a2[c]]"
 > ```text
@@ -691,6 +957,37 @@ Canonicalize Unix path. `/`, `.`, `..`, multiple slashes.
 
 > Split by `/`. For each part: `""` or `.` → skip; `..` → pop if non-empty; else → push. Join with `/`.
 
+> [!example]- 📊 Visual: directory stack mirrors filesystem walk
+> ```text
+>   path = "/a/./b/../../c/"
+>   Split on '/'  →  ['', 'a', '.', 'b', '..', '..', 'c', '']
+> 
+>   Stack tracks the current directory path from root:
+> 
+>     part     action          stack          path so far
+>     ────     ───────────     ─────────      ────────────
+>     ''       skip            []             /
+>     'a'      push            [a]            /a
+>     '.'      skip (here)     [a]            /a
+>     'b'      push            [a, b]         /a/b
+>     '..'     pop             [a]            /a       ← step up
+>     '..'     pop             []             /        ← step up
+>     'c'      push            [c]            /c
+>     ''       skip (trail)    [c]            /c
+> 
+>   Visualize the directory pointer's journey:
+> 
+>     root /                     /         (start)
+>       └── a                   /a         push a
+>             └── b             /a/b       push b
+>                   ↑           /a         pop (..)
+>                   ↑           /          pop (..)
+>     root /                    /
+>       └── c                   /c         push c   ← FINAL
+> 
+>   Result = '/' + '/'.join(stack) = "/c"
+> ```
+
 > [!info]- 🔍 Dry Run: path="/a/./b/../../c/"
 > ```text
 > Setup:
@@ -754,6 +1051,41 @@ Eval `s` with `+ - * /`, no parens, integer division truncates toward 0.
 ### 🧠 Pattern: Stack of Terms with Precedence
 
 > Track `prev_op` and current `num`. On hitting next operator (or end), apply `prev_op` to push onto stack: `+num` push, `-num` push, `*` pop·num push, `/` pop÷num push. Final answer = sum of stack.
+
+> [!example]- 📊 Visual: stack of TERMS — precedence collapses at top
+> ```text
+>   Idea: each stack slot is a SIGNED TERM. Sum at end = answer.
+>   + and -  push a NEW term.
+>   * and /  fold into the TOP term (higher precedence binds tighter).
+> 
+>   Example: 3 + 2 * 2
+> 
+>     "3"   prev_op '+'   → push 3
+>            stack: [3]
+> 
+>     "+"   prev_op '+'   → push 2 (later)
+>     "2"            (queued as num=2)
+> 
+>     "*"   apply prev '+': push 2
+>            stack: [3, 2]
+>            prev_op = '*'
+> 
+>     "2"   end of string, apply prev '*':
+>            pop 2, multiply by 2 → push 4
+>            stack: [3, 4]
+> 
+>     ─────────────────────  visualize  ─────────────────────
+> 
+>             ┌─┐                 ┌─┐                  ┌─┐
+>             │3│  push  +2  →    │2│   *2 folds  →   │4│
+>             └─┘                 │3│                  │3│
+>                                 └─┘                  └─┘
+>             sum=3              sum=5                sum=7  ← answer
+> 
+>   Note: 14 - 3 / 2  →  stack [14, -3] then top folds with /2
+>                            → [14, -1]   sum = 13
+>   (Python int(-3/2) truncates toward 0 → -1, NOT -2)
+> ```
 
 > [!info]- 🔍 Dry Run: s="3+2*2"
 > ```text
@@ -853,6 +1185,41 @@ Eval `s` with `+ -` and **parentheses** (no `*` `/`).
 ### 🧠 Pattern: Sign Stack with Parentheses
 
 > Walk left-to-right. Track `result`, current `num`, and a running `sign` (+1 or -1). On `(`, push current `result` and `sign` onto stack and reset. On `)`, fold: `result = popped_sign * result + popped_result`.
+
+> [!example]- 📊 Visual: nested parens = snapshots of outside context
+> ```text
+>   Expression: 1 + ( 2 - ( 3 + 4 ) )
+> 
+>   At each '(' we SAVE (outer_result, outer_sign) and reset to a
+>   fresh sub-expression. At ')' we collapse the sub-result back in.
+> 
+>      ┌──────────────────────────────────────────┐
+>      │  outer:  result=1   sign=+1              │
+>      │   ┌────────────────────────────────────┐ │
+>      │   │ middle:  result=2   sign=-1        │ │
+>      │   │  ┌───────────────────────────────┐ │ │
+>      │   │  │ inner:  result = 3+4 = 7      │ │ │
+>      │   │  └───────────────────────────────┘ │ │
+>      │   │ middle = -1 * 7 + 2 = -5           │ │
+>      │   └────────────────────────────────────┘ │
+>      │  outer = +1 * (-5) + 1 = -4              │
+>      └──────────────────────────────────────────┘
+> 
+>   The stack mirrors this nesting:
+> 
+>       at innermost '('         stack (bot→top)
+>                                ┌─────┐
+>                                │ -1  │  ← sign before inner '('
+>                                │  2  │  ← result before inner '('
+>                                │ +1  │  ← sign before outer '('
+>                                │  1  │  ← result before outer '('
+>                                └─────┘
+> 
+>   At each ')' pop (sign, result) and do:
+>       result = popped_sign * current_result + popped_result
+> 
+>   Final answer = -4  ✓
+> ```
 
 > [!info]- 🔍 Dry Run: s="1+(2-(3+4))"
 > ```text
@@ -985,6 +1352,43 @@ Longest substring of properly matched parentheses.
 ### 🧠 Pattern: Stack of Indices with a Sentinel
 
 > Push **indices** (not chars). Initialize with `-1` as a sentinel "base of valid run". On `(`, push index. On `)`: pop top; if stack now empty, push current index as new base; else, current valid length = `i - top of stack`.
+
+> [!example]- 📊 Visual: sentinel index marks "wall" before a valid run
+> ```text
+>   s   =  )  (  )  (  )  )
+>   i   =  0  1  2  3  4  5
+> 
+>   Stack holds INDICES, never chars. Bottom = "wall" before run.
+>   length of current valid run = i - stack.top()
+> 
+>   Visual of stack contents at each step:
+> 
+>     start             [-1]                          (sentinel wall)
+> 
+>     i=0 ')'  pop -1 → []. empty → push 0 as new wall.
+>                       [0]                ← new wall
+> 
+>     i=1 '('  push.    [0, 1]
+> 
+>     i=2 ')'  pop 1 → [0]. length = 2 - 0 = 2.   best=2
+>                          ┌─┐
+>                          │0│ wall
+>                          └─┘
+>           ▲────▲   length=2  (substring "()")
+>           1    2
+> 
+>     i=3 '('  push.    [0, 3]
+> 
+>     i=4 ')'  pop 3 → [0]. length = 4 - 0 = 4.   best=4
+> 
+>           ▲────────────▲    length=4  (substring "()()")
+>           1    2  3   4
+> 
+>     i=5 ')'  pop 0 → []. empty → push 5 as new wall.
+>                       [5]
+> 
+>   Best = 4. The "wall" trick lets length = i - top with no special cases.
+> ```
 
 > [!info]- 🔍 Dry Run: s=")()())"
 > ```text

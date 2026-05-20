@@ -60,6 +60,45 @@ Max profit from one buy + one later sell.
 
 > One-pass: keep the cheapest price seen; profit at `i` = `price[i] - cheapest`.
 
+> [!example]- 📊 Visual: running min as a "valley floor"
+> ```text
+>   prices = [7, 1, 5, 3, 6, 4]
+>             0  1  2  3  4  5
+> 
+>   Imagine the price as a stock chart:
+> 
+>     7 │ █                                 
+>     6 │ █              █                  
+>     5 │ █    █         █                  
+>     4 │ █    █         █  █               
+>     3 │ █    █  █      █  █               
+>     2 │ █    █  █      █  █               
+>     1 │ █  █ █  █      █  █               
+>       └──────────────────────             
+>         0  1  2  3  4  5
+> 
+>   The "valley floor" lo tracks the lowest price seen so far (running min):
+> 
+>      day:   0    1    2    3    4    5
+>      price: 7    1    5    3    6    4
+>      lo:    7    1    1    1    1    1     ← only goes DOWN
+>      gap:   0    0    4    2    5    3     ← price − lo
+>                                ▲
+>                                ★ best profit = 5 (buy @1, sell @6)
+> 
+>   Geometric view:
+> 
+>          peak ●     ←── sell here
+>             ╱│
+>            ╱ │ gap = 5  ← we want to maximise this gap
+>           ╱  │
+>     ●────●   │     ←── lo, the valley floor (only drops)
+>     buy @1 (day 1)
+> 
+>   Selling AFTER the buy is enforced because we update lo BEFORE
+>   computing the profit at each day — the buy is always in the past.
+> ```
+
 > [!info]- 🔍 Dry Run: prices=[7,1,5,3,6,4]
 > ```text
 > Setup:
@@ -275,6 +314,45 @@ Replace at most `k` chars; find longest substring of one repeated char.
 
 > Window valid iff `windowLen - maxFreq ≤ k`. Track char counts and running `maxFreq`. **Don't need to decrement `maxFreq`** when shrinking — only the answer matters, and it can't shrink.
 
+> [!example]- 📊 Visual: window with max-freq dominance
+> ```text
+>   s = "A A B A B B A"
+>        0 1 2 3 4 5 6      k=1 (allowed replacements)
+> 
+>   Valid window iff (windowLen - maxFreq) ≤ k
+>     i.e. the # of NON-dominant chars in the window ≤ k
+> 
+>   Window [0..3] = "AABA":  cnt={A:3, B:1}, maxF=3
+>     winLen - maxF = 4 - 3 = 1 ≤ k=1 ✓ valid (replace the B with A)
+> 
+>     ┌─ window ─┐
+>     │ A A B A │ B B A
+>     │ ↑     ↑ │
+>     │ l     r │
+>     │  cnt: A=3, B=1   maxF=3   winLen=4
+>     │  non-dominant = 4-3 = 1  ≤ k ✓
+>     └─────────┘
+> 
+>   Window [0..4] = "AABAB": cnt={A:3, B:2}, maxF=3
+>     5 - 3 = 2 > 1 INVALID → shrink from left
+> 
+>     ┌─── window ───┐
+>     │ A A B A B │ B A
+>     │ ↑       ↑ │
+>     │ l       r │
+>     │  cnt: A=3, B=2  maxF=3  winLen=5
+>     │  non-dominant = 5-3 = 2  >  k ✗  → drop s[l], l++
+>     └───────────┘
+> 
+>   Key trick: `maxF` need NOT decrease when we shrink. Why?
+>     • The answer (best window length) is monotonic — it never shrinks.
+>     • A larger window than the current best requires maxF strictly
+>       larger than ANY maxF we've ever recorded.
+>     • So a "stale" maxF only blocks growth, never improves it falsely.
+> 
+>   The "majority char" implicitly dominates — we replace the rest.
+> ```
+
 > [!info]- 🔍 Dry Run: s="AABABBA", k=1
 > ```text
 > Setup:
@@ -374,6 +452,42 @@ Does `s2` contain any permutation of `s1` as a substring?
 
 > Window of size `len(s1)` over `s2`. Compare two 26-int arrays.
 
+> [!example]- 📊 Visual: fixed window + two frequency vectors
+> ```text
+>   s1 = "ab"          target counts t[26]:  a=1, b=1, rest=0
+>   s2 = "e i d b a o o o"
+>         0 1 2 3 4 5 6 7
+> 
+>   Slide a window of size |s1|=2 across s2:
+> 
+>     window 0: [e i] d b a o o o     w = {e:1, i:1}     ≠ t
+>     window 1:  e[i d]b a o o o      w = {i:1, d:1}     ≠ t
+>     window 2:  e i[d b]a o o o      w = {d:1, b:1}     ≠ t
+>     window 3:  e i d[b a]o o o      w = {b:1, a:1}     == t  ★
+> 
+>   Incremental update (when sliding from [l..r] to [l+1..r+1]):
+> 
+>           ┌──────────────────┐
+>      ──── │  current window  │ ────
+>      drop │                  │ add
+>      this │                  │ this
+>      char │                  │ char
+>      └────┘                  └────┘
+>      l                            r+1
+> 
+>      w[s2[l]]--          w[s2[r+1]]++
+> 
+>   Compare the two 26-int vectors:
+> 
+>            a  b  c  d  e ... 
+>      t  = [1, 1, 0, 0, 0, ...]
+>      w  = [1, 1, 0, 0, 0, ...]   ← window 3
+>            ───────────────────
+>            EQUAL → permutation found!
+> 
+>   Cost: O(n) slides, O(26) compare each → O(26·n) = O(n).
+> ```
+
 > [!info]- 🔍 Dry Run: s1="ab", s2="eidbaooo"
 > ```text
 > Setup:
@@ -448,6 +562,39 @@ Does `s2` contain any permutation of `s1` as a substring?
 **LC #438** · Medium
 
 Same as P4 but **return all starting indices**.
+
+> [!example]- 📊 Visual: collect every matching window start
+> ```text
+>   s = "c b a e b a b a c d"   p = "abc"   target t = {a:1,b:1,c:1}
+>        0 1 2 3 4 5 6 7 8 9
+> 
+>   Slide a fixed window of size |p|=3. Record start index on match.
+> 
+>      window  contents   counts            match?  start
+>      ──────  ────────   ────────────      ──────  ─────
+>      [0..2]   "cba"      a:1,b:1,c:1       YES ★  → 0
+>      [1..3]   "bae"      a:1,b:1,e:1       no
+>      [2..4]   "aeb"      a:1,e:1,b:1       no
+>      [3..5]   "eba"      e:1,b:1,a:1       no
+>      [4..6]   "bab"      b:2,a:1           no
+>      [5..7]   "aba"      a:2,b:1           no
+>      [6..8]   "bac"      b:1,a:1,c:1       YES ★  → 6
+>      [7..9]   "acd"      a:1,c:1,d:1       no
+> 
+>   Visualised on the string:
+> 
+>      c  b  a  e  b  a  b  a  c  d
+>      ┌─────┐                              ← match at 0
+>      │ c b a│
+>      └─────┘                              
+>                          ┌─────┐         ← match at 6
+>                          │ b a c│
+>                          └─────┘
+> 
+>   ⇒ output: [0, 6]
+> 
+>   Same skeleton as P4; the only diff is we COLLECT instead of bail-on-first.
+> ```
 
 > [!info]- 🔍 Dry Run: s="cbaebabacd", p="abc"
 > ```text
@@ -543,6 +690,50 @@ Smallest substring of `s` containing every char of `t` (with multiplicity).
 ### 🧠 Pattern: Variable Window + Need Counter
 
 > Track how many distinct chars still need their full count. Expand `r` until `need == 0`; then shrink `l` while still valid, recording min window.
+
+> [!example]- 📊 Visual: expand → contract dance
+> ```text
+>   s = "A D O B E C O D E B A N C"        t = "ABC"
+>        0 1 2 3 4 5 6 7 8 9 10 11 12
+> 
+>   Two phases alternate, driven by `missing` (chars still needed):
+> 
+>      ┌─────────────────────────────────┐
+>      │  EXPAND r  ─── until missing=0  │     valid window found
+>      └─────────────────────────────────┘
+>                       ↓
+>      ┌─────────────────────────────────┐
+>      │  CONTRACT l ─── while still     │     try to make it smaller
+>      │              valid; record min  │     (record best as we go)
+>      └─────────────────────────────────┘
+>                       ↓
+>      ┌─────────────────────────────────┐
+>      │  CONTRACT broke validity →      │     back to EXPAND
+>      │  missing > 0; resume EXPAND     │
+>      └─────────────────────────────────┘
+> 
+>   Snapshots:
+> 
+>     Expanded to first valid: r=5
+>       ┌───────────┐
+>       │A D O B E C│ O D E B A N C            len 6 → best
+>       └───────────┘
+>        l           r
+> 
+>     Contract until invalid: drop 'A', missing→1
+>       A│D O B E C│O D E B A N C              continues expanding...
+> 
+>     Reach r=10:
+>       A│D O B E C O D E B│A N C → window "DOBECODEBA" — extend more...
+> 
+>     Reach r=12, contract aggressively:
+>       ... E B│A N C│                          len 4 ★ minimum
+>             l     r
+> 
+>   ★ minimum window = "BANC" (indices 9..12)
+> 
+>   The window NEVER moves backward — each char enters once and exits once → O(n).
+> ```
 
 > [!info]- 🔍 Dry Run: s="ADOBECODEBANC", t="ABC"
 > ```text
@@ -681,6 +872,46 @@ Max in each window of size `k`.
 
 > Maintain a deque of **indices** whose values are decreasing. Head is always the max of current window. Push `r`: pop tail while smaller. Drop head if out of window.
 
+> [!example]- 📊 Visual: monotonic decreasing deque
+> ```text
+>   nums = [1, 3, -1, -3, 5, 3, 6, 7]      k = 3
+>           0  1   2   3  4  5  6  7
+> 
+>   Deque holds INDICES. Values at those indices are DECREASING front→back:
+> 
+>      front (max)  ──→  back (smaller, newer)
+>      ┌──────┬──────┬──────┐
+>      │ idx  │ idx  │ idx  │     values:   5  >  3  >  ??
+>      └──────┴──────┴──────┘
+> 
+>   Two invariants maintained on each push of new index r:
+> 
+>     (1) FROM THE BACK: while dq nonempty and nums[dq.back] < nums[r]
+>            pop back     ← anyone smaller than the new value can never
+>                           be the max while r is alive — drop them.
+> 
+>     (2) FROM THE FRONT: if dq.front <= r - k
+>            pop front    ← left edge of window slid past them — expired.
+> 
+>     window max = nums[dq.front]
+> 
+>   State evolution:
+> 
+>      r=0   x= 1   dq=[0]                                           
+>      r=1   x= 3   pop 0 (1<3); dq=[1]                              
+>      r=2   x=-1   dq=[1,2]      window full → max=nums[1]=3 → out=[3]
+>      r=3   x=-3   dq=[1,2,3]    front=1 in [1..3] keep → out=[3,3]
+>      r=4   x= 5   pop 3,2,1 all <5; dq=[4]                  out=[3,3,5]
+>      r=5   x= 3   dq=[4,5]                                  out=[3,3,5,5]
+>      r=6   x= 6   pop 5,4 (<6); dq=[6]                      out=[3,3,5,5,6]
+>      r=7   x= 7   pop 6 (<7); dq=[7]                        out=[3,3,5,5,6,7]
+> 
+>   ┌────────────────────────────────────────────────────┐
+>   │ Each index pushed once and popped at most once →   │
+>   │ amortised O(1) per step → O(n) total.              │
+>   └────────────────────────────────────────────────────┘
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,3,-1,-3,5,3,6,7], k=3
 > ```text
 > Setup:
@@ -788,6 +1019,40 @@ Average of best window of size `k`.
 
 Classic fixed window: running sum, slide by 1.
 
+> [!example]- 📊 Visual: textbook fixed window slide
+> ```text
+>   nums = [1, 12, -5, -6, 50, 3]      k = 4
+>           0   1   2   3   4  5
+> 
+>   Initial window (first k elements):
+> 
+>        ┌──────────────────┐
+>        │  1  12  -5  -6   │  50   3       sum = 2
+>        └──────────────────┘
+>          0   1   2    3
+> 
+>   Slide by 1: ADD new (right), DROP old (left). NEVER recompute.
+> 
+>      step 4:  drop nums[0]=1, add nums[4]=50
+>        ┌──────────────────┐
+>       1│ 12 -5  -6  50    │  3       sum: 2 - 1 + 50 = 51 ★
+>        └──────────────────┘
+>             1   2   3   4
+> 
+>      step 5:  drop nums[1]=12, add nums[5]=3
+>           ┌──────────────────┐
+>     1  12 │ -5  -6  50   3   │       sum: 51 - 12 + 3 = 42
+>           └──────────────────┘
+>                2   3   4   5
+> 
+>   Window sums:    [2,   51,   42]
+>   Best sum:        51  ★
+>   Best average:    51 / 4 = 12.75
+> 
+>   Incremental update = O(1) per slide → O(n) total. The "no recompute"
+>   discipline is what separates O(n) from O(n·k) brute force.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,12,-5,-6,50,3], k=4
 > ```text
 > Setup:
@@ -846,6 +1111,47 @@ Count subarrays containing **exactly** k distinct ints.
 ### 🧠 Pattern: "Exactly K" = "At most K" − "At most K−1"
 
 > Counting subarrays with **exactly** k distinct is hard directly. Define `atMost(k)` (variable window, O(n)). Then `exactly(k) = atMost(k) - atMost(k-1)`.
+
+> [!example]- 📊 Visual: difference of two "at most" counts
+> ```text
+>   Let f(k) = #subarrays with AT MOST k distinct ints.
+>   Then:   #{exactly k}  =  f(k) − f(k-1)
+> 
+>   Why? Partition all subarrays by their distinct count d:
+> 
+>      d:    0    1    2    3    4   ...
+>            ┌────┬────┬────┬────┬────┐
+>      cnt:  │ c0 │ c1 │ c2 │ c3 │ c4 │ ...
+>            └────┴────┴────┴────┴────┘
+> 
+>      f(2) = c0 + c1 + c2                ←  ≤ 2
+>      f(1) = c0 + c1                     ←  ≤ 1
+>      ─────────────────────────────
+>      f(2) − f(1) = c2 = #(exactly 2)  ✓
+> 
+>   Each f(k) is a vanilla variable-window count:
+> 
+>        l         r
+>        ▼         ▼
+>     [ ─── window with ≤ k distinct values ─── ]
+> 
+>     For every r, after shrinking until valid:
+>        # new subarrays ending at r = (r − l + 1)
+>     Accumulate.
+> 
+>   Example: nums = [1, 2, 1, 2, 3]   k = 2
+> 
+>      f(2): all subarrays — most are valid except those touching 3
+>            in a way that brings 3 distinct values.    →  12
+>      f(1): only runs of a single value.               →   5
+> 
+>      exactly(2) = 12 − 5 = 7  ✓
+> 
+>   ┌──────────────────────────────────────────────┐
+>   │ Idiom: "EXACTLY k" → "atMost(k) − atMost(k-1)"│
+>   │ Works for distinct count, sum, odd count, … │
+>   └──────────────────────────────────────────────┘
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,2,1,2,3], k=2
 > ```text
@@ -945,6 +1251,42 @@ Longest subarray with at most 2 distinct values.
 
 Direct application: `atMost(2)` from P9 (but return max window len, not count).
 
+> [!example]- 📊 Visual: at-most-2-distinct window
+> ```text
+>   fruits = [1, 2, 1, 2, 3, 2, 2]
+>             0  1  2  3  4  5  6
+> 
+>   You can carry at most 2 BASKETS (= 2 distinct fruit types).
+>   Find the longest contiguous stretch obeying this rule.
+> 
+>   Window growth (cnt.size ≤ 2 = valid):
+> 
+>      r=0:   [1]                              cnt={1:1}                  len 1
+>      r=1:   [1 2]                            cnt={1:1, 2:1}             len 2
+>      r=2:   [1 2 1]                          cnt={1:2, 2:1}             len 3
+>      r=3:   [1 2 1 2]                        cnt={1:2, 2:2}    ★ best=4
+>      r=4:   [1 2 1 2 3] ← 3 distinct → SHRINK
+>             drop 1 → [2 1 2 3]   still 3
+>             drop 2 → [1 2 3]     still 3
+>             drop 1 → [2 3]       2 distinct ✓               len 2
+>      r=5:   [2 3 2]                          cnt={2:2, 3:1}             len 3
+>      r=6:   [2 3 2 2]                        cnt={2:3, 3:1}             len 4 (tie)
+> 
+>   Visualised as a sliding pane that GROWS on r, COLLAPSES on the left
+>   when a 3rd distinct type appears:
+> 
+>      1  2  1  2  3  2  2
+>      ┌──────────┐                        4 fruits, baskets {1,2} ★
+>      │ 1 2 1 2  │ 3  2  2
+>      └──────────┘
+>                  ┌──────────┐            collapse + regrow
+>      1 2 1 2  3  │ 2  3  2  │  2         (3rd type 3 entered, shrink past 1s)
+>                  └──────────┘
+> 
+>   ★ Best window length = 4.
+>   This IS the at-most-k template with k=2 baked in.
+> ```
+
 > [!info]- 🔍 Dry Run: fruits=[1,2,1,2,3,2,2]
 > ```text
 > Setup:
@@ -1013,6 +1355,44 @@ Direct application: `atMost(2)` from P9 (but return max window len, not count).
 Longest subarray of 1s after flipping **at most k zeros**.
 
 ### 🧠 Pattern: Variable Window with ≤ k "Violations"
+
+> [!example]- 📊 Visual: window with ≤ k zeros (= k flips)
+> ```text
+>   nums = [1 1 1 0 0 0 1 1 1 1 0]      k = 2
+>           0 1 2 3 4 5 6 7 8 9 10
+> 
+>   Treat zeros as "violations". A window is valid iff #zeros ≤ k.
+>   We're after the LONGEST valid window.
+> 
+>   1s look like solid bars; 0s are gaps:
+> 
+>      idx:   0  1  2  3  4  5  6  7  8  9  10
+>      bit:   █  █  █  ░  ░  ░  █  █  █  █  ░
+> 
+>   Grow window from the right; when zeros>k, shrink from the left:
+> 
+>      r=4 (zeros=2 ≤ k):     [█ █ █ ░ ░]               len 5 ★
+> 
+>      r=5 (zeros=3 > k):     INVALID → shrink past leftmost zero
+>                              ─ ─ ─[░ ░ ░]  →  ─ ─ ─ ─[░ ░]  zeros=2  ✓
+>                              len drops to 2 then we keep growing.
+> 
+>      r=9 (zeros=2):         keep growing — region [4..9] = ░ ░ █ █ █ █
+>                              + earlier non-zeros from [3..9]?
+>                              actual window: [3 .. 9] uses 2 zeros, len 7? 
+>                              Wait — recalc:
+>                              best window is [3..9]?  zeros at 3,4 = 2 → valid
+>                              ─ ─ ─[░ ░ ░ █ █ █ █]?  zeros=3 → no.
+>                              Shift l to 4:  ─ ─ ─ ─[░ ░ █ █ █ █]  zeros=2 ✓
+>                                                   len = 6 ★
+> 
+>      r=10: a new zero enters, zeros=3 → shrink past one zero → len stays 6.
+> 
+>   ┌──────────────────────────────────────────────┐
+>   │ "At most k bad" → variable window + counter. │
+>   │ Same skeleton as "at most k distinct".       │
+>   └──────────────────────────────────────────────┘
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,1,1,0,0,0,1,1,1,1,0], k=2
 > ```text
@@ -1086,6 +1466,53 @@ Count subarrays with **exactly** k odd numbers.
 ### Approach
 
 Same trick as P9: `exactly(k) = atMost(k) - atMost(k-1)`. Window counter = number of odds.
+
+> [!example]- 📊 Visual: reframe "exactly k odds" as a distinct-count problem
+> ```text
+>   nums  = [1, 1, 2, 1, 1]      k = 3
+>            ○  ○  ●  ○  ○         ○ = odd (target)   ● = even (filler)
+>            0  1  2  3  4
+> 
+>   Reduction:  treat each odd as a "+1 token". Then "exactly k odds" =
+>               "exactly k tokens in the window" = same as P9 atMost trick.
+> 
+>      f(k) = #subarrays with AT MOST k odd numbers
+> 
+>      answer = f(k) − f(k-1)
+> 
+>   Building f via variable window — `odds` is the in-window counter:
+> 
+>      l                 r
+>      ▼                 ▼
+>     [ window with ≤ k odd numbers ]
+> 
+>      while odds > k:
+>          if nums[l] is odd: odds--
+>          l++
+>      total += r − l + 1
+> 
+>   For nums=[1,1,2,1,1], k=3:
+> 
+>     f(3) counts ALL subarrays except those with 4+ odds:
+>       only [0..4] = [1,1,2,1,1] has 4 odds → exclude it.
+>       Every other subarray valid.   →  14
+> 
+>     f(2) is more restrictive:
+>       3-odd subarrays excluded: [0..3] [0..4] [1..4] etc.  →  12
+> 
+>     answer = 14 − 12 = 2
+> 
+>   The two witness subarrays:
+> 
+>      ┌────────────┐                 ┌────────────┐
+>      │ 1  1  2  1 │ 1                1 │ 1  2  1  1 │
+>      └────────────┘                    └────────────┘
+>       indices 0..3                       indices 1..4
+>       odds = 3 ✓                         odds = 3 ✓
+> 
+>   "Map your target predicate (odd? prime? = X?) onto a counter,
+>    then apply the at-most/exactly framework."
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,1,2,1,1], k=3
 > ```text

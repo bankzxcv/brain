@@ -47,6 +47,33 @@ status: in-progress
 
 **LC #136** · Easy
 
+> [!example]- 📊 Visual: XOR cancellation
+> ```text
+>   nums = [4, 1, 2, 1, 2]
+> 
+>   Run XOR across all:    4 ^ 1 ^ 2 ^ 1 ^ 2
+> 
+>   XOR is commutative + associative, so reorder:
+>     = 4 ^ (1 ^ 1) ^ (2 ^ 2)
+>     =      4   ^   0   ^   0
+>     =      4
+> 
+>   In binary:
+>     4 = 100
+>     1 = 001
+>     2 = 010
+>     1 = 001
+>     2 = 010
+>     ──────  XOR column-wise (sum mod 2 per bit)
+>     bit 0: 0+1+0+1+0 mod 2 = 0
+>     bit 1: 0+0+1+0+1 mod 2 = 0
+>     bit 2: 1+0+0+0+0 mod 2 = 1
+>     → 100 = 4 ✓
+> 
+>   Identity: x ^ x = 0   and   x ^ 0 = x
+>   Every duplicate cancels; the singleton is what remains.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[4,1,2,1,2]
 > ```text
 > out = 0
@@ -77,6 +104,31 @@ status: in-progress
 ## P2: Single Number II
 
 **LC #137** · Medium
+
+> [!example]- 📊 Visual: column-wise sum mod 3
+> ```text
+>   nums = [2, 2, 3, 2]
+> 
+>   Stack in binary (4 bits for clarity):
+> 
+>     2 = 0 0 1 0
+>     2 = 0 0 1 0
+>     3 = 0 0 1 1
+>     2 = 0 0 1 0
+>     ────────────  sum each bit column
+>     sum 0 0 4 1
+>     mod3 0 0 1 1  ← result bits  =  0011 = 3
+> 
+>   Why mod 3?
+>     Each "appears 3 times" number contributes 3 to every column where it
+>     has a 1-bit → mod 3 = 0  (it cancels).
+>     The unique number contributes 1 (its own bit) → mod 3 = 1 (it remains).
+> 
+>   Generalizes: for "everyone appears k times except one", use mod k.
+>     - k=2  →  XOR (the original Single Number)
+>     - k=3  →  this trick
+>     - k=4  →  mod 4 per bit
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[2,2,3,2]
 > ```text
@@ -128,6 +180,37 @@ status: in-progress
 
 **LC #260** · Medium
 
+> [!example]- 📊 Visual: partition by a bit where a ⊕ b differ
+> ```text
+>   nums = [1, 2, 1, 3, 2, 5]    two unique: a=3, b=5
+> 
+>   Step 1 — XOR everything → a ^ b:
+>     1^2^1^3^2^5 = (1^1)^(2^2) ^ 3 ^ 5 = 0 ^ 0 ^ 3 ^ 5 = 3 ^ 5 = 6
+> 
+>     3 = 011
+>     5 = 101
+>     ⊕
+>     6 = 110     ← bits where a and b DISAGREE
+> 
+>   Step 2 — isolate lowest set bit:  6 & -6 = 010   (bit 1)
+> 
+>   Step 3 — partition nums by "does bit 1 of x equal 1?"
+> 
+>          group A (bit1 = 1)        group B (bit1 = 0)
+>          ────────────────          ────────────────
+>          2 = 010                   1 = 001
+>          3 = 011                   1 = 001
+>          2 = 010                   5 = 101
+> 
+>          XOR group A: 2^3^2 = 3    XOR group B: 1^1^5 = 5
+> 
+>   Result: [3, 5] ✓
+> 
+>   Why does this work? Because a and b differ on the chosen bit, they fall
+>   into different groups. Each duplicate falls entirely into ONE group
+>   (it agrees with itself on every bit), so duplicates still cancel.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,2,1,3,2,5]
 > ```text
 > XOR all: 1^2^1^3^2^5 = (1^1)^(2^2)^3^5 = 0^0^3^5 = 3^5 = 6 (binary 110)
@@ -175,6 +258,31 @@ status: in-progress
 
 **LC #191** · Easy
 
+> [!example]- 📊 Visual: x & (x-1) drops lowest 1
+> ```text
+>   n = 11 = 1011
+> 
+>     iter 1:   n = 1011        Count = 1
+>                   n - 1 = 1010
+>                   n &= 1010 → 1010
+> 
+>     iter 2:   n = 1010        Count = 2
+>                   n - 1 = 1001
+>                   n &= 1001 → 1000
+> 
+>     iter 3:   n = 1000        Count = 3
+>                   n - 1 = 0111
+>                   n &= 0111 → 0000
+> 
+>   Each iteration drops EXACTLY ONE set bit.
+>   Loop runs popcount(n) times, not 32. O(set bits).
+> 
+>   Why does n & (n-1) drop the lowest 1?
+>     Subtracting 1 from "…X1 0…0" flips that lowest 1 to 0 and all the
+>     trailing zeros to 1: "…X0 1…1". ANDing with n keeps the upper "X"
+>     bits and zeros out the lowest-1-and-below region.
+> ```
+
 > [!info]- 🔍 Dry Run: n=11 (binary 1011)
 > ```text
 > count = 0
@@ -218,6 +326,28 @@ status: in-progress
 
 **LC #338** · Easy
 
+> [!example]- 📊 Visual: popcount(i) = popcount(i>>1) + (i & 1)
+> ```text
+>   i        binary    bits[i>>1]    (i&1)   bits[i]
+>   ──────────────────────────────────────────────────
+>   0        000          –            –        0
+>   1        001       bits[0]=0       1        1
+>   2        010       bits[1]=1       0        1
+>   3        011       bits[1]=1       1        2
+>   4        100       bits[2]=1       0        1
+>   5        101       bits[2]=1       1        2
+> 
+>   The recurrence "drop the last bit, ask the prefix":
+> 
+>      i = b_{k-1} b_{k-2} … b_1 b_0
+>            └──── i >> 1 ────┘  └─ b_0
+> 
+>   popcount(i) = popcount(prefix) + b_0
+> 
+>   Bottom-up DP fills bits[0..n] in O(n) with one add each — no per-number
+>   loop over 32 bits needed.
+> ```
+
 > [!info]- 🔍 Dry Run: n=5
 > ```text
 > bits[0] = 0
@@ -249,6 +379,39 @@ status: in-progress
 ## P6: Missing Number
 
 **LC #268** · Easy
+
+> [!example]- 📊 Visual: XOR indices AND values, everything pairs except the missing
+> ```text
+>   nums = [3, 0, 1]      n=3, expected set = {0, 1, 2, 3}
+> 
+>   Pair up indices 0..n with values nums[0..n-1] (use n itself as the
+>   "extra" index that has no nums entry):
+> 
+>     idx :  0   1   2   3
+>     val :  3   0   1   –
+> 
+>   XOR everything:
+>     result = n XOR (i₀ ^ v₀) XOR (i₁ ^ v₁) XOR (i₂ ^ v₂)
+>            = 3 ^ (0^3) ^ (1^0) ^ (2^1)
+> 
+>   Re-order (XOR is commutative):
+>     = (3^3) ^ (0^0) ^ (1^1) ^ 2
+>     =   0   ^   0   ^   0   ^ 2
+>     = 2     ← the missing number
+> 
+>   Visual: each integer in {0..n} that appears (as index OR value) pairs
+>   with itself and cancels. The one missing from values stays unpaired.
+> 
+>   Bit-column view (4 bits):
+>     0 = 0000
+>     1 = 0001
+>     2 = 0010   ← missing
+>     3 = 0011
+>     ────
+>     all values:  3,0,1  =  0011, 0000, 0001
+>     all indices: 0,1,2,3 = 0000, 0001, 0010, 0011
+>     XOR of all = 0010 = 2 ✓
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[3,0,1] (n=3, should contain 0..3 but missing 2)
 > ```text
@@ -283,6 +446,30 @@ status: in-progress
 ## P7: Reverse Bits
 
 **LC #190** · Easy
+
+> [!example]- 📊 Visual: shovel bits from n's right end to result's left end
+> ```text
+>   n     bit positions:  31 30 ... 2  1  0
+>   result bit positions: 31 30 ... 2  1  0   (we build it MSB-first)
+> 
+>   At each step:
+>     result = (result << 1) | (n & 1)
+>     n      = n >> 1
+> 
+>   Conceptually:
+> 
+>     n  : … b₃₁ b₃₀ b₂₉ … b₂ b₁ b₀
+>                                  │   pop from right
+>                                  ▼
+>     result : … b₀ b₁ b₂ … b₂₉ b₃₀ b₃₁
+>                              ▲
+>                              push from right (after left-shift)
+> 
+>   After 32 iterations:
+>     result[31-i] = n[i]   for every i  → fully reversed.
+> 
+>   Trick for repeated calls: pre-compute 8-bit reverse table → 4 lookups.
+> ```
 
 > [!info]- 🔍 Dry Run: n=43261596 (binary 00000010100101000001111010011100)
 > ```text
@@ -325,6 +512,41 @@ status: in-progress
 ## P8: Sum of Two Integers
 
 **LC #371** · Medium
+
+> [!example]- 📊 Visual: half-adder repeated until carry vanishes
+> ```text
+>   Truth table per bit:
+>     a  b   sum  carry
+>     0  0    0     0       (sum = a XOR b)
+>     0  1    1     0       (carry = a AND b)
+>     1  0    1     0
+>     1  1    0     1
+> 
+>   So:   sum-without-carry  = a ^ b
+>         carry-bits         = (a & b) << 1
+>         total              = (a ^ b) + ((a & b) << 1)   ← still has +!
+> 
+>   Loop until the carry is 0:
+> 
+>   a = 010 (2)        b = 011 (3)
+>     ┌─────────────────────────────────┐
+>     │ iter1                           │
+>     │   a^b  = 010 ^ 011 = 001        │
+>     │   a&b  = 010 & 011 = 010        │
+>     │   carry= 010 << 1  = 100        │
+>     │   a ← 001,   b ← 100            │
+>     ├─────────────────────────────────┤
+>     │ iter2                           │
+>     │   a^b  = 001 ^ 100 = 101        │
+>     │   a&b  = 001 & 100 = 000        │
+>     │   carry= 000                    │
+>     │   a ← 101,   b ← 000  → STOP    │
+>     └─────────────────────────────────┘
+>   result = 101 = 5 = 2 + 3 ✓
+> 
+>   Why it terminates: carry shifts LEFT each iteration; in 32 bits it
+>   eventually shifts off the end. O(32) per add.
+> ```
 
 > [!info]- 🔍 Dry Run: a=2, b=3
 > ```text
@@ -376,6 +598,41 @@ Given `nums` and queries `[xi, mi]`, return max `xi XOR nums[j]` for each query 
 ### 🧠 Pattern: Offline Queries + Sorted Insertion into Bit Trie
 
 > Process queries in increasing order of `mi`. Sort `nums` ascending. For each query, insert into a binary trie all nums ≤ mi (incrementally). Then perform max-XOR query against the trie (P6 in Tries).
+
+> [!example]- 📊 Visual: bit trie + greedy "pick opposite bit"
+> ```text
+>   Bit trie for {0, 1} (3-bit illustration):
+> 
+>                       root
+>                      /    \
+>                    0        (no 1 path yet)
+>                  /   \
+>                0       (n/a)
+>              /   \
+>            0       1
+>           ●●●     ●●●
+>          val=0   val=1
+> 
+>   To compute max XOR with x = 3 (binary 011):
+>     • At each level, prefer the OPPOSITE bit (gives a 1 in the XOR).
+>     • If the opposite branch is missing, follow the only branch you have.
+> 
+>     x=011
+>     level 2 (MSB):  x-bit=0  →  prefer 1.  Only "0" exists → follow it.   result bit: 0
+>     level 1:        x-bit=1  →  prefer 0.  Only "0" exists → follow it.   result bit: 1
+>     level 0:        x-bit=1  →  prefer 0.  "0" exists      → follow it.   result bit: 1
+> 
+>     max XOR = 011 = 3   (matches 3 XOR 0 = 3)
+> 
+>   ─────────────────────────────────────────
+>   Offline trick for "nums[j] ≤ mi" constraint:
+>     1. Sort nums ascending.
+>     2. Sort queries by mi ascending  (remember original index).
+>     3. Sweep queries; before each, insert into trie all nums ≤ current mi.
+>     4. Run max-XOR query as above.
+> 
+>   This way each nums value is inserted ONCE total → O((n+q) · BITS).
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[0,1,2,3,4], queries=[[3,1],[1,3],[5,6]]
 > ```text

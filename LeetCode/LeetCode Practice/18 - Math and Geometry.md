@@ -41,6 +41,29 @@ status: in-progress
 
 **LC #48** · Medium · **In place**
 
+> [!example]- 📊 Visual: transpose + reverse-each-row = 90° rotation
+> ```text
+>   Original          After transpose         After row-reverse
+>   1 2 3             1 4 7                   7 4 1
+>   4 5 6     ──→     2 5 8       ──→         8 5 2
+>   7 8 9             3 6 9                   9 6 3
+> 
+>   Transpose: swap M[i][j] ↔ M[j][i] for i < j
+>     (mirrors the matrix across the main diagonal ↘)
+> 
+>          ↘ diag
+>      1 . .
+>      ↕ 5 .
+>      ↕ ↕ 9     swaps: (0,1)↔(1,0), (0,2)↔(2,0), (1,2)↔(2,1)
+> 
+>   Then reverse each row → final rotation.
+> 
+>   Why this works:
+>     A 90° clockwise rotation maps (r, c) → (c, n-1-r).
+>     Transpose maps (r, c) → (c, r).
+>     Then reversing row r maps (c, r) → (c, n-1-r). ✓
+> ```
+
 > [!info]- 🔍 Dry Run: matrix=[[1,2,3],[4,5,6],[7,8,9]]
 > ```text
 > Step 1 — Transpose (swap M[i][j] ↔ M[j][i] for i<j):
@@ -86,6 +109,36 @@ status: in-progress
 ## P2: Spiral Matrix
 
 **LC #54** · Medium
+
+> [!example]- 📊 Visual: shrink boundaries on each lap
+> ```text>
+>   Starting matrix:
+>      1 → 2 → 3
+>                ↓
+>      4 → 5    6
+>      ↑        ↓
+>      7 ← 8 ← 9
+> 
+>   Path: 1 2 3 6 9 8 7 4 5
+> 
+>   Boundary walk:
+>     ┌─ top
+>     │  ┌──────────┐
+>     │  │ 1  2  3  │  ← walk left→right, then top++
+>     │  │ 4  5  6  │
+>     │  │ 7  8  9  │  ← walk right→left, then bottom--
+>     │  └──────────┘
+>     │  ↑          ↑
+>     │  left     right
+>     │              walk top→bottom on right col, then right--
+>     │              walk bottom→top on left col, then left++
+> 
+>   After 1st lap: top=1, bottom=1, left=1, right=1   (only [5] left)
+>   2nd lap visits just 5.
+> 
+>   The two inner `if`s (top ≤ bottom, left ≤ right) prevent revisits
+>   when the matrix collapses to a single row or column mid-spiral.
+> ```
 
 > [!info]- 🔍 Dry Run: M=[[1,2,3],[4,5,6],[7,8,9]]
 > ```text
@@ -138,6 +191,37 @@ status: in-progress
 ## P3: Set Matrix Zeroes
 
 **LC #73** · Medium · **In place, O(1) extra**
+
+> [!example]- 📊 Visual: first row/col as flag bits
+> ```text
+>   Input:                Stash whether row0/col0 have any 0:
+>     1 1 1                  first_row_has_0 = false
+>     1 0 1                  first_col_has_0 = false
+>     1 1 1
+> 
+>   Step A — scan inner cells (r≥1, c≥1).
+>   For each 0 found at (r,c), MARK by setting M[r][0]=0 and M[0][c]=0:
+> 
+>             c=0 c=1 c=2
+>     r=0:    1   ◦  1     ← col flags live in row 0
+>     r=1:    ◦  [0] 1     ← row flags live in col 0
+>     r=2:    1   1  1
+> 
+>     (◦ = marker bit overlaid on first row/col)
+> 
+>   Step B — for every inner cell (r≥1, c≥1):
+>     if M[r][0]==0 or M[0][c]==0  → set M[r][c]=0
+> 
+>            1 0 1
+>            0 0 0
+>            1 0 1
+> 
+>   Step C — apply the two stashed flags to first row/col.
+>     (Here both were false, so nothing extra to do.)
+> 
+>   We reused the existing matrix as O(1) extra storage — only TWO scalars
+>   needed (the two stashed booleans).
+> ```
 
 > [!info]- 🔍 Dry Run: matrix=[[1,1,1],[1,0,1],[1,1,1]]
 > ```text
@@ -201,6 +285,31 @@ status: in-progress
 
 **LC #202** · Easy
 
+> [!example]- 📊 Visual: digit-square sequence → reaches 1 or cycles
+> ```text
+>   sum_of_digit_squares(x):  e.g.  19 → 1² + 9² = 1 + 81 = 82
+> 
+>   n=19 trajectory:
+>     19 → 82 → 68 → 100 → 1 → 1 → 1 …       HAPPY ✓
+> 
+>     19  ──▶  82  ──▶  68  ──▶  100  ──▶  1  ↻
+> 
+>   n=2 trajectory:
+>     2 → 4 → 16 → 37 → 58 → 89 → 145 → 42 → 20 → 4 → 16 → …
+> 
+>          ┌─────────────────────────────────────┐
+>          ▼                                     │
+>     2 → 4 ─→ 16 ─→ 37 ─→ 58 ─→ 89 ─→ 145 ─→ 42 ─→ 20
+>          ↑___________________________________________│  (cycle, never reaches 1)
+> 
+>   Floyd's tortoise & hare on the integer state graph:
+>     - If fast lands on 1     → happy (true)
+>     - If slow == fast (≠ 1)  → cycle detected → not happy
+> 
+>   Why is the sequence bounded? For any x, the next value is at most
+>   81·(#digits of x), which shrinks fast. State space is finite → must cycle.
+> ```
+
 > [!info]- 🔍 Dry Run: n=19
 > ```text
 > Helper: next_n(x) sums squares of digits.
@@ -259,6 +368,35 @@ status: in-progress
 
 **LC #50** · Medium
 
+> [!example]- 📊 Visual: binary exponentiation tree
+> ```text
+>   Compute  2^10.   Binary of 10 = 1010₂  →  10 = 8 + 2.
+> 
+>   So  2^10 = 2^8 · 2^2.
+> 
+>   Build successive squares of x  (each is x^(2^k)):
+> 
+>          x = 2
+>          ↓ square
+>          x² = 4              ← used (bit 1 of n is 1)
+>          ↓ square
+>          x⁴ = 16
+>          ↓ square
+>          x⁸ = 256            ← used (bit 3 of n is 1)
+> 
+>   Multiply the chosen ones:
+> 
+>     result = x² · x⁸  =  4 · 256  =  1024
+> 
+>   Trace of the while loop (n in binary, low bit first):
+>     n=1010   bit0=0  skip mult,   x: 2→4,   n→101
+>     n= 101   bit0=1  result*=x→4, x: 4→16,  n→ 10
+>     n=  10   bit0=0  skip mult,   x:16→256, n→  1
+>     n=   1   bit0=1  result*=x→1024, n→0    EXIT
+> 
+>   O(log n) multiplications instead of n. Negative n: flip x=1/x, n=-n.
+> ```
+
 > [!info]- 🔍 Dry Run: x=2.0, n=10
 > ```text
 > Iterative fast exponentiation:
@@ -315,6 +453,40 @@ status: in-progress
 ## P6: Multiply Strings
 
 **LC #43** · Medium
+
+> [!example]- 📊 Visual: schoolbook long-multiplication grid
+> ```text
+>   num1 = "123"   num2 = "45"     answer = "5535"
+> 
+>   Schoolbook layout:
+> 
+>           1   2   3
+>         ×     4   5
+>         ─────────────
+>           1   2   3        ← (5 · "123") column-shifted to units place
+>         · 5  10  15
+>         (carries fold in: 5·3=15→5 carry1, 5·2+1=11→1 carry1, 5·1+1=6)
+>         →     6   1   5
+>           4   8  12         ← (4 · "123") shifted one place left
+>         (4·3=12→2 c1, 4·2+1=9, 4·1=4)
+>         →   4   9   2 _
+>         ─────────────────
+>           5   5   3   5
+> 
+>   In-array indexing trick: digit num1[i] · num2[j] contributes to result
+>   positions (i+j, i+j+1).   p2 holds units; p1 holds carry.
+> 
+>     index in res :    0     1     2     3     4
+>     for i=2,j=1 :                       p1=3  p2=4
+>     for i=2,j=0 :                 p1=2  p2=3
+>     for i=1,j=1 :                 p1=2  p2=3
+>     for i=1,j=0 :           p1=1  p2=2
+>     for i=0,j=1 :           p1=1  p2=2
+>     for i=0,j=0 :     p1=0  p2=1
+> 
+>   After all contributions + carry propagation:
+>     res = [0, 5, 5, 3, 5]  →  strip leading 0  →  "5535"
+> ```
 
 > [!info]- 🔍 Dry Run: num1="123", num2="45"
 > ```text
@@ -399,6 +571,31 @@ status: in-progress
 
 **LC #66** · Easy
 
+> [!example]- 📊 Visual: carry propagates right-to-left
+> ```text
+>   digits = [1, 2, 9]    add 1
+> 
+>     [ 1 ][ 2 ][ 9 ]
+>                 ▲
+>                 │  9 + 1 = 10  →  write 0, carry 1
+>     [ 1 ][ 2 ][ 0 ]
+>           ▲
+>           │  2 + 1 = 3  →  write 3, done (no carry)
+>     [ 1 ][ 3 ][ 0 ]      → 130 ✓
+> 
+>   ─────────────────────────────────────────
+>   Worst case digits = [9, 9, 9]:
+> 
+>     [ 9 ][ 9 ][ 9 ]
+>     [ 9 ][ 9 ][ 0 ]  carry
+>     [ 9 ][ 0 ][ 0 ]  carry
+>     [ 0 ][ 0 ][ 0 ]  carry off the front → PREPEND 1
+>   [1][ 0 ][ 0 ][ 0 ]      → 1000 ✓
+> 
+>   In code: if any digit is < 9 we increment and return; else set to 0 and
+>   continue. If we exit the loop we walked off the front → prepend 1.
+> ```
+
 > [!info]- 🔍 Dry Run: digits=[1,2,9]
 > ```text
 > i=2: digits[2]=9. Not < 9 → set to 0; continue loop with carry implicit
@@ -435,6 +632,33 @@ status: in-progress
 ## P8: Random Pick with Weight
 
 **LC #528** · Medium · Design
+
+> [!example]- 📊 Visual: weights as variable-width bins on a number line
+> ```text
+>   weights w = [1, 3, 2, 4]      total = 10
+>   prefix    = [1, 4, 6, 10]
+> 
+>   Place buckets back-to-back on the number line [0, 10):
+> 
+>     index:    0       1            2         3
+>            ┌───┬─────────────┬─────────┬─────────────────┐
+>            │ 1 │      3      │    2    │        4        │
+>            └───┴─────────────┴─────────┴─────────────────┘
+>     0      1                 4         6                 10
+> 
+>   To sample with the desired weights:
+>     1. r = uniform[0, 10)
+>     2. answer = bisect_left(prefix, r)
+>        (first prefix value strictly greater than r → that bucket)
+> 
+>   Example draws:
+>     r = 0.4  → falls in bin 0  → return 0   (prob 1/10)
+>     r = 2.3  → falls in bin 1  → return 1   (prob 3/10)
+>     r = 5.7  → falls in bin 2  → return 2   (prob 2/10)
+>     r = 8.0  → falls in bin 3  → return 3   (prob 4/10)
+> 
+>   O(n) build; O(log n) per query (binary search into prefix array).
+> ```
 
 > [!info]- 🔍 Dry Run: w=[1, 3, 2, 4], pickIndex
 > ```text
@@ -498,6 +722,49 @@ Count pairs `(i, j)` with `i < j` and `nums[i] > 2 * nums[j]`.
 ### 🧠 Pattern: Modified Merge Sort
 
 > Pure brute force = O(n²). Merge sort gives O(n log n) by counting "reverse pairs" during the **merge** step: when we have two sorted halves, for each i in left, count how many j in right satisfy `left[i] > 2*right[j]`. Two pointers — both monotonic.
+
+> [!example]- 📊 Visual: count cross-pairs during merge sort
+> ```text
+>   nums = [1, 3, 2, 3, 1]    count pairs (i<j) with nums[i] > 2·nums[j]
+> 
+>   Recursion tree (split, then merge):
+> 
+>                  [1 3 2 3 1]
+>                 ╱           ╲
+>             [1 3 2]         [3 1]
+>             ╱     ╲          ╱  ╲
+>          [1 3]   [2]       [3]  [1]
+>          ╱ ╲
+>        [1] [3]
+> 
+>   Bottom-up — at each MERGE, count pairs using two sorted halves:
+> 
+>     merge [1] | [3]:
+>          left=[1]  right=[3]
+>          1 > 2·3=6 ?  no.   +0
+>          sorted: [1,3]
+> 
+>     merge [1,3] | [2]:
+>          1 > 2·2=4 ?  no
+>          3 > 4    ?  no   +0
+>          sorted: [1,2,3]
+> 
+>     merge [3] | [1]:
+>          3 > 2·1=2 ? YES   +1
+>          sorted: [1,3]
+> 
+>     merge [1,2,3] | [1,3]:
+>          For each i in left, advance j in right while left[i] > 2·right[j]:
+>            i=1: not > 2·1=2
+>            i=2: not > 2
+>            i=3: > 2  → j=1 (right[1]=3, 3 > 6? no, stop)   +1
+>          +1 total at this level
+> 
+>   Grand total = 0 + 0 + 1 + 1 = 2   ✓
+> 
+>   Key insight: when both halves are SORTED, the j-pointer only moves forward
+>   across all i — amortized O(n) at each merge → O(n log n) overall.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[1,3,2,3,1]
 > ```text

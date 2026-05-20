@@ -172,6 +172,46 @@ Return index where `target` should be inserted to keep array sorted.
 
 > Find smallest index `i` with `nums[i] ≥ target`. Same skeleton, return `l` when loop exits.
 
+> [!example]- 📊 Visual: lower-bound converges to insertion slot
+> ```text
+>   nums = [1, 3, 5, 6]    target = 2     (find smallest i with nums[i] ≥ 2)
+>   idx:    0  1  2  3
+> 
+>   Half-open window [l, r) with r = n=4 (one past last).
+> 
+>   Iter 1:  l=0                      r=4
+>            ▼                        ▼
+>          ┌───┬───┬───┬───┐
+>          │ 1 │ 3 │ 5 │ 6 │ (none)
+>          └───┴───┴───┴───┘
+>                  ▲ mid=2, nums[2]=5
+>            5 ≥ 2 → r = mid = 2     (answer in left half, including mid)
+> 
+>   Iter 2:  l=0          r=2
+>            ▼            ▼
+>          ┌───┬───┬───┬───┐
+>          │ 1 │ 3 │░░░│░░░│
+>          └───┴───┴───┴───┘
+>              ▲ mid=1, nums[1]=3
+>            3 ≥ 2 → r = 1
+> 
+>   Iter 3:  l=0    r=1
+>            ▼      ▼
+>          ┌───┬───┬───┬───┐
+>          │ 1 │░░░│░░░│░░░│
+>          └───┴───┴───┴───┘
+>            ▲ mid=0, nums[0]=1
+>            1 < 2 → l = mid+1 = 1
+> 
+>   l=r=1 exit → return 1 (insert position).
+> 
+>   Insertion meaning:
+> 
+>      [1] [3] [5] [6]
+>          ↑
+>     insert "2" here → [1, 2, 3, 5, 6]
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,3,5,6], target=5
 > ```text
 > Setup:
@@ -242,6 +282,41 @@ Find first bad version. Sequence is `[good, good, ..., bad, bad, ...]` — monot
 
 > Reframe: find smallest `v` with `isBadVersion(v) = true`. Half-open template.
 
+> [!example]- 📊 Visual: monotone predicate — find the FFFFTTT boundary
+> ```text
+>   Versions:    1     2     3     4     5
+>   isBad:       F     F     F     T     T
+>                                  ↑
+>                       FIRST TRUE — what we want
+> 
+>   The predicate is monotone:  once true, always true.
+>   So binary search the BOUNDARY between F and T.
+> 
+>   Half-open template:
+> 
+>     while l < r:
+>       mid = (l+r)/2
+>       if P(mid):  r = mid          (answer ≤ mid)
+>       else:       l = mid + 1      (answer > mid)
+> 
+>   Visualize the window shrinking around the boundary "|":
+> 
+>     start:  [ F  F  F | T  T ]      l=1, r=5
+>             ┌──┬──┬──┬──┬──┐
+>             │1 │2 │3 │4 │5 │
+>             └──┴──┴──┴──┴──┘
+> 
+>     mid=3 P(3)=F → l=4
+>     [ ░  ░  ░ | T  T ]              l=4, r=5
+> 
+>     mid=4 P(4)=T → r=4
+>     [ ░  ░  ░ | T  ░ ]              l=4, r=4  exit
+> 
+>   Return l = 4.
+> 
+>   This pattern works for ANY monotone predicate — not just sorted arrays.
+> ```
+
 > [!info]- 🔍 Dry Run: n=5, first bad = 4 (versions 1,2,3 good; 4,5 bad)
 > ```text
 > Setup:
@@ -304,6 +379,32 @@ Return `[first, last]` indices of target.
 ### 🧠 Pattern: Two Bounds (Lower + Upper)
 
 > first = lower_bound(target). last = lower_bound(target+1) - 1.
+
+> [!example]- 📊 Visual: two lower-bound boundaries bracket the run
+> ```text
+>   nums   = [5, 7, 7, 8, 8, 10]    target = 8
+>   idx      0  1  2  3  4  5
+> 
+>   Two binary searches mark the run of 8s:
+> 
+>     lower(8)  = smallest i with nums[i] ≥ 8     →  3
+>     lower(9)  = smallest i with nums[i] ≥ 9     →  5
+>     last      = lower(9) - 1                    →  4
+> 
+>     ┌───┬───┬───┬───┬───┬───┐
+>     │ 5 │ 7 │ 7 │ 8 │ 8 │10 │
+>     └───┴───┴───┴───┴───┴───┘
+>       0   1   2   3   4   5
+>                   ↑       ↑
+>                first=3  last=4
+>                   └───┬───┘
+>                  range = [3, 4]
+> 
+>   Validity check: nums[first] must equal target; else return [-1,-1].
+> 
+>   Why two lower bounds? "≥ t+1" cleanly gives ONE past the last t,
+>   avoiding fiddly off-by-ones for an upper-bound implementation.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[5,7,7,8,8,10], target=8
 > ```text
@@ -374,6 +475,37 @@ Sorted array rotated at some pivot. Find target.
 ### 🧠 Pattern: One Half Is Always Sorted
 
 > At each step, `[l..mid]` or `[mid..r]` is sorted. Check which; if target in sorted half, narrow there; else go the other way.
+
+> [!example]- 📊 Visual: pivoted sorted array
+> ```text
+>   nums = [4, 5, 6, 7, 0, 1, 2]   target = 0
+>   idx     0  1  2  3  4  5  6
+> 
+>   Visually: sorted, then "cut and swap" at the pivot:
+> 
+>     original sorted:  [0, 1, 2, 4, 5, 6, 7]
+>                                ↑
+>                            rotation cut
+> 
+>     after rotation:   [4, 5, 6, 7 | 0, 1, 2]
+>                        sorted half | sorted half
+> 
+>   At each binary-search step, ONE half is always sorted (test which):
+> 
+>     mid=3 (val 7):
+>       nums[l]=4 ≤ nums[mid]=7  →  LEFT half is sorted
+>       Is target in [4, 7)?  0 < 4, NO  →  go RIGHT
+> 
+>     mid=5 (val 1):
+>       nums[l=4]=0 ≤ nums[mid=5]=1  →  LEFT half sorted
+>       Is 0 in [0, 1)?  YES  →  go LEFT
+> 
+>     mid=4 (val 0):  MATCH → return 4
+> 
+>   Rule of thumb:
+>     if nums[l] ≤ nums[mid]:  left half sorted
+>     else:                    right half sorted
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[4,5,6,7,0,1,2], target=0
 > ```text
@@ -454,6 +586,38 @@ Sorted array rotated at some pivot. Find target.
 
 > If `nums[mid] > nums[r]`, min is in right half. Else, in left half (including mid).
 
+> [!example]- 📊 Visual: compare to right edge to locate pivot
+> ```text
+>   nums = [4, 5, 6, 7, 0, 1, 2]      (rotated sorted)
+> 
+>   Plotted (values vs index) — there is ONE cliff at the pivot:
+> 
+>      7 │       █
+>      6 │    █  █
+>      5 │ █  █  █
+>      4 │ █  █  █
+>      3 │ █  █  █
+>      2 │ █  █  █              █
+>      1 │ █  █  █           █  █
+>      0 │ █  █  █        █  █  █
+>        └─────────────────────────
+>          0  1  2  3   4  5  6
+>                       ▲
+>                    MIN here
+> 
+>   Rule (compare mid to RIGHT, not LEFT, to avoid same-half ambiguity):
+> 
+>     nums[mid] > nums[r]   →  min is in (mid, r]
+>     nums[mid] ≤ nums[r]   →  min is in [l, mid]
+> 
+>   Window shrinks like this:
+> 
+>     [4 5 6 7 0 1 2]   l=0 r=6 mid=3 nums[3]=7 > nums[6]=2 → l=4
+>     [░ ░ ░ ░ 0 1 2]   l=4 r=6 mid=5 nums[5]=1 < 2 → r=5
+>     [░ ░ ░ ░ 0 1 ░]   l=4 r=5 mid=4 nums[4]=0 < 1 → r=4
+>     [░ ░ ░ ░ 0 ░ ░]   l=r=4 exit → answer nums[4]=0
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[4,5,6,7,0,1,2]
 > ```text
 > Setup:
@@ -517,6 +681,36 @@ Sorted array rotated at some pivot. Find target.
 ### 🧠 Pattern: Flatten Index
 
 > Treat matrix as 1D of length `m*n`. `mid` index `k` maps to `(k / cols, k % cols)`.
+
+> [!example]- 📊 Visual: row-major flatten makes 2D into 1D
+> ```text
+>   matrix (3 × 4):
+>     ┌────┬────┬────┬────┐
+>     │  1 │  3 │  5 │  7 │   row 0   flat idx 0..3
+>     ├────┼────┼────┼────┤
+>     │ 10 │ 11 │ 16 │ 20 │   row 1   flat idx 4..7
+>     ├────┼────┼────┼────┤
+>     │ 23 │ 30 │ 34 │ 60 │   row 2   flat idx 8..11
+>     └────┴────┴────┴────┘
+> 
+>   Flat view (length 12), globally sorted:
+> 
+>     flat:  1  3  5  7 10 11 16 20 23 30 34 60
+>     idx:   0  1  2  3  4  5  6  7  8  9 10 11
+> 
+>   Index conversion:   k → (k / cols,  k % cols)
+>     k=5 → (5/4, 5%4) = (1, 1)  → matrix[1][1] = 11
+>     k=2 → (0, 2)               → matrix[0][2] = 5
+> 
+>   Binary search this virtual 1D array. Looking for 3:
+> 
+>     l=0  r=11  mid=5  v=11  >3 → r=4
+>     l=0  r=4   mid=2  v=5   >3 → r=1
+>     l=0  r=1   mid=0  v=1   <3 → l=1
+>     l=1  r=1   mid=1  v=3   = → found at (0, 1) ✓
+> 
+>   Works ONLY if matrix is globally sorted (rows joined head-to-tail).
+> ```
 
 > [!info]- 🔍 Dry Run: matrix=[[1,3,5,7],[10,11,16,20],[23,30,34,60]], target=3
 > ```text
@@ -596,6 +790,40 @@ Sorted array rotated at some pivot. Find target.
 
 > Start at top-right corner. If value > target → go left. If value < target → go down. Each step eliminates a row or column → O(m+n).
 
+> [!example]- 📊 Visual: staircase from top-right corner
+> ```text
+>   Each row sorted L→R, each column sorted top→bottom (NOT globally sorted).
+> 
+>   matrix:                          target = 5
+> 
+>          c=0  c=1  c=2  c=3
+>     r=0 ┌──┬──┬──┬──┐
+>         │ 1│ 4│ 7│11│ ← start here (top-right)
+>     r=1 ├──┼──┼──┼──┤
+>         │ 2│ 5│ 8│12│
+>     r=2 ├──┼──┼──┼──┤
+>         │ 3│ 6│ 9│16│
+>     r=3 ├──┼──┼──┼──┤
+>         │10│13│14│17│
+>         └──┴──┴──┴──┘
+> 
+>   From top-right:  value > target → go LEFT  (column dropped)
+>                    value < target → go DOWN  (row dropped)
+> 
+>   Trace for target=5:
+> 
+>     (0,3) = 11  > 5  ←   eliminate col 3
+>     (0,2) =  7  > 5  ←   eliminate col 2
+>     (0,1) =  4  < 5  ↓   eliminate row 0
+>     (1,1) =  5  = 5  ✓ found
+> 
+>   Path:    11 → 7 → 4 → 5
+>            ←   ←   ↓
+> 
+>   Each step drops one row OR one column → at most m+n steps total.
+>   NOT binary search — this is a "staircase decision" walker.
+> ```
+
 > [!info]- 🔍 Dry Run: matrix=[[1,4,7,11],[2,5,8,12],[3,6,9,16],[10,13,14,17]], target=5
 > ```text
 > Setup:
@@ -657,6 +885,42 @@ Sorted array rotated at some pivot. Find target.
 ### 🧠 Pattern: Floor Lookup via Binary Search
 
 > Per key, store sorted list of `(timestamp, value)`. `get` = upper_bound(ts) - 1.
+
+> [!example]- 📊 Visual: timeline of versioned writes; floor lookup
+> ```text
+>   set("foo","bar", 1) ; set("foo","bar2", 4)
+> 
+>   Per-key sorted list of (ts, value):
+> 
+>     data["foo"] = [(1, "bar"), (4, "bar2")]
+> 
+>   Timeline:
+> 
+>     ts:     0     1     2     3     4     5     6 ...
+>             │     │                 │
+>          (none) "bar"  "bar"  "bar" "bar2""bar2""bar2"
+>                  ↑                    ↑
+>                  write                write
+> 
+>   get(ts) returns value at LARGEST ts' ≤ ts (the "floor"):
+> 
+>     get("foo", 0)  →  ""      (no write yet)
+>     get("foo", 1)  →  "bar"
+>     get("foo", 3)  →  "bar"   (last write was at ts=1)
+>     get("foo", 4)  →  "bar2"
+>     get("foo", 5)  →  "bar2"
+> 
+>   Implementation:  i = upper_bound(ts);  answer = arr[i-1]  (or "" if i=0)
+> 
+>     bisect with sentinel high value lands JUST PAST the floor:
+> 
+>     arr = [ (1,"bar")  (4,"bar2") ]
+>             idx 0       idx 1            len=2
+> 
+>     get(3): upper_bound = 1  → arr[0] = "bar"   ✓
+>     get(5): upper_bound = 2  → arr[1] = "bar2"  ✓
+>     get(0): upper_bound = 0  → no floor → ""
+> ```
 
 > [!info]- 🔍 Dry Run: set("foo","bar",1), set("foo","bar2",4), get("foo",3), get("foo",5)
 > ```text
@@ -731,6 +995,38 @@ Find any peak (`nums[i] > nums[i-1] && nums[i] > nums[i+1]`). Edges treated as -
 
 > If `nums[mid] < nums[mid+1]`, a peak exists on the **right** (slope is climbing). Else, on the left. Half-open BS converges to a peak.
 
+> [!example]- 📊 Visual: follow the uphill slope
+> ```text
+>   nums = [1, 2, 3, 1]
+> 
+>      3 │       █          ← peak
+>      2 │    █  █
+>      1 │ █  █  █  █
+>        └─────────────
+>          0  1  2  3
+> 
+>   Key insight: if nums[mid] < nums[mid+1], the slope at mid is UP.
+>   Walking uphill from any point in a bounded array MUST hit a peak
+>   (the edges are -∞, so the climb terminates).
+> 
+>   So: pick the side that GOES UP from mid.
+> 
+>     mid → mid+1  going UP    → peak in (mid, r]   set l = mid+1
+>     mid → mid+1  going DOWN  → peak in [l, mid]   set r = mid
+> 
+>   Trace:
+> 
+>     [1 2 3 1]   l=0 r=3
+>     mid=1, nums[1]=2 < nums[2]=3  → uphill → l=2
+> 
+>     [░ ░ 3 1]   l=2 r=3
+>     mid=2, nums[2]=3 > nums[3]=1  → downhill → r=2
+> 
+>     l=r=2 exit → return index 2 (value 3, a peak)
+> 
+>   Works on UNSORTED arrays — only local monotonicity matters.
+> ```
+
 > [!info]- 🔍 Dry Run: nums=[1,2,3,1]
 > ```text
 > Setup:
@@ -791,6 +1087,40 @@ Find any peak (`nums[i] > nums[i-1] && nums[i] > nums[i+1]`). Edges treated as -
 ### 🧠 Pattern: Binary Search the Partition Point
 
 > Pick `i` in A. Then `j = (m+n+1)/2 - i` in B. The split `[A[0..i-1] | A[i..]]` and `[B[0..j-1] | B[j..]]` is correct iff `A[i-1] ≤ B[j]` and `B[j-1] ≤ A[i]`. BS on `i` until both hold.
+
+> [!example]- 📊 Visual: dual partition with crossing inequalities
+> ```text
+>   A = [1, 3]            (smaller; binary-search on its partition i)
+>   B = [2, 4, 5, 6]
+>   total = 6 (even).  half = (6+1)/2 = 3 elements on the LEFT side.
+> 
+>   Partition: pick i in A (count from A's left); j = half - i from B.
+> 
+>      A_left | A_right          B_left  | B_right
+>      ──────────────             ──────────────
+>      [ ]    | [1, 3]   i=0     [2,4,5] | [6]      j=3
+>      [1]    | [3]      i=1     [2, 4]  | [5, 6]   j=2
+>      [1, 3] | [ ]      i=2     [2]     | [4, 5,6] j=1   ← winner
+> 
+>   Visualize the picked split (i=2, j=1):
+> 
+>          LEFT side (3 elems)         RIGHT side (3 elems)
+>      ──────────────────────       ──────────────────────
+>             1, 2, 3                   4, 5, 6
+>              ↑ ↑                       ↑
+>           aL bL                       bR  (aR = +∞ since i=m)
+> 
+>   Validity:    aL ≤ bR    (3 ≤ 4 ✓)
+>                bL ≤ aR    (2 ≤ ∞ ✓)
+> 
+>   Median (even total) = ( max(aL, bL) + min(aR, bR) ) / 2
+>                       = ( max(3, 2)  + min(∞, 4)  ) / 2
+>                       = (3 + 4) / 2 = 3.5
+> 
+>   BS on i in [0, m]:
+>     aL > bR  → too many from A → shrink i (r = i-1)
+>     bL > aR  → too few from A  → grow i  (l = i+1)
+> ```
 
 > [!info]- 🔍 Dry Run: A=[1,3], B=[2,4,5,6]
 > ```text
@@ -883,6 +1213,47 @@ Min eating speed `k` so Koko finishes all piles within `h` hours. `time(k) = sum
 
 > Range: `1` to `max(piles)`.
 
+> [!example]- 📊 Visual: search-on-answer with monotone predicate
+> ```text
+>   piles = [3, 6, 7, 11]    h = 8 (hours)
+> 
+>   Define can(k) = "can Koko finish at speed k within h hours?"
+>   This is MONOTONE in k:
+> 
+>     k:        1   2   3   4   5   6   7   8   9  10  11
+>     can(k):   F   F   F   T   T   T   T   T   T   T   T
+>                          ↑
+>                  MINIMUM k that works
+> 
+>   So binary-search the answer line, not the input array!
+> 
+>   Number line:  l──────────────────────────────────────r
+>                 1                                      11
+>                                  ↑ mid → test can(mid)
+> 
+>   Trace:
+>     l=1   r=11  mid=6   can(6)? T → r=6
+>                         |░░░░░░░░░░░|
+>                         1           6
+> 
+>     l=1   r=6   mid=3   can(3)? F → l=4
+>                         |░░░░░░░|
+>                         4       6
+> 
+>     l=4   r=6   mid=5   can(5)? T → r=5
+>                         |░░░|
+>                         4   5
+> 
+>     l=4   r=5   mid=4   can(4)? T → r=4
+>                         |░|
+>                         4
+> 
+>     l=r=4 exit → answer = 4
+> 
+>   Pattern: l = min plausible (1), r = max plausible (max pile).
+>            Simulate can(); the rest is template lower-bound.
+> ```
+
 > [!info]- 🔍 Dry Run: piles=[3,6,7,11], h=8
 > ```text
 > Setup:
@@ -965,6 +1336,39 @@ Min ship capacity so all packages ship in ≤ D days, in given order.
 ### Approach
 
 `can(cap) = days_needed(cap) ≤ D`. Range `[max(weights), sum(weights)]`. Same template as P12.
+
+> [!example]- 📊 Visual: capacity number line bounded by [max, sum]
+> ```text
+>   weights = [1,2,3,4,5,6,7,8,9,10]    D = 5 days
+> 
+>   Search range for ship capacity:
+> 
+>     l = max(weights) = 10      ← must fit the BIGGEST single item
+>     r = sum(weights) = 55      ← ship everything in 1 day
+> 
+>   Predicate can(cap) = "days needed ≤ D?" is MONOTONE:
+> 
+>     cap:    10  11  12  13  14  15  16  17  18  ...  55
+>     can?:    F   F   F   F   F   T   T   T   T  ...   T
+>                                   ↑
+>                              minimum capacity
+> 
+>   Number line of the search:
+> 
+>     l=10                                                  r=55
+>     ●────────────────────────────────────────────────────●
+>           too small  │      enough  │
+>                      ↑              ↑
+>                  predicate flips    target answer = 15
+> 
+>   Simulator: greedy fill — start a new day when adding the next
+>   package would overflow `cap`. Count days; compare to D.
+> 
+>   Identical TEMPLATE to Koko (P12) and Split Array (P14):
+>     - define [l, r] over the answer
+>     - implement can(x) greedily
+>     - lower_bound on `can`
+> ```
 
 > [!info]- 🔍 Dry Run: weights=[1,2,3,4,5,6,7,8,9,10], days=5
 > ```text
@@ -1079,6 +1483,44 @@ Split `nums` into `m` non-empty subarrays. Minimize the **maximum subarray sum**
 ### Approach
 
 Same as P13. `can(maxSum) = "can we split into ≤ m parts each ≤ maxSum"`.
+
+> [!example]- 📊 Visual: minimize the largest piece when slicing into m parts
+> ```text
+>   nums = [7, 2, 5, 10, 8]    m = 2 parts
+> 
+>   Imagine a ruler of values laid end to end; we cut it with m-1 knives,
+>   trying to MINIMIZE the largest piece sum:
+> 
+>     ┌───┬─┬───┬────┬───┐
+>     │ 7 │2│ 5 │ 10 │ 8 │     total = 32
+>     └───┴─┴───┴────┴───┘
+> 
+>   Best 2-cut for nums (one knife):
+> 
+>     Cut after index 2:    [7, 2, 5] | [10, 8]
+>                            sum=14      sum=18    →  max piece = 18  ★
+>     Cut after index 3:    [7, 2, 5, 10] | [8]
+>                            sum=24          sum=8 →  max piece = 24
+>     ... etc.
+> 
+>   So the answer is 18.
+> 
+>   Binary search on the answer (maxSum candidate):
+> 
+>     l = max(nums) = 10     ← any single element must fit in a piece
+>     r = sum(nums) = 32     ← 1 piece holds everything (m=1)
+> 
+>     cap:     10  11  ...  17  18  19  ...  32
+>     can?:     F   F  ...   F   T   T  ...   T
+>                                ↑
+>                       minimum feasible
+> 
+>   Greedy can(cap):
+>     walk nums left→right, accumulate; when adding next > cap,
+>     start a new piece (parts++). Feasible iff parts ≤ m.
+> 
+>   Same template as P12, P13. Minimax via search-on-answer.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[7,2,5,10,8], m=2
 > ```text

@@ -63,6 +63,29 @@ Mirror the tree (swap left/right at every node).
 
 ### 🧠 Pattern: DFS Swap (Post-order or Pre-order both work)
 
+> [!example]- 📊 Visual: original vs mirrored
+> ```text
+>   Original                Mirrored
+>        4                       4
+>       / \                     / \
+>      2   7        ──►        7   2
+>     /|   |\                  /|   |\
+>    1 3   6 9                9 6   3 1
+> 
+>   At each node, swap left ↔ right children:
+> 
+>        ●n●                    ●n●
+>        / \      swap         / \
+>       L   R     ───►        R   L
+> 
+>   Recursion direction (post-order shown):
+>     dfs(4) ──┬── dfs(2) ──┬── dfs(1)  ← leaf, swap nulls
+>              │            └── dfs(3)
+>              └── dfs(7) ──┬── dfs(6)
+>                           └── dfs(9)
+>     ▲ swap happens AFTER both children return
+> ```
+
 > [!info]- 🔍 Dry Run
 > ```text
 > Input:
@@ -122,6 +145,28 @@ Mirror the tree (swap left/right at every node).
 
 `depth(node) = 1 + max(depth(left), depth(right))`. Base `null → 0`.
 
+> [!example]- 📊 Visual: depth-from-root labels
+> ```text
+>   Depths (1-indexed at each node):
+> 
+>            3       ← depth 1
+>           / \
+>          9   20    ← depth 2
+>             /  \
+>            15   7  ← depth 3   ✓ max depth = 3
+> 
+>   Bottom-up recursion returns subtree height:
+> 
+>            ●3     returns 1 + max(1, 2) = 3
+>           / \
+>          ●9   ●20  returns 1 + max(1, 1) = 2
+>          (1)  / \
+>             ●15  ●7   each returns 1
+>             (1) (1)
+> 
+>   Nulls return 0. Each parent adds 1 for itself + max(child heights).
+> ```
+
 > [!info]- 🔍 Dry Run
 > ```text
 > Tree:
@@ -167,6 +212,29 @@ Mirror the tree (swap left/right at every node).
 ## P3: Same Tree
 
 **LC #100** · Easy
+
+> [!example]- 📊 Visual: walking two pointers in parallel
+> ```text
+>   p tree         q tree
+> 
+>      ●1            ●1     ← compare (p, q): vals equal ✓
+>     /  \          /  \
+>    ●2  ●3        ●2  ●3   ← recurse pairs in lockstep
+> 
+>   Two pointers traverse the SAME positions:
+> 
+>      (p,q)         step 1: compare roots
+>      ╱   ╲
+>   (pL,qL) (pR,qR)  step 2: compare left pair AND right pair
+> 
+>   Mismatch path (counter-example p=[1,2,1], q=[1,1,2]):
+> 
+>      ●1   ●1       ✓ equal
+>     / \   / \
+>    ●2  ●1 ●1  ●2   ← p.left=2 vs q.left=1: MISMATCH ✗ → false
+>    ↑       ↑
+>    └───────┘ short-circuit, no further recursion
+> ```
 
 > [!info]- 🔍 Dry Run: p=[1,2,3], q=[1,2,3]
 > ```text
@@ -225,6 +293,29 @@ Is `subRoot` a subtree of `root`?
 ### Approach
 
 DFS over root: at each node, check `isSameTree(node, subRoot)`. Recurse children.
+
+> [!example]- 📊 Visual: matching subtree highlighted
+> ```text
+>   root:                        sub:
+>          3                       4
+>         / \                     / \
+>     ╔══●═══╗   5                1   2
+>     ║  4   ║                   
+>     ║ / \  ║                   
+>     ║●1  ●2║                   
+>     ╚══════╝
+>     ↑
+>     matched! this subtree == sub
+> 
+>   Walk every node of root; at each, ask "does sameTree(node, sub) hold?"
+> 
+>     isSubtree(3) ──┬── sameTree(3, 4)? ✗
+>                    ├── isSubtree(4) ──┬── sameTree(4, 4)? ✓ ★ FOUND
+>                    │                  └── short-circuit
+>                    └── (skipped — already true)
+> 
+>   Time: O(m·n) — m nodes in root, each may trigger an O(n) sameTree check.
+> ```
 
 > [!info]- 🔍 Dry Run: root=[3,4,5,1,2], sub=[4,1,2]
 > ```text
@@ -398,6 +489,33 @@ Every node: `|leftDepth - rightDepth| ≤ 1`.
 
 > Avoid recomputing depth at each level. Return `-1` to short-circuit.
 
+> [!example]- 📊 Visual: balanced vs unbalanced (heights + abs-diff)
+> ```text
+>   ✓ Balanced                       ✗ Unbalanced
+> 
+>           ●3  h=3                          ●1  h=4
+>          / \                              /
+>        ●9   ●20  h=2                    ●2  h=3
+>        h=1  / \                         /
+>           ●15  ●7  h=1                 ●3  h=2
+>           h=1  h=1                     /
+>                                       ●4  h=1
+>     check at each node:
+>       3:  |1-2|=1 ✓                    check at 1: |3-0|=3 → -1 (FAIL)
+>       9:  |0-0|=0 ✓                    short-circuit upward
+>       20: |1-1|=0 ✓
+>       15,7: leaves ✓
+> 
+>   Sentinel propagation:
+> 
+>        ●               return -1 if |L-R| > 1
+>       / \              else return 1 + max(L, R)
+>      L   R
+>     (h)  (h)
+> 
+>     Any -1 from a child → immediately propagate -1.
+> ```
+
 > [!info]- 🔍 Dry Run: [3,9,20,null,null,15,7] (balanced)
 > ```text
 > Tree:
@@ -469,6 +587,32 @@ Is the tree a mirror of itself?
 ### Approach
 
 Two-pointer DFS: `mirror(a, b) = (a.val == b.val) && mirror(a.l, b.r) && mirror(a.r, b.l)`.
+
+> [!example]- 📊 Visual: mirror line down the middle
+> ```text
+>                  ●1
+>                 / │ \
+>                /  │  \
+>              ●2   │   ●2
+>             / \   │   / \
+>           ●3  ●4  │  ●4  ●3
+>                   │
+>                ── mirror line ──
+> 
+>   Pairs to compare (drawn with ⇔ across the mirror):
+> 
+>         ●2  ⇔  ●2          (root.left  ⇔  root.right)
+>         ●3  ⇔  ●3          (L.left     ⇔  R.right)
+>         ●4  ⇔  ●4          (L.right    ⇔  R.left)
+> 
+>   Recursion mirrors child positions:
+> 
+>          mirror(a,b)
+>            /      \
+>     mirror(a.L,b.R)  mirror(a.R,b.L)   ← note the CROSS
+> 
+>   Reflect, don't repeat. The "swap" is in the recursive call args.
+> ```
 
 > [!info]- 🔍 Dry Run: [1,2,2,3,4,4,3]
 > ```text
@@ -644,6 +788,29 @@ Values visible from the right at each level.
 
 BFS by level; last node of each level.
 
+> [!example]- 📊 Visual: rightmost-per-level circled
+> ```text
+>   Tree:                            What you see from the RIGHT:
+> 
+>          1                                  ◉1     ← level 0
+>         / \                                /
+>        2   ◉3   ← level 1 last           (2)  ◉3
+>         \   \                              \   \
+>          5   ◉4  ← level 2 last           (5)  ◉4
+> 
+>   ◉ = visible from right       (·) = blocked by something to its right
+> 
+>   BFS keeps level groups; capture i == n-1 (last index):
+> 
+>     Level 0: [1]        → output 1   ◉
+>     Level 1: [2, 3]     → output 3   ◉
+>     Level 2: [5, 4]     → output 4   ◉
+> 
+>   ✓ Answer: [1, 3, 4]
+> 
+>   Alternative DFS trick: visit right-first, record first node seen at each depth.
+> ```
+
 > [!info]- 🔍 Dry Run: [1,2,3,null,5,null,4]
 > ```text
 > Tree:
@@ -723,6 +890,27 @@ Root-to-leaf path summing to `target`?
 
 Top-down DFS: subtract `node.val` from target. Leaf with `target == 0` → true.
 
+> [!example]- 📊 Visual: valid root-to-leaf path (target=22)
+> ```text
+>                ●5━━━┓               remaining: 22 - 5 = 17
+>               /     ┃
+>             ●4━━━━━━┫               remaining: 17 - 4 = 13
+>             /       ┃   \
+>          ●11━━━━━━━━┫    13         remaining: 13 - 11 = 2
+>          /  ┃        \    \
+>         7   ●2━━━━━━━┛    4         leaf hit: 2 == 2 ✓ → TRUE
+>             ▲
+>             goal leaf
+> 
+>   Subtracting accumulator:
+> 
+>     target=22 ──► 17 ──► 13 ──► 2 ──► leaf reached, 2-2=0 ✓
+> 
+>   Each step: t' = t - node.val. At a leaf, check t' == 0  (equiv. node.val == t).
+> 
+>   ━━━ = the winning path
+> ```
+
 > [!info]- 🔍 Dry Run: tree=[5,4,8,11,null,13,4,7,2,null,null,null,1], target=22
 > ```text
 > Path 5→4→11→2 sums to 22.
@@ -777,6 +965,37 @@ All root-to-leaf paths summing to target.
 ### 🧠 Pattern: DFS + Backtracking
 
 > Push node onto path; recurse; pop on return.
+
+> [!example]- 📊 Visual: two paths summing to 22
+> ```text
+>                  ●5━━━━━━━━━━━━━━━╗
+>                 ╱ ┃               ╲ ┃
+>               ●4━━┫              ●8━┫
+>              ╱    ┃             ╱ ┃ ╲
+>           ●11━━━━━┫           13 ●4━┫
+>          ╱  ┃      ╲              ╱ ┃ ╲
+>         7   ●2━━━━┛━━━━━╗      ●5━┛  1
+>         ▲   ▲           ║      ▲
+>         ╲   ╲           ║      ╲
+>          path A: 5→4→11→2 = 22  ━━━ (double line)
+>                              path B: 5→8→4→5 = 22  ═══ (different line)
+> 
+>   Backtracking stack snapshot (printable trace):
+> 
+>     path=[5]
+>       path=[5,4]
+>         path=[5,4,11]
+>           path=[5,4,11,7]   leaf, 27 ≠ 22  ✗   pop 7
+>           path=[5,4,11,2]   leaf, 22 = 22  ✓   record copy   pop 2
+>         pop 11
+>       pop 4
+>       path=[5,8]
+>         path=[5,8,4]
+>           path=[5,8,4,5]   leaf, 22 ✓   record copy   pop 5
+>           ...
+> 
+>   Push on entry, pop on exit — list reused, snapshots taken via path[:].
+> ```
 
 > [!info]- 🔍 Dry Run: tree=[5,4,8,11,null,13,4,7,2,null,null,5,1], target=22
 > ```text
@@ -846,6 +1065,32 @@ All root-to-leaf paths summing to target.
 ### 🧠 Pattern: BST Property
 
 > If both p, q < root → LCA in left. If both > root → LCA in right. Else, root is the split point = LCA.
+
+> [!example]- 📊 Visual: BST split point for p=2, q=8
+> ```text
+>                  ◎6   ◀── SPLIT! p=2 < 6 < q=8 → 6 is the LCA
+>                 ╱   ╲
+>               ●2     ●8
+>              ╱  ╲   ╱  ╲
+>             0    4 7    9
+>                 ╱ ╲
+>                3   5
+> 
+>   Walking down the BST, the FIRST node where p and q part ways = LCA.
+> 
+>   Decision at each node:
+>     ┌──────────────────────────────────────────────────┐
+>     │  p.val < node.val AND q.val < node.val → go LEFT │
+>     │  p.val > node.val AND q.val > node.val → go RIGHT│
+>     │  otherwise (one each side, or hit) → THIS IS LCA │
+>     └──────────────────────────────────────────────────┘
+> 
+>   Another case: p=2, q=4 (both ≤ 6, then split at 2)
+> 
+>                  6   both 2,4 < 6 → go LEFT
+>                 ╱
+>               ◎2   ◀── p hits self; q=4 is on right of 2 → SPLIT → LCA=2
+> ```
 
 > [!info]- 🔍 Dry Run: root=[6,2,8,0,4,7,9,null,null,3,5], p=2, q=8
 > ```text
@@ -1006,6 +1251,34 @@ Not a BST — general binary tree.
 
 > Recurse with `(lo, hi)`. At node, must have `lo < node.val < hi`. Left child gets `(lo, node.val)`; right gets `(node.val, hi)`.
 
+> [!example]- 📊 Visual: local OK, global FAIL + (lo, hi) range narrowing
+> ```text
+>   Tricky tree (locally each parent > left, < right — but invalid overall):
+> 
+>            ●5        range: (-∞, +∞)
+>           ╱  ╲
+>          1    ●4     ◀── 4 < 5 locally OK, but must be > 5! globally fails
+>              ╱ ╲
+>             3   6
+> 
+>   Narrow (lo, hi) as we recurse:
+> 
+>     visit 5: (-∞, +∞)   ✓ -∞ < 5 < +∞
+>       L → visit 1: (-∞, 5)   ✓ -∞ < 1 < 5
+>       R → visit 4: (5, +∞)   ✗ requires 5 < 4 — FALSE → return false
+> 
+>   Range propagation rule:
+> 
+>               ●n  (lo, hi)
+>              ╱  ╲
+>     (lo, n) L   R (n, hi)
+> 
+>     • going left:   new hi = n.val  (everything left must be < n)
+>     • going right:  new lo = n.val  (everything right must be > n)
+> 
+>   Window shrinks monotonically as you descend.
+> ```
+
 > [!info]- 🔍 Dry Run: [5,1,4,null,null,3,6]
 > ```text
 > Tree:        5
@@ -1065,6 +1338,33 @@ Not a BST — general binary tree.
 ### 🧠 Pattern: In-Order Traversal (yields sorted)
 
 > Iterative in-order with stack. Count nodes visited; return on k.
+
+> [!example]- 📊 Visual: in-order numbering = sorted order
+> ```text
+>   BST:                  In-order visit numbers (1, 2, 3, ...):
+> 
+>          3                       3 ③
+>         ╱ ╲                     ╱ ╲
+>        1   4                  ① 1   4 ④
+>         ╲                       ╲
+>          2                       2 ②
+> 
+>   In-order: left → node → right
+>   Visit sequence: 1, 2, 3, 4   (sorted!)
+> 
+>   For k=1 → answer is 1 (stop at first pop)
+>   For k=3 → answer is 3
+> 
+>   Iterative-with-stack walk for k=3:
+> 
+>     push 3, push 1                       stack: [3, 1]
+>     pop 1  (visit #1, k=2)               cur → 1.right = 2
+>     push 2                               stack: [3, 2]
+>     pop 2  (visit #2, k=1)               cur → 2.right = null
+>     pop 3  (visit #3, k=0)  ✓ return 3
+> 
+>   Stop as soon as the k-th pop happens — don't traverse the rest.
+> ```
 
 > [!info]- 🔍 Dry Run: root=[3,1,4,null,2], k=1
 > ```text
@@ -1138,6 +1438,37 @@ Not a BST — general binary tree.
 ### 🧠 Pattern: Preorder Root + Inorder Split
 
 > Preorder gives the **root** (first elem). Inorder lets you split into left/right subtrees by finding root's index. Recurse.
+
+> [!example]- 📊 Visual: preorder root + inorder split
+> ```text
+>   preorder = [ ●3 , 9, 20, 15, 7 ]    ← FIRST element is the root
+>                ▲
+>                root of whole tree
+> 
+>   inorder  = [ 9 │ ●3 │ 15, 20, 7 ]   ← find root, split here
+>                ▲      ▲
+>             left      right
+>             subtree   subtree
+> 
+>   Recurse on each side:
+> 
+>     LEFT  subtree → inorder [9]            preorder next = 9  → leaf
+>     RIGHT subtree → inorder [15, 20, 7]    preorder next = 20 → root
+> 
+>     20's split:    inorder [15 │ ●20 │ 7]
+>                              ▲        ▲
+>                            left      right
+> 
+>   Building bottom-up gives:
+> 
+>            3
+>           / \
+>          9   20
+>             /  \
+>            15   7
+> 
+>   Trick: precompute a hashmap value → inorder-index for O(1) splits → O(n) total.
+> ```
 
 > [!info]- 🔍 Dry Run: preorder=[3,9,20,15,7], inorder=[9,3,15,20,7]
 > ```text
@@ -1333,6 +1664,34 @@ Max sum of any path (any node to any node, edges may go up-and-down at one apex)
 ### 🧠 Pattern: Preorder + Null Markers
 
 > Serialize: preorder DFS, output `val,` for nodes, `#,` for null. Deserialize: split, consume tokens with a generator.
+
+> [!example]- 📊 Visual: tree ↔ serialized string
+> ```text
+>   Tree:                              Serialized (preorder + # for null):
+> 
+>           ●1                          "1,2,#,#,3,4,#,#,5,#,#"
+>          ╱  ╲                          │ │ │ │ │ │ │ │ │ │ │
+>        ●2    ●3                        ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼
+>             ╱  ╲                     ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
+>          ●4    ●5                    │1│2│#│#│3│4│#│#│5│#│#│
+>                                      └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
+>                                       ▲   ▲   ▲   ▲   ▲   ▲
+>   Encoding order (preorder DFS):       │   │   │   │   │   │
+>                                  root─┘   │   │   │   │   │
+>     1 ─► 2 ─► (null 2.L) ─► (null 2.R) ──┴───┘   │   │   │
+>       ─► 3 ─► 4 ─► (null) ─► (null) ──────────┘   │   │
+>             ─► 5 ─► (null) ─► (null) ─────────────┴───┘
+> 
+>   Why preorder + null markers?
+>     • Root-first lets you build top-down on the way back in
+>     • Null markers eliminate ambiguity (no need for a second order)
+>     • A single linear consumer (iterator) rebuilds in O(n)
+> 
+>     build():
+>       tok = next(tokens)
+>       if tok == '#': return None
+>       return Node(int(tok), build(), build())   ← left first, then right
+> ```
 
 > [!info]- 🔍 Dry Run
 > ```text

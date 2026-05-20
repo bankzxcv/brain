@@ -51,6 +51,28 @@ Implement `insert`, `search`, `startsWith`.
 
 Node = `{children: Map, isEnd: bool}`. Walk one char at a time, creating nodes as needed.
 
+> [!example]- 📊 Visual: trie structure
+> ```text
+>   Inserted words: "apple", "app", "ape"
+> 
+>             root
+>              │
+>              a
+>              │
+>              p
+>             / \
+>            p   e($)         "ape" ends here
+>           / \
+>          l   ($)            "app" ends here
+>          │
+>          e($)               "apple" ends here
+> 
+>   '$' marker = word ends at this node.
+>   Each edge is one character; each path root→node spells a prefix.
+>   search(w) walks chars; success requires final node to carry '$'.
+>   startsWith(p) walks chars; success means the walk didn't fail.
+> ```
+
 > [!info]- 🔍 Dry Run: insert("apple"), search("apple"), search("app"), startsWith("app"), insert("app"), search("app")
 > ```text
 > Setup:
@@ -156,6 +178,34 @@ Node = `{children: Map, isEnd: bool}`. Walk one char at a time, creating nodes a
 
 > On `.`, try all children — recurse.
 
+> [!example]- 📊 Visual: wildcard DFS branches every child
+> ```text
+>   After addWord("bad"), ("dad"), ("mad"):
+> 
+>            root
+>           / | \
+>          b  d  m
+>          │  │  │
+>          a  a  a
+>          │  │  │
+>          d($) d($) d($)
+> 
+>   search(".ad"):
+>                 dfs(root, i=0)
+>                 c='.' → try ALL children
+>                /        |        \
+>            try 'b'   try 'd'   try 'm'
+>             ↓          ↓          ↓
+>           dfs(b,1)   dfs(d,1)   dfs(m,1)
+>           c='a' ✓    c='a' ✓    c='a' ✓
+>             ↓          ↓          ↓
+>           dfs(_a,2)  dfs(_a,2)  dfs(_a,2)
+>           c='d'+$    c='d'+$    c='d'+$
+>             TRUE ─── short-circuit
+> 
+>   '.' = wildcard frontier; literal char = single branch only.
+> ```
+
 > [!info]- 🔍 Dry Run: addWord("bad"), addWord("dad"), addWord("mad"), search("pad"), search(".ad"), search("b..")
 > ```text
 > After adds:
@@ -257,6 +307,35 @@ Given an `m×n` board and a list of words, return words present on the board.
 > 
 > **Better:** Insert all words into a trie. Walk every starting cell; descend trie + grid together, pruning when no child matches.
 
+> [!example]- 📊 Visual: trie + grid walk in lockstep
+> ```text
+>   words = ["oath", "eat"]    →    trie:
+> 
+>                root
+>               /    \
+>              o      e
+>              │      │
+>              a      a
+>              │      │
+>              t      t($, "eat")
+>              │
+>              h($, "oath")
+> 
+>   Grid:                         Trie pointer follows the path:
+>     o  a  a  n
+>     e  t  a  e                  (0,0)='o' → trie:o
+>     i  h  k  r                  (0,1)='a' → trie:o.a
+>     i  f  l  v                  (1,1)='t' → trie:o.a.t
+>                                 (2,1)='h' → trie:o.a.t.h ($) ✓ "oath"
+> 
+>   Both pointers advance together:
+>     • Grid pointer = where we are on the board (mark cell visited)
+>     • Trie pointer = which prefix we've matched
+>   If trie has no child for current grid char → PRUNE this branch.
+>   After harvesting a word, delete its '$' to avoid duplicates; if node
+>   becomes empty, delete from parent → prune dead twigs.
+> ```
+
 > [!info]- 🔍 Dry Run: board=[["o","a","a","n"],["e","t","a","e"],["i","h","k","r"],["i","f","l","v"]], words=["oath","pea","eat","rain"]
 > ```text
 > Trie of words:
@@ -344,6 +423,29 @@ Replace each word in a sentence with its **shortest root** from a dictionary.
 
 Build trie of roots. For each word, walk trie; on `isEnd`, output that prefix.
 
+> [!example]- 📊 Visual: stop at the first '$' along the walk
+> ```text
+>   roots = ["cat", "bat", "rat"]      word = "cattle"
+> 
+>            root
+>           / | \
+>          c  b  r
+>          │  │  │
+>          a  a  a
+>          │  │  │
+>          t($)t($)t($)
+> 
+>   Walk "cattle" through trie:
+> 
+>     'c' ─→ trie:c             (no $)
+>     'a' ─→ trie:c.a           (no $)
+>     't' ─→ trie:c.a.t   ($!)  STOP — emit "cat"
+>     ───── never look at 't','l','e' ─────
+> 
+>   Replace "cattle" with the shortest matching root "cat".
+>   If the walk hits a dead end before any '$' → keep the word unchanged.
+> ```
+
 > [!info]- 🔍 Dry Run: dictionary=["cat","bat","rat"], sentence="the cattle was rattled by the battery"
 > ```text
 > Trie of roots:
@@ -410,6 +512,35 @@ Longest word that can be built **one char at a time**, each prefix in dict. Ties
 ### Approach
 
 Trie of words. DFS preferring lex order; only descend if `isEnd`. Track longest path.
+
+> [!example]- 📊 Visual: descend only through '$' nodes
+> ```text
+>   words = ["w","wo","wor","worl","world"]
+> 
+>            root
+>             │
+>             w($)         ← every node along path has '$'
+>             │
+>             o($)
+>             │
+>             r($)
+>             │
+>             l($)
+>             │
+>             d($)         ← deepest valid chain
+> 
+>   DFS rule:  child must have '$' to be visited.
+>   Path so far:  w → wo → wor → worl → world   (best = "world")
+> 
+>   Counter-example: words=["a","banana"]
+>            root
+>           /  \
+>          a($) b           ← 'b' has NO $
+>                │
+>                a          ← unreachable: dfs refuses non-$ children
+> 
+>   So "banana" can't be "built one char at a time" → best = "a".
+> ```
 
 > [!info]- 🔍 Dry Run: words=["w","wo","wor","worl","world"]
 > ```text
@@ -479,6 +610,32 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 ### 🧠 Pattern: Binary Trie + Greedy Bit Matching
 
 > Insert each number as a 32-bit binary string into a trie (root → MSB → LSB). For each number, traverse trie greedily preferring the **opposite** bit at each level (maximizes XOR). The path gives the best pair.
+
+> [!example]- 📊 Visual: binary trie + greedy opposite-bit walk
+> ```text
+>   Nums (5-bit illustration):  5=00101, 25=11001
+> 
+>   Bit position →  4   3   2   1   0
+> 
+>                  root
+>                  / \
+>             bit 0   bit 1                 (MSB)
+>                /        \
+>             ...           ...
+>           (for 5)       (for 25)
+> 
+>   For x = 5 (00101), greedy walk wanting OPPOSITE bit each level:
+> 
+>     level 4:  x-bit=0, want 1.  '1' exists (25-path) → take.  cur += 16
+>     level 3:  x-bit=0, want 1.  '1' exists       → take.  cur +=  8
+>     level 2:  x-bit=1, want 0.  '0' exists       → take.  cur +=  4
+>     level 1:  x-bit=0, want 1.  only '0' here    → fallback.
+>     level 0:  x-bit=1, want 0.  only '1' here    → fallback.
+> 
+>     XOR achieved = 16 + 8 + 4 = 28   ( = 5 XOR 25 ✓ )
+> 
+>   At each level, prefer the toggle-branch if it exists; else follow same-bit.
+> ```
 
 > [!info]- 🔍 Dry Run: nums=[3,10,5,25,2,8]
 > ```text
@@ -551,6 +708,31 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 ### 🧠 Pattern: Reverse Trie + Recent Buffer
 
 > Insert each word **reversed** into a trie. For `query`, walk recent chars **backwards** through the trie; if any prefix (= original suffix) hits `isEnd`, return true.
+
+> [!example]- 📊 Visual: reverse trie + backward walk on buffer
+> ```text
+>   dictionary = ["cd", "f", "kl"]
+> 
+>   Insert REVERSED words:    "dc",   "f",   "lk"
+> 
+>            root
+>           / | \
+>          d  f($)  l
+>          │       │
+>          c($)    k($)
+> 
+>   Stream so far: [... a, b, c, d]
+>                                  ↑ newest char (we just appended 'd')
+> 
+>   Walk buffer BACKWARDS through reverse trie:
+> 
+>     newest 'd' → root has 'd' ✓ → descend          (no $)
+>     prev    'c' → trie:d has 'c' ✓ → descend     ($ → TRUE) → matched "cd"
+> 
+>   Reading buffer right→left through reverse trie is equivalent
+>   to checking "does any dictionary word end exactly here?"
+>   Cap buffer length at max-word-length to bound memory.
+> ```
 
 > [!info]- 🔍 Dry Run: words=["cd","f","kl"], queries: 'a','b','c','d','e','f','g','h','i','j','k','l'
 > ```text
@@ -631,6 +813,43 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 ### Approach
 
 Trie node stores `total` (sum of all subtree values). On insert, walk and **add delta** = newVal − oldVal at every node on the path.
+
+> [!example]- 📊 Visual: aggregate sum lives on every node of the path
+> ```text
+>   After insert("apple", 3):
+> 
+>     root[_total=3]
+>       │
+>       a[_total=3]
+>       │
+>       p[_total=3]
+>       │
+>       p[_total=3]
+>       │
+>       l[_total=3]
+>       │
+>       e[_total=3]
+> 
+>   Now insert("app", 2):    delta = +2, walk 'a','p','p'.
+> 
+>     root[5]
+>       │
+>       a[5]
+>       │
+>       p[5]
+>       │
+>       p[5]      ← "app" ends here (implicit)
+>       │
+>       l[3]      ← unaffected — beyond "app"
+>       │
+>       e[3]
+> 
+>   sum("ap")  → walk to p; return node._total = 5  (covers apple + app)
+>   sum("app") → walk to second p; return 5
+>   sum("apple") → walk to e; return 3
+> 
+>   Update via DELTA (= newVal − oldVal) so re-inserting same key works.
+> ```
 
 > [!info]- 🔍 Dry Run: insert("apple", 3), sum("ap"), insert("app", 2), sum("ap")
 > ```text
