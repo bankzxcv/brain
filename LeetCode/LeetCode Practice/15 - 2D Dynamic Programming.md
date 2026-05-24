@@ -89,6 +89,19 @@ status: in-progress
 > ✅ Answer: 6
 > ```
 
+> [!success]- JS
+> ```js
+> const uniquePaths = (m, n) => {
+>   const dp = Array.from({length: m}, () => new Array(n).fill(1));
+>   for (let i = 1; i < m; i++) {
+>     for (let j = 1; j < n; j++) {
+>       dp[i][j] = dp[i-1][j] + dp[i][j-1];
+>     }
+>   }
+>   return dp[m-1][n-1];
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def unique_paths(m, n):
@@ -150,6 +163,23 @@ status: in-progress
 >   1 1 2
 > 
 > ✅ Answer: 2
+> ```
+
+> [!success]- JS
+> ```js
+> const uniquePathsWithObstacles = (grid) => {
+>   const m = grid.length, n = grid[0].length;
+>   const dp = Array.from({length: m}, () => new Array(n).fill(0));
+>   dp[0][0] = grid[0][0] ? 0 : 1;
+>   for (let i = 0; i < m; i++) {
+>     for (let j = 0; j < n; j++) {
+>       if (grid[i][j]) { dp[i][j] = 0; continue; }
+>       if (i === 0 && j === 0) continue;
+>       dp[i][j] = (i ? dp[i-1][j] : 0) + (j ? dp[i][j-1] : 0);
+>     }
+>   }
+>   return dp[m-1][n-1];
+> };
 > ```
 
 > [!success]- Python
@@ -224,6 +254,22 @@ status: in-progress
 >   Verify: top-right path: 1+3+1+1+1=7 ✓
 > ```
 
+> [!success]- JS
+> ```js
+> const minPathSum = (grid) => {
+>   const m = grid.length, n = grid[0].length;
+>   for (let i = 0; i < m; i++) {
+>     for (let j = 0; j < n; j++) {
+>       if (i === 0 && j === 0) continue;
+>       const up = i ? grid[i-1][j] : Infinity;
+>       const left = j ? grid[i][j-1] : Infinity;
+>       grid[i][j] += Math.min(up, left);
+>     }
+>   }
+>   return grid[m-1][n-1];
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def min_path_sum(grid):
@@ -290,6 +336,21 @@ status: in-progress
 > Return dp[5][3] = 3
 > 
 > ✅ Answer: 3   (LCS = "ace")
+> ```
+
+> [!success]- JS
+> ```js
+> const longestCommonSubsequence = (t1, t2) => {
+>   const m = t1.length, n = t2.length;
+>   const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+>   for (let i = 1; i <= m; i++) {
+>     for (let j = 1; j <= n; j++) {
+>       if (t1[i-1] === t2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+>       else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+>     }
+>   }
+>   return dp[m][n];
+> };
 > ```
 
 > [!success]- Python
@@ -361,6 +422,23 @@ status: in-progress
 > 
 > ✅ Answer: 3
 >   Operations: horse → rorse (replace h→r) → rose (delete r) → ros (delete e). 3 ops. ✓
+> ```
+
+> [!success]- JS
+> ```js
+> const minDistance = (w1, w2) => {
+>   const m = w1.length, n = w2.length;
+>   const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+>   for (let i = 0; i <= m; i++) dp[i][0] = i;
+>   for (let j = 0; j <= n; j++) dp[0][j] = j;
+>   for (let i = 1; i <= m; i++) {
+>     for (let j = 1; j <= n; j++) {
+>       if (w1[i-1] === w2[j-1]) dp[i][j] = dp[i-1][j-1];
+>       else dp[i][j] = 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+>     }
+>   }
+>   return dp[m][n];
+> };
 > ```
 
 > [!success]- Python
@@ -452,6 +530,24 @@ status: in-progress
 > ✅ Answer: "bab" (or "aba" — both are valid len-3 palindromes)
 > ```
 
+> [!success]- JS
+> ```js
+> const longestPalindrome = (s) => {
+>   let start = 0, end = 0;
+>   const expand = (l, r) => {
+>     while (l >= 0 && r < s.length && s[l] === s[r]) { l--; r++; }
+>     return [l + 1, r - 1];
+>   };
+>   for (let i = 0; i < s.length; i++) {
+>     const [a1, b1] = expand(i, i);
+>     const [a2, b2] = expand(i, i + 1);
+>     if (b1 - a1 > end - start) { start = a1; end = b1; }
+>     if (b2 - a2 > end - start) { start = a2; end = b2; }
+>   }
+>   return s.slice(start, end + 1);
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def longest_palindrome(s):
@@ -533,6 +629,23 @@ status: in-progress
 > ✅ Answer: 4   (subsequence "bbbb")
 > ```
 
+> [!success]- JS
+> ```js
+> const longestPalindromeSubseq = (s) => {
+>   const n = s.length;
+>   const dp = Array.from({length: n}, () => new Array(n).fill(0));
+>   for (let i = 0; i < n; i++) dp[i][i] = 1;
+>   for (let length = 2; length <= n; length++) {
+>     for (let i = 0; i <= n - length; i++) {
+>       const j = i + length - 1;
+>       if (s[i] === s[j]) dp[i][j] = (length > 2 ? dp[i+1][j-1] : 0) + 2;
+>       else dp[i][j] = Math.max(dp[i+1][j], dp[i][j-1]);
+>     }
+>   }
+>   return dp[0][n-1];
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def longest_palindrome_subseq(s):
@@ -608,6 +721,22 @@ status: in-progress
 >   Pairs: (2,3), (2,4), (3,4) → 3 ways. ✓
 > ```
 
+> [!success]- JS
+> ```js
+> const numDistinct = (s, t) => {
+>   const m = s.length, n = t.length;
+>   const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+>   for (let i = 0; i <= m; i++) dp[i][0] = 1;
+>   for (let i = 1; i <= m; i++) {
+>     for (let j = 1; j <= n; j++) {
+>       if (s[i-1] === t[j-1]) dp[i][j] = dp[i-1][j-1] + dp[i-1][j];
+>       else dp[i][j] = dp[i-1][j];
+>     }
+>   }
+>   return dp[m][n];
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def num_distinct(s, t):
@@ -681,6 +810,23 @@ status: in-progress
 > Eventually dp[5][5] = T
 > 
 > ✅ Answer: true
+> ```
+
+> [!success]- JS
+> ```js
+> const isInterleave = (s1, s2, s3) => {
+>   const m = s1.length, n = s2.length;
+>   if (m + n !== s3.length) return false;
+>   const dp = Array.from({length: m+1}, () => new Array(n+1).fill(false));
+>   dp[0][0] = true;
+>   for (let i = 0; i <= m; i++) {
+>     for (let j = 0; j <= n; j++) {
+>       if (i > 0 && s1[i-1] === s3[i+j-1]) dp[i][j] = dp[i][j] || dp[i-1][j];
+>       if (j > 0 && s2[j-1] === s3[i+j-1]) dp[i][j] = dp[i][j] || dp[i][j-1];
+>     }
+>   }
+>   return dp[m][n];
+> };
 > ```
 
 > [!success]- Python
@@ -770,6 +916,25 @@ status: in-progress
 > ✅ Answer: 4
 > ```
 
+> [!success]- JS
+> ```js
+> const maximalSquare = (matrix) => {
+>   if (!matrix.length) return 0;
+>   const m = matrix.length, n = matrix[0].length;
+>   const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+>   let best = 0;
+>   for (let i = 1; i <= m; i++) {
+>     for (let j = 1; j <= n; j++) {
+>       if (matrix[i-1][j-1] === '1') {
+>         dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+>         best = Math.max(best, dp[i][j]);
+>       }
+>     }
+>   }
+>   return best * best;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def maximal_square(matrix):
@@ -841,6 +1006,28 @@ status: in-progress
 > Return dp[2][2] = 2
 > 
 > ✅ Answer: 2   (Buy at 2, sell at 4; profit 2. Second transaction not useful.)
+> ```
+
+> [!success]- JS
+> ```js
+> const maxProfitIV = (k, prices) => {
+>   const n = prices.length;
+>   if (!n || k === 0) return 0;
+>   if (k >= Math.floor(n / 2)) {
+>     let sum = 0;
+>     for (let i = 1; i < n; i++) sum += Math.max(0, prices[i] - prices[i-1]);
+>     return sum;
+>   }
+>   const dp = Array.from({length: k+1}, () => new Array(n).fill(0));
+>   for (let t = 1; t <= k; t++) {
+>     let maxDiff = -prices[0];
+>     for (let i = 1; i < n; i++) {
+>       dp[t][i] = Math.max(dp[t][i-1], prices[i] + maxDiff);
+>       maxDiff = Math.max(maxDiff, dp[t-1][i] - prices[i]);
+>     }
+>   }
+>   return dp[k][n-1];
+> };
 > ```
 
 > [!success]- Python
@@ -942,6 +1129,24 @@ status: in-progress
 >             max = 167
 > 
 > ✅ Answer: 167
+> ```
+
+> [!success]- JS
+> ```js
+> const maxCoins = (nums) => {
+>   const a = [1, ...nums, 1];
+>   const n = a.length;
+>   const dp = Array.from({length: n}, () => new Array(n).fill(0));
+>   for (let length = 2; length < n; length++) {
+>     for (let l = 0; l < n - length; l++) {
+>       const r = l + length;
+>       for (let k = l + 1; k < r; k++) {
+>         dp[l][r] = Math.max(dp[l][r], a[l]*a[k]*a[r] + dp[l][k] + dp[k][r]);
+>       }
+>     }
+>   }
+>   return dp[0][n-1];
+> };
 > ```
 
 > [!success]- Python

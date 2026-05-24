@@ -88,6 +88,15 @@ status: in-progress
 >   The duplicates 1^1=0 and 2^2=0 cancel; only 4 survives.
 > ```
 
+> [!success]- JS
+> ```js
+> const singleNumber = (nums) => {
+>   let out = 0;
+>   for (const x of nums) out ^= x;
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def single_number(nums):
@@ -157,6 +166,24 @@ status: in-progress
 > 
 > ✅ Answer: 3
 >   The triplicate 2 contributes 3 to each set bit; mod 3 wipes it out.
+> ```
+
+> [!success]- JS
+> ```js
+> const singleNumberII = (nums) => {
+>   let result = 0;
+>   for (let i = 0; i < 32; i++) {
+>     let s = 0;
+>     for (const x of nums) s += (x >> i) & 1;
+>     s %= 3;
+>     if (i === 31 && s) {
+>       result -= 1 << 31; // sign bit, handle negatives
+>     } else {
+>       result |= s << i;
+>     }
+>   }
+>   return result;
+> };
 > ```
 
 > [!success]- Python
@@ -235,6 +262,21 @@ status: in-progress
 > ✅ Answer: [3, 5]
 > ```
 
+> [!success]- JS
+> ```js
+> const singleNumberIII = (nums) => {
+>   let xorAll = 0;
+>   for (const x of nums) xorAll ^= x;
+>   const diffBit = xorAll & -xorAll;
+>   let a = 0, b = 0;
+>   for (const x of nums) {
+>     if (x & diffBit) a ^= x;
+>     else b ^= x;
+>   }
+>   return [a, b];
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def single_number_iii(nums):
@@ -308,6 +350,18 @@ status: in-progress
 >   Check: 11 = 8+2+1, three 1-bits. ✓
 > ```
 
+> [!success]- JS
+> ```js
+> const hammingWeight = (n) => {
+>   let count = 0;
+>   while (n !== 0) {
+>     n &= n - 1;
+>     count++;
+>   }
+>   return count;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def hamming_weight(n):
@@ -361,6 +415,17 @@ status: in-progress
 > Final bits = [0, 1, 1, 2, 1, 2]
 > 
 > ✅ Answer: [0, 1, 1, 2, 1, 2]
+> ```
+
+> [!success]- JS
+> ```js
+> const countBits = (n) => {
+>   const bits = new Array(n + 1).fill(0);
+>   for (let i = 1; i <= n; i++) {
+>     bits[i] = bits[i >> 1] + (i & 1);
+>   }
+>   return bits;
+> };
 > ```
 
 > [!success]- Python
@@ -428,6 +493,17 @@ status: in-progress
 >   Every number that appears in both 0..n and nums cancels; the missing one is what's left.
 > ```
 
+> [!success]- JS
+> ```js
+> const missingNumber = (nums) => {
+>   let result = nums.length;
+>   for (let i = 0; i < nums.length; i++) {
+>     result ^= i ^ nums[i];
+>   }
+>   return result;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def missing_number(nums):
@@ -493,6 +569,18 @@ status: in-progress
 > After 32 iterations, result holds the bit-reversed value.
 > 
 > ✅ Answer: 964176192 (binary 00111001011110000010100101000000)
+> ```
+
+> [!success]- JS
+> ```js
+> const reverseBits = (n) => {
+>   let result = 0;
+>   for (let i = 0; i < 32; i++) {
+>     result = (result << 1) | (n & 1);
+>     n >>>= 1; // unsigned right shift
+>   }
+>   return result >>> 0; // coerce to unsigned 32-bit
+> };
 > ```
 
 > [!success]- Python
@@ -571,6 +659,19 @@ status: in-progress
 > 
 > ─────────────────────────────────────────
 > Python negatives: requires masking to 32 bits because Python ints are unbounded.
+> ```
+
+> [!success]- JS
+> ```js
+> const getSum = (a, b) => {
+>   // JS bitwise ops are already 32-bit signed; no masking needed.
+>   while (b !== 0) {
+>     const carry = (a & b) << 1;
+>     a = a ^ b;
+>     b = carry;
+>   }
+>   return a;
+> };
 > ```
 
 > [!success]- Python
@@ -684,6 +785,57 @@ Given `nums` and queries `[xi, mi]`, return max `xi XOR nums[j]` for each query 
 > Return answers in original order: [3, 3, 7]
 > 
 > ✅ Answer: [3, 3, 7]
+> ```
+
+> [!success]- JS
+> ```js
+> const maximizeXor = (nums, queries) => {
+>   nums.sort((a, b) => a - b);
+>   // attach original index: [m, x, origIdx]
+>   const q = queries
+>     .map(([x, m], i) => [m, x, i])
+>     .sort((a, b) => a[0] - b[0]);
+>   const BITS = 31;
+>   const root = {};
+>   let rootEmpty = true;
+>   const insert = (n) => {
+>     let node = root;
+>     for (let i = BITS; i >= 0; i--) {
+>       const b = (n >> i) & 1;
+>       if (!(b in node)) node[b] = {};
+>       node = node[b];
+>     }
+>     rootEmpty = false;
+>   };
+>   const maxXor = (x) => {
+>     if (rootEmpty) return -1;
+>     let node = root;
+>     let out = 0;
+>     for (let i = BITS; i >= 0; i--) {
+>       const b = (x >> i) & 1;
+>       const toggle = 1 - b;
+>       if (toggle in node) {
+>         out |= 1 << i;
+>         node = node[toggle];
+>       } else if (b in node) {
+>         node = node[b];
+>       } else {
+>         return -1;
+>       }
+>     }
+>     return out;
+>   };
+>   const answers = new Array(queries.length).fill(0);
+>   let ni = 0;
+>   for (const [m, x, orig] of q) {
+>     while (ni < nums.length && nums[ni] <= m) {
+>       insert(nums[ni]);
+>       ni++;
+>     }
+>     answers[orig] = maxXor(x);
+>   }
+>   return answers;
+> };
 > ```
 
 > [!success]- Python

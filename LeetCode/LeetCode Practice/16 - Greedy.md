@@ -91,6 +91,18 @@ status: in-progress
 >   i=4: i=4 > furthest=3 → return false
 > ```
 
+> [!success]- JS
+> ```js
+> const canJump = (nums) => {
+>   let furthest = 0;
+>   for (let i = 0; i < nums.length; i++) {
+>     if (i > furthest) return false;
+>     furthest = Math.max(furthest, i + nums[i]);
+>   }
+>   return true;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def can_jump(nums):
@@ -163,6 +175,23 @@ status: in-progress
 > ✅ Answer: 2 jumps   (0 → idx 1 → idx 4)
 > ```
 
+> [!success]- JS
+> ```js
+> const jump = (nums) => {
+>   let jumps = 0;
+>   let curEnd = 0;
+>   let farthest = 0;
+>   for (let i = 0; i < nums.length - 1; i++) {
+>     farthest = Math.max(farthest, i + nums[i]);
+>     if (i === curEnd) {
+>       jumps++;
+>       curEnd = farthest;
+>     }
+>   }
+>   return jumps;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def jump(nums):
@@ -228,6 +257,19 @@ status: in-progress
 > ✅ Answer: 6
 > ```
 
+> [!success]- JS
+> ```js
+> const maxSubarray = (nums) => {
+>   let cur = nums[0];
+>   let best = nums[0];
+>   for (let i = 1; i < nums.length; i++) {
+>     cur = cur < 0 ? nums[i] : cur + nums[i];
+>     best = Math.max(best, cur);
+>   }
+>   return best;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def max_subarray(nums):
@@ -290,6 +332,25 @@ status: in-progress
 > 
 > ✅ Answer: 3
 >   Verify: from station 3: +4-1=3, station 4: 3+5-2=6, station 0: 6+1-3=4, station 1: 4+2-4=2, station 2: 2+3-5=0. Made it.
+> ```
+
+> [!success]- JS
+> ```js
+> const canCompleteCircuit = (gas, cost) => {
+>   const totalGas = gas.reduce((a, b) => a + b, 0);
+>   const totalCost = cost.reduce((a, b) => a + b, 0);
+>   if (totalGas < totalCost) return -1;
+>   let start = 0;
+>   let tank = 0;
+>   for (let i = 0; i < gas.length; i++) {
+>     tank += gas[i] - cost[i];
+>     if (tank < 0) {
+>       start = i + 1;
+>       tank = 0;
+>     }
+>   }
+>   return start;
+> };
 > ```
 
 > [!success]- Python
@@ -371,6 +432,26 @@ status: in-progress
 > All groups formed. ✅ Answer: true
 > ```
 
+> [!success]- JS
+> ```js
+> const isNStraightHand = (hand, groupSize) => {
+>   if (hand.length % groupSize !== 0) return false;
+>   const cnt = new Map();
+>   for (const x of hand) cnt.set(x, (cnt.get(x) ?? 0) + 1);
+>   const keys = [...cnt.keys()].sort((a, b) => a - b);
+>   for (const x of keys) {
+>     const c = cnt.get(x) ?? 0;
+>     if (c === 0) continue;
+>     for (let i = 0; i < groupSize; i++) {
+>       const cur = cnt.get(x + i) ?? 0;
+>       if (cur < c) return false;
+>       cnt.set(x + i, cur - c);
+>     }
+>   }
+>   return true;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import Counter
@@ -445,6 +526,20 @@ status: in-progress
 > 
 > ✅ Answer: true
 >   By componentwise-max of [2,5,3] and [1,7,5] = [2,7,5] = target.
+> ```
+
+> [!success]- JS
+> ```js
+> const mergeTriplets = (triplets, target) => {
+>   const good = [false, false, false];
+>   for (const t of triplets) {
+>     if (t[0] > target[0] || t[1] > target[1] || t[2] > target[2]) continue;
+>     for (let i = 0; i < 3; i++) {
+>       if (t[i] === target[i]) good[i] = true;
+>     }
+>   }
+>   return good.every(Boolean);
+> };
 > ```
 
 > [!success]- Python
@@ -533,6 +628,25 @@ status: in-progress
 > ✅ Answer: [9, 7, 8]
 > ```
 
+> [!success]- JS
+> ```js
+> const partitionLabels = (s) => {
+>   const last = {};
+>   for (let i = 0; i < s.length; i++) last[s[i]] = i;
+>   const out = [];
+>   let start = 0;
+>   let end = 0;
+>   for (let i = 0; i < s.length; i++) {
+>     end = Math.max(end, last[s[i]]);
+>     if (i === end) {
+>       out.push(end - start + 1);
+>       start = i + 1;
+>     }
+>   }
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def partition_labels(s):
@@ -616,6 +730,22 @@ status: in-progress
 >   hi < 0 during processing → return false immediately
 > ```
 
+> [!success]- JS
+> ```js
+> const checkValidString = (s) => {
+>   let lo = 0;
+>   let hi = 0;
+>   for (const c of s) {
+>     if (c === '(') { lo++; hi++; }
+>     else if (c === ')') { lo--; hi--; }
+>     else { lo--; hi++; }
+>     if (hi < 0) return false;
+>     lo = Math.max(lo, 0);
+>   }
+>   return lo === 0;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def check_valid_string(s):
@@ -672,6 +802,17 @@ status: in-progress
 > Total = 4 + 3 = 7
 > 
 > ✅ Answer: 7   (buy at 1 sell at 5, buy at 3 sell at 6 → 4+3=7)
+> ```
+
+> [!success]- JS
+> ```js
+> const maxProfitII = (prices) => {
+>   let total = 0;
+>   for (let i = 1; i < prices.length; i++) {
+>     total += Math.max(0, prices[i] - prices[i - 1]);
+>   }
+>   return total;
+> };
 > ```
 
 > [!success]- Python
@@ -747,6 +888,22 @@ status: in-progress
 > Now l=1 > r=0 → exit loop.
 > 
 > ✅ Answer: 3 boats
+> ```
+
+> [!success]- JS
+> ```js
+> const numRescueBoats = (people, limit) => {
+>   people.sort((a, b) => a - b);
+>   let l = 0;
+>   let r = people.length - 1;
+>   let boats = 0;
+>   while (l <= r) {
+>     if (people[l] + people[r] <= limit) l++;
+>     r--;
+>     boats++;
+>   }
+>   return boats;
+> };
 > ```
 
 > [!success]- Python
@@ -837,6 +994,23 @@ Give candies to children with ratings: every child gets at least 1; higher-rated
 >   R→L: i=1: 2>2 NO. i=0: 1>2 NO. → [1,2,1]
 >   Sum = 4
 >   Note: child 2 has ratings[2]==ratings[1]=2, so the "strictly higher" rule doesn't apply between them.
+> ```
+
+> [!success]- JS
+> ```js
+> const candy = (ratings) => {
+>   const n = ratings.length;
+>   const candies = new Array(n).fill(1);
+>   for (let i = 1; i < n; i++) {
+>     if (ratings[i] > ratings[i - 1]) candies[i] = candies[i - 1] + 1;
+>   }
+>   for (let i = n - 2; i >= 0; i--) {
+>     if (ratings[i] > ratings[i + 1]) {
+>       candies[i] = Math.max(candies[i], candies[i + 1] + 1);
+>     }
+>   }
+>   return candies.reduce((a, b) => a + b, 0);
+> };
 > ```
 
 > [!success]- Python

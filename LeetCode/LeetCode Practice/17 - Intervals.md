@@ -93,6 +93,24 @@ status: in-progress
 > ✅ Answer: [[1, 6], [8, 10], [15, 18]]
 > ```
 
+> [!success]- JS
+> ```js
+> const merge = (intervals) => {
+>   intervals.sort((a, b) => a[0] - b[0]);
+>   const out = [intervals[0]];
+>   for (let i = 1; i < intervals.length; i++) {
+>     const [s, e] = intervals[i];
+>     const top = out[out.length - 1];
+>     if (s <= top[1]) {
+>       top[1] = Math.max(top[1], e);
+>     } else {
+>       out.push([s, e]);
+>     }
+>   }
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def merge(intervals):
@@ -170,6 +188,30 @@ status: in-progress
 >   Result: [[1,2],[3,10],[12,16]]
 > ```
 
+> [!success]- JS
+> ```js
+> const insert = (intervals, newInterval) => {
+>   const out = [];
+>   const n = intervals.length;
+>   let i = 0;
+>   while (i < n && intervals[i][1] < newInterval[0]) {
+>     out.push(intervals[i]);
+>     i++;
+>   }
+>   while (i < n && intervals[i][0] <= newInterval[1]) {
+>     newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
+>     newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
+>     i++;
+>   }
+>   out.push(newInterval);
+>   while (i < n) {
+>     out.push(intervals[i]);
+>     i++;
+>   }
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def insert(intervals, new):
@@ -232,6 +274,23 @@ status: in-progress
 > ✅ Answer: 1   (remove [1,3] to leave [[1,2],[2,3],[3,4]] non-overlapping)
 > ```
 
+> [!success]- JS
+> ```js
+> const eraseOverlapIntervals = (intervals) => {
+>   intervals.sort((a, b) => a[1] - b[1]);
+>   let removed = 0;
+>   let end = -Infinity;
+>   for (const [s, e] of intervals) {
+>     if (s >= end) {
+>       end = e;
+>     } else {
+>       removed++;
+>     }
+>   }
+>   return removed;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def erase_overlap_intervals(intervals):
@@ -289,6 +348,17 @@ status: in-progress
 >   sort: [[2,4],[7,10]]
 >   i=1: 7 < 4? NO → continue
 >   loop ends → true
+> ```
+
+> [!success]- JS
+> ```js
+> const canAttendMeetings = (intervals) => {
+>   intervals.sort((a, b) => a[0] - b[0]);
+>   for (let i = 1; i < intervals.length; i++) {
+>     if (intervals[i][0] < intervals[i - 1][1]) return false;
+>   }
+>   return true;
+> };
 > ```
 
 > [!success]- Python
@@ -350,6 +420,26 @@ status: in-progress
 >   (We reuse the room that ended at 10.)
 >   
 > ✅ Answer: 2
+> ```
+
+> [!success]- JS
+> ```js
+> const minMeetingRooms = (intervals) => {
+>   const starts = intervals.map((i) => i[0]).sort((a, b) => a - b);
+>   const ends = intervals.map((i) => i[1]).sort((a, b) => a - b);
+>   let rooms = 0;
+>   let best = 0;
+>   let j = 0;
+>   for (const s of starts) {
+>     if (s >= ends[j]) {
+>       j++;
+>     } else {
+>       rooms++;
+>     }
+>     best = Math.max(best, rooms);
+>   }
+>   return best;
+> };
 > ```
 
 > [!success]- Python
@@ -415,6 +505,23 @@ status: in-progress
 > ✅ Answer: 2
 >   Arrow 1 at x=6 hits balloons [1,6] and [2,8].
 >   Arrow 2 at x=12 hits [7,12] and [10,16].
+> ```
+
+> [!success]- JS
+> ```js
+> const findMinArrowShots = (points) => {
+>   points.sort((a, b) => a[1] - b[1]);
+>   let arrows = 1;
+>   let end = points[0][1];
+>   for (let i = 1; i < points.length; i++) {
+>     const [s, e] = points[i];
+>     if (s > end) {
+>       arrows++;
+>       end = e;
+>     }
+>   }
+>   return arrows;
+> };
 > ```
 
 > [!success]- Python
@@ -508,6 +615,23 @@ status: in-progress
 > ✅ Answer: [[1,2], [5,5], [8,10], [15,23], [24,24], [25,25]]
 > ```
 
+> [!success]- JS
+> ```js
+> const intervalIntersection = (A, B) => {
+>   const out = [];
+>   let i = 0;
+>   let j = 0;
+>   while (i < A.length && j < B.length) {
+>     const lo = Math.max(A[i][0], B[j][0]);
+>     const hi = Math.min(A[i][1], B[j][1]);
+>     if (lo <= hi) out.push([lo, hi]);
+>     if (A[i][1] < B[j][1]) i++;
+>     else j++;
+>   }
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def interval_intersection(A, B):
@@ -584,6 +708,23 @@ status: in-progress
 >   At time 3 we'd have 2+3=5 passengers, exceeds capacity 4.
 > ```
 
+> [!success]- JS
+> ```js
+> const carPooling = (trips, capacity) => {
+>   const diff = new Array(1001).fill(0);
+>   for (const [p, f, t] of trips) {
+>     diff[f] += p;
+>     diff[t] -= p;
+>   }
+>   let cur = 0;
+>   for (const x of diff) {
+>     cur += x;
+>     if (cur > capacity) return false;
+>   }
+>   return true;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def car_pooling(trips, capacity):
@@ -650,6 +791,28 @@ status: in-progress
 >   gap = (merged[0].end, merged[1].start) = (3, 4) → free interval [3, 4]
 > 
 > ✅ Answer: [[3, 4]]
+> ```
+
+> [!success]- JS
+> ```js
+> const employeeFreeTime = (schedule) => {
+>   const all = schedule.flat().sort((a, b) => a.start - b.start);
+>   const merged = [all[0]];
+>   for (let k = 1; k < all.length; k++) {
+>     const iv = all[k];
+>     const top = merged[merged.length - 1];
+>     if (iv.start <= top.end) {
+>       top.end = Math.max(top.end, iv.end);
+>     } else {
+>       merged.push(iv);
+>     }
+>   }
+>   const free = [];
+>   for (let i = 0; i < merged.length - 1; i++) {
+>     free.push(new Interval(merged[i].end, merged[i + 1].start));
+>   }
+>   return free;
+> };
 > ```
 
 > [!success]- Python
@@ -738,6 +901,67 @@ status: in-progress
 >   Loop exit (i=3=n, heap empty)
 > 
 > ✅ Answer: 3
+> ```
+
+> [!success]- JS
+> ```js
+> class MinHeap {
+>   constructor() { this.h = []; }
+>   size() { return this.h.length; }
+>   peek() { return this.h[0]; }
+>   push(v) {
+>     this.h.push(v);
+>     let i = this.h.length - 1;
+>     while (i > 0) {
+>       const p = (i - 1) >> 1;
+>       if (this.h[p] <= this.h[i]) break;
+>       [this.h[p], this.h[i]] = [this.h[i], this.h[p]];
+>       i = p;
+>     }
+>   }
+>   pop() {
+>     const top = this.h[0];
+>     const last = this.h.pop();
+>     if (this.h.length) {
+>       this.h[0] = last;
+>       let i = 0;
+>       const n = this.h.length;
+>       while (true) {
+>         const l = 2 * i + 1, r = 2 * i + 2;
+>         let s = i;
+>         if (l < n && this.h[l] < this.h[s]) s = l;
+>         if (r < n && this.h[r] < this.h[s]) s = r;
+>         if (s === i) break;
+>         [this.h[s], this.h[i]] = [this.h[i], this.h[s]];
+>         i = s;
+>       }
+>     }
+>     return top;
+>   }
+> }
+> 
+> const maxEvents = (events) => {
+>   events.sort((a, b) => a[0] - b[0]);
+>   const h = new MinHeap();
+>   let i = 0;
+>   let attended = 0;
+>   let day = 0;
+>   const n = events.length;
+>   while (i < n || h.size()) {
+>     if (!h.size()) day = events[i][0];
+>     while (i < n && events[i][0] <= day) {
+>       h.push(events[i][1]);
+>       i++;
+>     }
+>     while (h.size() && h.peek() < day) h.pop();
+>     if (h.size()) {
+>       h.pop();
+>       attended++;
+>       day++;
+>     }
+>   }
+>   return attended;
+> };
 > ```
 
 > [!success]- Python

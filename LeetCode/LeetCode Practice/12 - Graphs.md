@@ -204,6 +204,23 @@ Same DFS, return **size** as you go.
 > ✅ Answer: 4
 > ```
 
+> [!success]- JS
+> ```js
+> const maxAreaOfIsland = (grid) => {
+>   const R = grid.length, C = grid[0].length;
+>   const dfs = (r, c) => {
+>     if (r < 0 || r >= R || c < 0 || c >= C || grid[r][c] !== 1) return 0;
+>     grid[r][c] = 0;
+>     return 1 + dfs(r + 1, c) + dfs(r - 1, c) + dfs(r, c + 1) + dfs(r, c - 1);
+>   };
+>   let best = 0;
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+>     if (grid[r][c] === 1) best = Math.max(best, dfs(r, c));
+>   }
+>   return best;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def max_area_of_island(grid):
@@ -281,6 +298,22 @@ Deep copy a connected undirected graph (each node has `val` and `neighbors[]`).
 >   return 1'
 > 
 > ✅ All nodes cloned with edges preserved. No infinite recursion thanks to the map.
+> ```
+
+> [!success]- JS
+> ```js
+> const cloneGraph = (node) => {
+>   if (!node) return null;
+>   const mp = new Map();
+>   const dfs = (n) => {
+>     if (mp.has(n)) return mp.get(n);
+>     const copy = new Node(n.val);
+>     mp.set(n, copy);
+>     for (const nb of n.neighbors) copy.neighbors.push(dfs(nb));
+>     return copy;
+>   };
+>   return dfs(node);
+> };
 > ```
 
 > [!success]- Python
@@ -370,6 +403,28 @@ Fill each empty room with distance to nearest gate.
 >   2  2  1 -1
 >   1 -1  2 -1
 >   0 -1  3  4
+> ```
+
+> [!success]- JS
+> ```js
+> const wallsAndGates = (rooms) => {
+>   const R = rooms.length, C = rooms[0].length;
+>   const q = [];
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+>     if (rooms[r][c] === 0) q.push([r, c]);
+>   }
+>   const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+>   while (q.length) {
+>     const [r, c] = q.shift();
+>     for (const [dr, dc] of dirs) {
+>       const nr = r + dr, nc = c + dc;
+>       if (nr >= 0 && nr < R && nc >= 0 && nc < C && rooms[nr][nc] === 2147483647) {
+>         rooms[nr][nc] = rooms[r][c] + 1;
+>         q.push([nr, nc]);
+>       }
+>     }
+>   }
+> };
 > ```
 
 > [!success]- Python
@@ -490,6 +545,34 @@ Multi-source BFS from all initially-rotten oranges. Track minutes via BFS level.
 > ✅ Answer: 4
 > ```
 
+> [!success]- JS
+> ```js
+> const orangesRotting = (grid) => {
+>   const R = grid.length, C = grid[0].length;
+>   const q = [];
+>   let fresh = 0;
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+>     if (grid[r][c] === 2) q.push([r, c, 0]);
+>     else if (grid[r][c] === 1) fresh++;
+>   }
+>   const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+>   let minutes = 0;
+>   while (q.length) {
+>     const [r, c, t] = q.shift();
+>     minutes = Math.max(minutes, t);
+>     for (const [dr, dc] of dirs) {
+>       const nr = r + dr, nc = c + dc;
+>       if (nr >= 0 && nr < R && nc >= 0 && nc < C && grid[nr][nc] === 1) {
+>         grid[nr][nc] = 2;
+>         fresh--;
+>         q.push([nr, nc, t + 1]);
+>       }
+>     }
+>   }
+>   return fresh === 0 ? minutes : -1;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import deque
@@ -579,6 +662,26 @@ Cells whose water can flow to BOTH oceans (touching N/W = Pacific; S/E = Atlanti
 > For this matrix, answer = [[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]
 > ```
 
+> [!success]- JS
+> ```js
+> const pacificAtlantic = (heights) => {
+>   const R = heights.length, C = heights[0].length;
+>   const pac = new Set(), atl = new Set();
+>   const key = (r, c) => r * C + c;
+>   const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+>   const dfs = (r, c, seen, prev) => {
+>     if (r < 0 || r >= R || c < 0 || c >= C || seen.has(key(r, c)) || heights[r][c] < prev) return;
+>     seen.add(key(r, c));
+>     for (const [dr, dc] of dirs) dfs(r + dr, c + dc, seen, heights[r][c]);
+>   };
+>   for (let r = 0; r < R; r++) { dfs(r, 0, pac, 0); dfs(r, C - 1, atl, 0); }
+>   for (let c = 0; c < C; c++) { dfs(0, c, pac, 0); dfs(R - 1, c, atl, 0); }
+>   const out = [];
+>   for (const k of pac) if (atl.has(k)) out.push([Math.floor(k / C), k % C]);
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def pacific_atlantic(heights):
@@ -657,6 +760,24 @@ DFS from each border 'O', mark them as safe (temp char like '#'). Then sweep: '#
 >   X X X X
 >   X X X X
 >   X O X X
+> ```
+
+> [!success]- JS
+> ```js
+> const solve = (board) => {
+>   if (!board || !board.length) return;
+>   const R = board.length, C = board[0].length;
+>   const dfs = (r, c) => {
+>     if (r < 0 || r >= R || c < 0 || c >= C || board[r][c] !== 'O') return;
+>     board[r][c] = '#';
+>     dfs(r + 1, c); dfs(r - 1, c); dfs(r, c + 1); dfs(r, c - 1);
+>   };
+>   for (let r = 0; r < R; r++) { dfs(r, 0); dfs(r, C - 1); }
+>   for (let c = 0; c < C; c++) { dfs(0, c); dfs(R - 1, c); }
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+>     board[r][c] = board[r][c] === '#' ? 'O' : 'X';
+>   }
+> };
 > ```
 
 > [!success]- Python
@@ -768,6 +889,39 @@ Shortest transformation `begin → end`, one letter at a time, each step in word
 > ✅ Answer: 5  (hit → hot → dot → dog → cog)
 > ```
 
+> [!success]- JS
+> ```js
+> const ladderLength = (beginWord, endWord, wordList) => {
+>   const words = new Set(wordList);
+>   if (!words.has(endWord)) return 0;
+>   const L = beginWord.length;
+>   const buckets = new Map();
+>   for (const w of words) {
+>     for (let i = 0; i < L; i++) {
+>       const pat = w.slice(0, i) + '*' + w.slice(i + 1);
+>       if (!buckets.has(pat)) buckets.set(pat, []);
+>       buckets.get(pat).push(w);
+>     }
+>   }
+>   const q = [[beginWord, 1]];
+>   const seen = new Set([beginWord]);
+>   while (q.length) {
+>     const [w, d] = q.shift();
+>     if (w === endWord) return d;
+>     for (let i = 0; i < L; i++) {
+>       const pat = w.slice(0, i) + '*' + w.slice(i + 1);
+>       for (const nb of (buckets.get(pat) || [])) {
+>         if (!seen.has(nb)) {
+>           seen.add(nb);
+>           q.push([nb, d + 1]);
+>         }
+>       }
+>     }
+>   }
+>   return 0;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import deque, defaultdict
@@ -844,6 +998,31 @@ Shortest transformation `begin → end`, one letter at a time, each step in word
 > Eventually reach "0202" — count depth.
 > 
 > ✅ Answer: 6 (the well-known answer for this input)
+> ```
+
+> [!success]- JS
+> ```js
+> const openLock = (deadends, target) => {
+>   const dead = new Set(deadends);
+>   if (dead.has('0000')) return -1;
+>   if (target === '0000') return 0;
+>   const q = [['0000', 0]];
+>   const seen = new Set(['0000']);
+>   while (q.length) {
+>     const [s, d] = q.shift();
+>     for (let i = 0; i < 4; i++) {
+>       for (const delta of [-1, 1]) {
+>         const digit = (Number(s[i]) + delta + 10) % 10;
+>         const nb = s.slice(0, i) + digit + s.slice(i + 1);
+>         if (seen.has(nb) || dead.has(nb)) continue;
+>         if (nb === target) return d + 1;
+>         seen.add(nb);
+>         q.push([nb, d + 1]);
+>       }
+>     }
+>   }
+>   return -1;
+> };
 > ```
 
 > [!success]- Python
@@ -929,6 +1108,29 @@ Shortest transformation `begin → end`, one letter at a time, each step in word
 >   At enqueue, check if it's target — return 4.
 > 
 > ✅ Answer: 4    (path 0,0 → 0,1 → 0,2 → 1,2 → 2,2)
+> ```
+
+> [!success]- JS
+> ```js
+> const shortestPathBinaryMatrix = (grid) => {
+>   const N = grid.length;
+>   if (grid[0][0] || grid[N - 1][N - 1]) return -1;
+>   const q = [[0, 0, 1]];
+>   const seen = new Set(['0,0']);
+>   const dirs = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+>   while (q.length) {
+>     const [r, c, d] = q.shift();
+>     if (r === N - 1 && c === N - 1) return d;
+>     for (const [dr, dc] of dirs) {
+>       const nr = r + dr, nc = c + dc, k = `${nr},${nc}`;
+>       if (nr >= 0 && nr < N && nc >= 0 && nc < N && grid[nr][nc] === 0 && !seen.has(k)) {
+>         seen.add(k);
+>         q.push([nr, nc, d + 1]);
+>       }
+>     }
+>   }
+>   return -1;
+> };
 > ```
 
 > [!success]- Python
@@ -1018,6 +1220,31 @@ Multi-source BFS from all 0s. Initialize 1s to ∞; relax during BFS.
 > ✅ Answer: [[0,0,0],[0,1,0],[1,2,1]]
 > ```
 
+> [!success]- JS
+> ```js
+> const updateMatrix = (mat) => {
+>   const R = mat.length, C = mat[0].length;
+>   const INF = Infinity;
+>   const dist = Array.from({ length: R }, () => new Array(C).fill(INF));
+>   const q = [];
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+>     if (mat[r][c] === 0) { dist[r][c] = 0; q.push([r, c]); }
+>   }
+>   const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+>   while (q.length) {
+>     const [r, c] = q.shift();
+>     for (const [dr, dc] of dirs) {
+>       const nr = r + dr, nc = c + dc;
+>       if (nr >= 0 && nr < R && nc >= 0 && nc < C && dist[nr][nc] > dist[r][c] + 1) {
+>         dist[nr][nc] = dist[r][c] + 1;
+>         q.push([nr, nc]);
+>       }
+>     }
+>   }
+>   return dist;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import deque
@@ -1096,6 +1323,24 @@ Can you visit all rooms starting from room 0 (each room contains keys to other r
 > ✅ Answer: true
 > ```
 
+> [!success]- JS
+> ```js
+> const canVisitAllRooms = (rooms) => {
+>   const seen = new Set([0]);
+>   const stack = [0];
+>   while (stack.length) {
+>     const r = stack.pop();
+>     for (const k of rooms[r]) {
+>       if (!seen.has(k)) {
+>         seen.add(k);
+>         stack.push(k);
+>       }
+>     }
+>   }
+>   return seen.size === rooms.length;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def can_visit_all_rooms(rooms):
@@ -1167,6 +1412,25 @@ Can you visit all rooms starting from room 0 (each room contains keys to other r
 > pop → []
 > 
 > ✅ Answer: [[0,1,3], [0,2,3]]
+> ```
+
+> [!success]- JS
+> ```js
+> const allPathsSourceTarget = (graph) => {
+>   const out = [], path = [];
+>   const target = graph.length - 1;
+>   const dfs = (node) => {
+>     path.push(node);
+>     if (node === target) {
+>       out.push([...path]);
+>     } else {
+>       for (const nb of graph[node]) dfs(nb);
+>     }
+>     path.pop();
+>   };
+>   dfs(0);
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -1241,6 +1505,31 @@ Adjacency matrix; count connected components.
 > ✅ Answer: 2
 > ```
 
+> [!success]- JS
+> ```js
+> const findCircleNum = (isConnected) => {
+>   const n = isConnected.length;
+>   const seen = new Set();
+>   const dfs = (i) => {
+>     for (let j = 0; j < n; j++) {
+>       if (isConnected[i][j] && !seen.has(j)) {
+>         seen.add(j);
+>         dfs(j);
+>       }
+>     }
+>   };
+>   let count = 0;
+>   for (let i = 0; i < n; i++) {
+>     if (!seen.has(i)) {
+>       seen.add(i);
+>       dfs(i);
+>       count++;
+>     }
+>   }
+>   return count;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def find_circle_num(isConnected):
@@ -1306,6 +1595,25 @@ Islands not touching the border.
 > Two closed islands in this grid.
 > 
 > ✅ Answer: 2
+> ```
+
+> [!success]- JS
+> ```js
+> const closedIsland = (grid) => {
+>   const R = grid.length, C = grid[0].length;
+>   const dfs = (r, c) => {
+>     if (r < 0 || r >= R || c < 0 || c >= C || grid[r][c] !== 0) return;
+>     grid[r][c] = 1;
+>     dfs(r + 1, c); dfs(r - 1, c); dfs(r, c + 1); dfs(r, c - 1);
+>   };
+>   for (let r = 0; r < R; r++) { dfs(r, 0); dfs(r, C - 1); }
+>   for (let c = 0; c < C; c++) { dfs(0, c); dfs(R - 1, c); }
+>   let count = 0;
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+>     if (grid[r][c] === 0) { dfs(r, c); count++; }
+>   }
+>   return count;
+> };
 > ```
 
 > [!success]- Python
@@ -1422,6 +1730,25 @@ A node is **safe** if every path leads to a terminal. Return all safe nodes (sor
 > Final: BLACK nodes are [2, 4, 5, 6]
 > 
 > ✅ Answer: [2, 4, 5, 6]
+> ```
+
+> [!success]- JS
+> ```js
+> const eventualSafeNodes = (graph) => {
+>   const color = new Array(graph.length).fill(0); // 0 white, 1 gray, 2 black
+>   const dfs = (node) => {
+>     if (color[node] > 0) return color[node] === 2;
+>     color[node] = 1;
+>     for (const nb of graph[node]) {
+>       if (!dfs(nb)) return false;
+>     }
+>     color[node] = 2;
+>     return true;
+>   };
+>   const out = [];
+>   for (let i = 0; i < graph.length; i++) if (dfs(i)) out.push(i);
+>   return out;
+> };
 > ```
 
 > [!success]- Python

@@ -191,6 +191,20 @@ Heap of size K, key = `-distSquared` (max-heap of distances), pop when oversize.
 > ✅ Answer: [[-2, 2], [0, 1]]
 > ```
 
+> [!success]- JS
+> ```js
+> // assumes MaxHeap class keyed by first tuple element
+> const kClosest = (points, k) => {
+>   const h = new MaxHeap((a, b) => a[0] - b[0]);
+>   for (const [x, y] of points) {
+>     const d = x * x + y * y;
+>     h.push([d, x, y]);
+>     if (h.size() > k) h.pop();
+>   }
+>   return h.toArray().map(([, x, y]) => [x, y]);
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > import heapq
@@ -257,6 +271,21 @@ Count with hash map; min-heap of size K on `(freq, val)`.
 > Extract vals: [2, 1]
 > 
 > ✅ Answer: [1, 2] (order may vary)
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MinHeap class keyed by first tuple element (freq)
+> const topKFrequent = (nums, k) => {
+>   const cnt = new Map();
+>   for (const x of nums) cnt.set(x, (cnt.get(x) ?? 0) + 1);
+>   const h = new MinHeap((a, b) => a[0] - b[0]);
+>   for (const [v, f] of cnt) {
+>     h.push([f, v]);
+>     if (h.size() > k) h.pop();
+>   }
+>   return h.toArray().map(([, v]) => v);
+> };
 > ```
 
 > [!success]- Python
@@ -344,6 +373,21 @@ Max-heap; repeatedly pop top two, push difference, until ≤ 1 left.
 > Loop exits (size < 2).
 > 
 > ✅ Answer: 1
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MaxHeap class
+> const lastStoneWeight = (stones) => {
+>   const h = new MaxHeap();
+>   for (const s of stones) h.push(s);
+>   while (h.size() > 1) {
+>     const a = h.pop();
+>     const b = h.pop();
+>     if (a !== b) h.push(a - b);
+>   }
+>   return h.size() ? h.peek() : 0;
+> };
 > ```
 
 > [!success]- Python
@@ -436,6 +480,23 @@ Maintain min-heap of size K. `add(x)`: push, evict if oversize. Top is current K
 >   return 8
 > 
 > ✅ Returns: [4, 5, 5, 8, 8]
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MinHeap class
+> class KthLargest {
+>   constructor(k, nums) {
+>     this.k = k;
+>     this.h = new MinHeap();
+>     for (const x of nums) this.add(x);
+>   }
+>   add(x) {
+>     this.h.push(x);
+>     if (this.h.size() > this.k) this.h.pop();
+>     return this.h.peek();
+>   }
+> }
 > ```
 
 > [!success]- Python
@@ -543,6 +604,28 @@ Maintain min-heap of size K. `add(x)`: push, evict if oversize. Top is current K
 >   |low| > |high| → return -low[0] = 2
 > 
 > ✅ Returns: 1, 1.5, 2
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MinHeap and MaxHeap classes
+> class MedianFinder {
+>   constructor() {
+>     this.low = new MaxHeap();   // bottom half
+>     this.high = new MinHeap();  // top half
+>   }
+>   addNum(x) {
+>     this.low.push(x);
+>     this.high.push(this.low.pop());
+>     if (this.high.size() > this.low.size()) {
+>       this.low.push(this.high.pop());
+>     }
+>   }
+>   findMedian() {
+>     if (this.low.size() > this.high.size()) return this.low.peek();
+>     return (this.low.peek() + this.high.peek()) / 2;
+>   }
+> }
 > ```
 
 > [!success]- Python
@@ -653,6 +736,30 @@ n-CPU scheduling: same-task cooldown `n`. Min CPU intervals to finish.
 > Correct answer for this input: 8.
 > ```
 
+> [!success]- JS
+> ```js
+> // assumes MaxHeap class
+> const leastInterval = (tasks, n) => {
+>   const cnt = new Map();
+>   for (const t of tasks) cnt.set(t, (cnt.get(t) ?? 0) + 1);
+>   const h = new MaxHeap();
+>   for (const c of cnt.values()) h.push(c);
+>   const q = [];   // [remaining, availableAt]
+>   let time = 0;
+>   while (h.size() || q.length) {
+>     time += 1;
+>     if (h.size()) {
+>       const c = h.pop() - 1;
+>       if (c > 0) q.push([c, time + n]);
+>     }
+>     if (q.length && q[0][1] === time) {
+>       h.push(q.shift()[0]);
+>     }
+>   }
+>   return time;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > import heapq
@@ -745,6 +852,28 @@ Rearrange so no two adjacent chars are equal.
 >   counts={a:3, b:1}; max=3 > (4+1)/2=2 → return ""
 > ```
 
+> [!success]- JS
+> ```js
+> // assumes MaxHeap class keyed by first tuple element (count)
+> const reorganizeString = (s) => {
+>   const cnt = new Map();
+>   for (const ch of s) cnt.set(ch, (cnt.get(ch) ?? 0) + 1);
+>   if (Math.max(...cnt.values()) > Math.floor((s.length + 1) / 2)) return "";
+>   const h = new MaxHeap((a, b) => a[0] - b[0]);
+>   for (const [ch, c] of cnt) h.push([c, ch]);
+>   const out = [];
+>   while (h.size() >= 2) {
+>     const [c1, ch1] = h.pop();
+>     const [c2, ch2] = h.pop();
+>     out.push(ch1, ch2);
+>     if (c1 - 1 > 0) h.push([c1 - 1, ch1]);
+>     if (c2 - 1 > 0) h.push([c2 - 1, ch2]);
+>   }
+>   if (h.size()) out.push(h.peek()[1]);
+>   return out.join("");
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > import heapq
@@ -815,6 +944,18 @@ Count, then sort by count desc (or `heapq.nlargest`).
 > ✅ Answer: "eert"
 > ```
 
+> [!success]- JS
+> ```js
+> const frequencySort = (s) => {
+>   const cnt = new Map();
+>   for (const ch of s) cnt.set(ch, (cnt.get(ch) ?? 0) + 1);
+>   return [...cnt.entries()]
+>     .sort((a, b) => b[1] - a[1])
+>     .map(([ch, c]) => ch.repeat(c))
+>     .join("");
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import Counter
@@ -879,6 +1020,20 @@ Min rooms needed for given intervals.
 > 
 > ✅ Answer: 2 rooms
 >   Reasoning: meeting [0,30] needs a room throughout; [5,10] needs a second room (overlaps with [0,30]); [15,20] can reuse the room that [5,10] vacated at time 10.
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MinHeap class
+> const minMeetingRooms = (intervals) => {
+>   intervals.sort((a, b) => a[0] - b[0]);
+>   const h = new MinHeap();
+>   for (const [s, e] of intervals) {
+>     if (h.size() && h.peek() <= s) h.pop();
+>     h.push(e);
+>   }
+>   return h.size();
+> };
 > ```
 
 > [!success]- Python
@@ -960,6 +1115,22 @@ Each course `(duration, lastDay)`. Max courses you can complete in order of `las
 >   We took 3 courses successfully.
 > 
 > ✅ Answer: len(heap) = 3 courses
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MaxHeap class
+> const scheduleCourse = (courses) => {
+>   courses.sort((a, b) => a[1] - b[1]);
+>   const h = new MaxHeap();
+>   let time = 0;
+>   for (const [dur, end] of courses) {
+>     time += dur;
+>     h.push(dur);
+>     if (time > end) time -= h.pop();
+>   }
+>   return h.size();
+> };
 > ```
 
 > [!success]- Python
@@ -1047,6 +1218,27 @@ Pick at most k projects to maximize capital. Each project requires `capital[i]`;
 > Done (k rounds).
 > 
 > ✅ Answer: 4
+> ```
+
+> [!success]- JS
+> ```js
+> // assumes MaxHeap class
+> const findMaximizedCapital = (k, w, profits, capital) => {
+>   const projects = capital
+>     .map((c, idx) => [c, profits[idx]])
+>     .sort((a, b) => a[0] - b[0]);
+>   const h = new MaxHeap();
+>   let i = 0;
+>   for (let round = 0; round < k; round++) {
+>     while (i < projects.length && projects[i][0] <= w) {
+>       h.push(projects[i][1]);
+>       i += 1;
+>     }
+>     if (!h.size()) break;
+>     w += h.pop();
+>   }
+>   return w;
+> };
 > ```
 
 > [!success]- Python

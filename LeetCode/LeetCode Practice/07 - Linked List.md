@@ -306,6 +306,19 @@ Reverse a singly linked list.
 >     • On a straight road, the faster runner just exits the road.
 > ```
 
+> [!success]- JS
+> ```js
+> const hasCycle = (head) => {
+>   let slow = head, fast = head;
+>   while (fast && fast.next) {
+>     slow = slow.next;
+>     fast = fast.next.next;
+>     if (slow === fast) return true;
+>   }
+>   return false;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def has_cycle(head):

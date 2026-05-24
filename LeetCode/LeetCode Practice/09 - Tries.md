@@ -379,6 +379,43 @@ Given an `m×n` board and a list of words, return words present on the board.
 > [!tip] Trie pruning makes this fast
 > When a leaf is fully consumed, delete it from its parent — future searches skip it.
 
+> [!success]- JS
+> ```js
+> const findWords = (board, words) => {
+>   const root = {};
+>   for (const w of words) {
+>     let n = root;
+>     for (const c of w) {
+>       if (!(c in n)) n[c] = {};
+>       n = n[c];
+>     }
+>     n.$ = w;
+>   }
+>   const R = board.length, C = board[0].length;
+>   const out = [];
+>   const dfs = (r, c, n) => {
+>     const ch = board[r][c];
+>     if (!(ch in n)) return;
+>     const nxt = n[ch];
+>     if ('$' in nxt) {
+>       out.push(nxt.$);
+>       delete nxt.$;
+>     }
+>     board[r][c] = '#';
+>     for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+>       const nr = r + dr, nc = c + dc;
+>       if (nr >= 0 && nr < R && nc >= 0 && nc < C && board[nr][nc] !== '#') {
+>         dfs(nr, nc, nxt);
+>       }
+>     }
+>     board[r][c] = ch;
+>     if (Object.keys(nxt).length === 0) delete n[ch];
+>   };
+>   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) dfs(r, c, root);
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def find_words(board, words):
@@ -481,6 +518,32 @@ Build trie of roots. For each word, walk trie; on `isEnd`, output that prefix.
 > ✅ Answer: "the cat was rat by the bat"
 > ```
 
+> [!success]- JS
+> ```js
+> const replaceWords = (dictionary, sentence) => {
+>   const root = {};
+>   for (const w of dictionary) {
+>     let n = root;
+>     for (const c of w) {
+>       if (!(c in n)) n[c] = {};
+>       n = n[c];
+>     }
+>     n.$ = true;
+>   }
+>   const shortest = (word) => {
+>     let n = root;
+>     for (let i = 0; i < word.length; i++) {
+>       const c = word[i];
+>       if (!(c in n)) return word;
+>       n = n[c];
+>       if (n.$) return word.slice(0, i + 1);
+>     }
+>     return word;
+>   };
+>   return sentence.split(' ').map(shortest).join(' ');
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def replace_words(dictionary, sentence):
@@ -573,6 +636,36 @@ Trie of words. DFS preferring lex order; only descend if `isEnd`. Track longest 
 >   apple len 5
 >   apply len 5
 > Tie → lex smallest → "apple"
+> ```
+
+> [!success]- JS
+> ```js
+> const longestWord = (words) => {
+>   const root = {};
+>   for (const w of words) {
+>     let n = root;
+>     for (const c of w) {
+>       if (!(c in n)) n[c] = {};
+>       n = n[c];
+>     }
+>     n.$ = w;
+>   }
+>   let best = "";
+>   const dfs = (n, path) => {
+>     if ('$' in n) {
+>       if (path.length > best.length || (path.length === best.length && path < best)) {
+>         best = path;
+>       }
+>     }
+>     const keys = Object.keys(n).filter(k => k !== '$').sort();
+>     for (const c of keys) {
+>       const child = n[c];
+>       if ('$' in child) dfs(child, path + c);
+>     }
+>   };
+>   dfs(root, "");
+>   return best;
+> };
 > ```
 
 > [!success]- Python
@@ -669,6 +762,37 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 > Try other x's... the max across all is 28.
 > 
 > ✅ Answer: 28
+> ```
+
+> [!success]- JS
+> ```js
+> const findMaximumXOR = (nums) => {
+>   const root = {};
+>   for (const x of nums) {
+>     let n = root;
+>     for (let i = 31; i >= 0; i--) {
+>       const b = (x >> i) & 1;
+>       if (!(b in n)) n[b] = {};
+>       n = n[b];
+>     }
+>   }
+>   let best = 0;
+>   for (const x of nums) {
+>     let n = root, cur = 0;
+>     for (let i = 31; i >= 0; i--) {
+>       const b = (x >> i) & 1;
+>       const toggle = 1 - b;
+>       if (toggle in n) {
+>         cur |= (1 << i);
+>         n = n[toggle];
+>       } else {
+>         n = n[b];
+>       }
+>     }
+>     best = Math.max(best, cur);
+>   }
+>   return best;
+> };
 > ```
 
 > [!success]- Python
@@ -774,6 +898,36 @@ Max `a XOR b` over all pairs `a, b ∈ nums`.
 > 
 > query('l'): walk back 'l' → root has 'l' ✓, '$' NO
 >             next back 'k' → root.l has 'k' ✓, '$' YES → TRUE
+> ```
+
+> [!success]- JS
+> ```js
+> class StreamChecker {
+>   constructor(words) {
+>     this.root = {};
+>     for (const w of words) {
+>       let n = this.root;
+>       for (let i = w.length - 1; i >= 0; i--) {
+>         const c = w[i];
+>         if (!(c in n)) n[c] = {};
+>         n = n[c];
+>       }
+>       n.$ = true;
+>     }
+>     this.buf = [];
+>   }
+>   query(c) {
+>     this.buf.push(c);
+>     let n = this.root;
+>     for (let i = this.buf.length - 1; i >= 0; i--) {
+>       const ch = this.buf[i];
+>       if (!(ch in n)) return false;
+>       n = n[ch];
+>       if (n.$) return true;
+>     }
+>     return false;
+>   }
+> }
 > ```
 
 > [!success]- Python
@@ -893,6 +1047,35 @@ Trie node stores `total` (sum of all subtree values). On insert, walk and **add 
 >   delta = 7 - 3 = 4
 >   walk and add 4 to all nodes on "apple" path.
 >   root._total: 5+4=9
+> ```
+
+> [!success]- JS
+> ```js
+> class MapSum {
+>   constructor() {
+>     this.root = { _total: 0 };
+>     this.vals = new Map();
+>   }
+>   insert(key, val) {
+>     const delta = val - (this.vals.get(key) ?? 0);
+>     this.vals.set(key, val);
+>     let n = this.root;
+>     n._total += delta;
+>     for (const c of key) {
+>       if (!(c in n)) n[c] = { _total: 0 };
+>       n = n[c];
+>       n._total += delta;
+>     }
+>   }
+>   sum(prefix) {
+>     let n = this.root;
+>     for (const c of prefix) {
+>       if (!(c in n)) return 0;
+>       n = n[c];
+>     }
+>     return n._total;
+>   }
+> }
 > ```
 
 > [!success]- Python

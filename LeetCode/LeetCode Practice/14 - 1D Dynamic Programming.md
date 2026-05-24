@@ -92,6 +92,18 @@ status: in-progress
 >   (1+1+1+1+1, 1+1+1+2, 1+1+2+1, 1+2+1+1, 2+1+1+1, 1+2+2, 2+1+2, 2+2+1)
 > ```
 
+> [!success]- JS
+> ```js
+> const climbStairs = (n) => {
+>   if (n <= 2) return n;
+>   let a = 1, b = 2;
+>   for (let i = 3; i <= n; i++) {
+>     [a, b] = [b, a + b];
+>   }
+>   return b;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def climb_stairs(n):
@@ -144,6 +156,17 @@ status: in-progress
 >      = min(0+15, 10+20) = 15
 > 
 > ✅ Answer: 15   (path: step 1 → top, pay cost[1]=15)
+> ```
+
+> [!success]- JS
+> ```js
+> const minCostClimbingStairs = (cost) => {
+>   let a = 0, b = 0;
+>   for (let i = 2; i <= cost.length; i++) {
+>     [a, b] = [b, Math.min(a + cost[i - 2], b + cost[i - 1])];
+>   }
+>   return b;
+> };
 > ```
 
 > [!success]- Python
@@ -211,6 +234,17 @@ status: in-progress
 > ✅ Answer: 12
 > ```
 
+> [!success]- JS
+> ```js
+> const rob = (nums) => {
+>   let prev2 = 0, prev1 = 0;
+>   for (const x of nums) {
+>     [prev2, prev1] = [prev1, Math.max(prev1, prev2 + x)];
+>   }
+>   return prev1;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def rob(nums):
@@ -268,6 +302,21 @@ status: in-progress
 > max(A, B) = 3
 > 
 > ✅ Answer: 3
+> ```
+
+> [!success]- JS
+> ```js
+> const robCircular = (nums) => {
+>   if (nums.length === 1) return nums[0];
+>   const robLinear = (arr) => {
+>     let prev2 = 0, prev1 = 0;
+>     for (const x of arr) {
+>       [prev2, prev1] = [prev1, Math.max(prev1, prev2 + x)];
+>     }
+>     return prev1;
+>   };
+>   return Math.max(robLinear(nums.slice(1)), robLinear(nums.slice(0, -1)));
+> };
 > ```
 
 > [!success]- Python
@@ -339,6 +388,22 @@ status: in-progress
 >   Decodings: "2,2,6"=BBF, "22,6"=VF, "2,26"=BZ
 > ```
 
+> [!success]- JS
+> ```js
+> const numDecodings = (s) => {
+>   if (!s || s[0] === '0') return 0;
+>   let prev2 = 1, prev1 = 1;
+>   for (let i = 1; i < s.length; i++) {
+>     let cur = 0;
+>     if (s[i] !== '0') cur += prev1;
+>     const two = parseInt(s.slice(i - 1, i + 1), 10);
+>     if (two >= 10 && two <= 26) cur += prev2;
+>     [prev2, prev1] = [prev1, cur];
+>   }
+>   return prev1;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def num_decodings(s):
@@ -402,6 +467,23 @@ status: in-progress
 >   dp[11] = 3
 > 
 > ✅ Answer: 3   (e.g., 5+5+1)
+> ```
+
+> [!success]- JS
+> ```js
+> const coinChange = (coins, amount) => {
+>   const INF = amount + 1;
+>   const dp = new Array(amount + 1).fill(INF);
+>   dp[0] = 0;
+>   for (let a = 1; a <= amount; a++) {
+>     for (const c of coins) {
+>       if (c <= a) {
+>         dp[a] = Math.min(dp[a], dp[a - c] + 1);
+>       }
+>     }
+>   }
+>   return dp[amount] <= amount ? dp[amount] : -1;
+> };
 > ```
 
 > [!success]- Python
@@ -478,6 +560,23 @@ status: in-progress
 > ✅ Answer: 6
 > ```
 
+> [!success]- JS
+> ```js
+> const maxProduct = (nums) => {
+>   let curMax = nums[0], curMin = nums[0], best = nums[0];
+>   for (let i = 1; i < nums.length; i++) {
+>     const x = nums[i];
+>     if (x < 0) {
+>       [curMax, curMin] = [curMin, curMax];
+>     }
+>     curMax = Math.max(x, curMax * x);
+>     curMin = Math.min(x, curMin * x);
+>     best = Math.max(best, curMax);
+>   }
+>   return best;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def max_product(nums):
@@ -545,6 +644,26 @@ status: in-progress
 > Return dp[8] = True
 > 
 > ✅ Answer: true
+> ```
+
+> [!success]- JS
+> ```js
+> const wordBreak = (s, wordDict) => {
+>   const words = new Set(wordDict);
+>   const maxW = wordDict.reduce((m, w) => Math.max(m, w.length), 0);
+>   const n = s.length;
+>   const dp = new Array(n + 1).fill(false);
+>   dp[0] = true;
+>   for (let i = 1; i <= n; i++) {
+>     for (let j = Math.max(0, i - maxW); j < i; j++) {
+>       if (dp[j] && words.has(s.slice(j, i))) {
+>         dp[i] = true;
+>         break;
+>       }
+>     }
+>   }
+>   return dp[n];
+> };
 > ```
 
 > [!success]- Python
@@ -628,6 +747,28 @@ status: in-progress
 > Note: tails is NOT the actual LIS; just tracks lengths.
 > ```
 
+> [!success]- JS (O(n log n))
+> ```js
+> const lengthOfLIS = (nums) => {
+>   const tails = [];
+>   const bisectLeft = (arr, x) => {
+>     let lo = 0, hi = arr.length;
+>     while (lo < hi) {
+>       const mid = (lo + hi) >> 1;
+>       if (arr[mid] < x) lo = mid + 1;
+>       else hi = mid;
+>     }
+>     return lo;
+>   };
+>   for (const x of nums) {
+>     const i = bisectLeft(tails, x);
+>     if (i === tails.length) tails.push(x);
+>     else tails[i] = x;
+>   }
+>   return tails.length;
+> };
+> ```
+
 > [!success]- Python (O(n log n))
 > ```python
 > from bisect import bisect_left
@@ -640,6 +781,21 @@ status: in-progress
 >         else:
 >             tails[i] = x
 >     return len(tails)
+> ```
+
+> [!success]- JS (O(n²) for clarity)
+> ```js
+> const lengthOfLISN2 = (nums) => {
+>   const dp = new Array(nums.length).fill(1);
+>   for (let i = 1; i < nums.length; i++) {
+>     for (let j = 0; j < i; j++) {
+>       if (nums[j] < nums[i]) {
+>         dp[i] = Math.max(dp[i], dp[j] + 1);
+>       }
+>     }
+>   }
+>   return Math.max(...dp);
+> };
 > ```
 
 > [!success]- Python (O(n²) for clarity)
@@ -707,6 +863,23 @@ status: in-progress
 > dp[11] = T
 > 
 > ✅ Answer: true
+> ```
+
+> [!success]- JS
+> ```js
+> const canPartition = (nums) => {
+>   const total = nums.reduce((a, b) => a + b, 0);
+>   if (total % 2) return false;
+>   const target = total / 2;
+>   const dp = new Array(target + 1).fill(false);
+>   dp[0] = true;
+>   for (const x of nums) {
+>     for (let s = target; s >= x; s--) {
+>       dp[s] = dp[s] || dp[s - x];
+>     }
+>   }
+>   return dp[target];
+> };
 > ```
 
 > [!success]- Python
@@ -804,6 +977,21 @@ status: in-progress
 > Actually answer is 3 per spec. Best: buy at 1, sell at 2 (+1); cooldown; buy at 0, sell at 2 (+2). Total +3 ✓
 > ```
 
+> [!success]- JS
+> ```js
+> const maxProfitCooldown = (prices) => {
+>   let held = -Infinity, sold = 0, rest = 0;
+>   for (const p of prices) {
+>     [held, sold, rest] = [
+>       Math.max(held, rest - p),
+>       held + p,
+>       Math.max(rest, sold),
+>     ];
+>   }
+>   return Math.max(sold, rest);
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def max_profit_cooldown(prices):
@@ -878,6 +1066,19 @@ status: in-progress
 > ✅ Answer: 8
 > ```
 
+> [!success]- JS
+> ```js
+> const maxProfitFee = (prices, fee) => {
+>   let held = -prices[0], free = 0;
+>   for (let i = 1; i < prices.length; i++) {
+>     const p = prices[i];
+>     held = Math.max(held, free - p);
+>     free = Math.max(free, held + p - fee);
+>   }
+>   return free;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def max_profit_fee(prices, fee):
@@ -935,6 +1136,23 @@ status: in-progress
 > a=12: c=1: dp[12]=dp[11]+1=4; c=4: dp[12]=min(4, dp[8]+1=3)=3; c=9: dp[12]=min(3, dp[3]+1=4)=3
 > 
 > ✅ Answer: 3    (e.g., 4 + 4 + 4)
+> ```
+
+> [!success]- JS
+> ```js
+> const numSquares = (n) => {
+>   const dp = new Array(n + 1).fill(Infinity);
+>   dp[0] = 0;
+>   const squares = [];
+>   for (let i = 1; i * i <= n; i++) squares.push(i * i);
+>   for (let a = 1; a <= n; a++) {
+>     for (const sq of squares) {
+>       if (sq > a) break;
+>       dp[a] = Math.min(dp[a], dp[a - sq] + 1);
+>     }
+>   }
+>   return dp[n];
+> };
 > ```
 
 > [!success]- Python
@@ -996,6 +1214,20 @@ status: in-progress
 > 
 > ✅ Answer: 7
 >   Sequences: (1,1,1,1), (1,1,2), (1,2,1), (2,1,1), (2,2), (1,3), (3,1)
+> ```
+
+> [!success]- JS
+> ```js
+> const combinationSum4 = (nums, target) => {
+>   const dp = new Array(target + 1).fill(0);
+>   dp[0] = 1;
+>   for (let t = 1; t <= target; t++) {
+>     for (const n of nums) {
+>       if (n <= t) dp[t] += dp[t - n];
+>     }
+>   }
+>   return dp[target];
+> };
 > ```
 
 > [!success]- Python
@@ -1066,6 +1298,21 @@ status: in-progress
 > Return 9
 > 
 > ✅ Answer: 9   (take all 3s for sum 9; can't take 2s or 4s)
+> ```
+
+> [!success]- JS
+> ```js
+> const deleteAndEarn = (nums) => {
+>   if (nums.length === 0) return 0;
+>   const M = Math.max(...nums);
+>   const bucket = new Array(M + 1).fill(0);
+>   for (const x of nums) bucket[x] += x;
+>   let prev2 = 0, prev1 = 0;
+>   for (const v of bucket) {
+>     [prev2, prev1] = [prev1, Math.max(prev1, prev2 + v)];
+>   }
+>   return prev1;
+> };
 > ```
 
 > [!success]- Python
@@ -1140,6 +1387,25 @@ status: in-progress
 > Since best_max > 0 (not all negatives), answer = max(3, 2) = 3
 > 
 > ✅ Answer: 3
+> ```
+
+> [!success]- JS
+> ```js
+> const maxSubarrayCircular = (nums) => {
+>   let curMax = nums[0], bestMax = nums[0];
+>   let curMin = nums[0], bestMin = nums[0];
+>   let total = nums[0];
+>   for (let i = 1; i < nums.length; i++) {
+>     const x = nums[i];
+>     curMax = Math.max(x, curMax + x);
+>     bestMax = Math.max(bestMax, curMax);
+>     curMin = Math.min(x, curMin + x);
+>     bestMin = Math.min(bestMin, curMin);
+>     total += x;
+>   }
+>   if (bestMax < 0) return bestMax;
+>   return Math.max(bestMax, total - bestMin);
+> };
 > ```
 
 > [!success]- Python
@@ -1265,6 +1531,33 @@ Match `s` against pattern `p` with `.` (any single char) and `*` (zero or more o
 > Return dp[3][5] = T
 > 
 > ✅ Answer: true
+> ```
+
+> [!success]- JS
+> ```js
+> const isMatch = (s, p) => {
+>   const m = s.length, n = p.length;
+>   const dp = Array.from({length: m + 1}, () => new Array(n + 1).fill(false));
+>   dp[0][0] = true;
+>   for (let j = 1; j <= n; j++) {
+>     if (p[j - 1] === '*') dp[0][j] = dp[0][j - 2];
+>   }
+>   for (let i = 1; i <= m; i++) {
+>     for (let j = 1; j <= n; j++) {
+>       if (p[j - 1] === '*') {
+>         dp[i][j] = dp[i][j - 2]; // zero occurrences
+>         if (p[j - 2] === '.' || p[j - 2] === s[i - 1]) {
+>           dp[i][j] = dp[i][j] || dp[i - 1][j];
+>         }
+>       } else {
+>         if (p[j - 1] === '.' || p[j - 1] === s[i - 1]) {
+>           dp[i][j] = dp[i - 1][j - 1];
+>         }
+>       }
+>     }
+>   }
+>   return dp[m][n];
+> };
 > ```
 
 > [!success]- Python

@@ -233,6 +233,25 @@ All subsets of distinct `nums`.
 > ✅ Answer: [[], [1], [1,2], [1,2,2], [2], [2,2]]
 > ```
 
+> [!success]- JS
+> ```js
+> const subsetsWithDup = (nums) => {
+>   nums.sort((a, b) => a - b);
+>   const out = [], path = [];
+>   const dfs = (i) => {
+>     out.push([...path]);
+>     for (let j = i; j < nums.length; j++) {
+>       if (j > i && nums[j] === nums[j - 1]) continue;
+>       path.push(nums[j]);
+>       dfs(j + 1);
+>       path.pop();
+>     }
+>   };
+>   dfs(0);
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def subsets_with_dup(nums):
@@ -315,6 +334,30 @@ All subsets of distinct `nums`.
 >   i=2 free → produce [3,1,2] and [3,2,1]
 > 
 > ✅ Answer: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]
+> ```
+
+> [!success]- JS
+> ```js
+> const permute = (nums) => {
+>   const out = [], path = [];
+>   const used = new Array(nums.length).fill(false);
+>   const dfs = () => {
+>     if (path.length === nums.length) {
+>       out.push([...path]);
+>       return;
+>     }
+>     for (let i = 0; i < nums.length; i++) {
+>       if (used[i]) continue;
+>       used[i] = true;
+>       path.push(nums[i]);
+>       dfs();
+>       path.pop();
+>       used[i] = false;
+>     }
+>   };
+>   dfs();
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -409,6 +452,32 @@ Same as P3 + dedup: sort; in the loop, skip if `nums[i] == nums[i-1] && !used[i-
 > ✅ Answer: [[1,1,2], [1,2,1], [2,1,1]]
 > ```
 
+> [!success]- JS
+> ```js
+> const permuteUnique = (nums) => {
+>   nums.sort((a, b) => a - b);
+>   const out = [], path = [];
+>   const used = new Array(nums.length).fill(false);
+>   const dfs = () => {
+>     if (path.length === nums.length) {
+>       out.push([...path]);
+>       return;
+>     }
+>     for (let i = 0; i < nums.length; i++) {
+>       if (used[i]) continue;
+>       if (i > 0 && nums[i] === nums[i - 1] && !used[i - 1]) continue;
+>       used[i] = true;
+>       path.push(nums[i]);
+>       dfs();
+>       path.pop();
+>       used[i] = false;
+>     }
+>   };
+>   dfs();
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def permute_unique(nums):
@@ -482,6 +551,26 @@ Choose `k` items from `1..n`.
 >     pop
 > 
 > ✅ Answer: [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
+> ```
+
+> [!success]- JS
+> ```js
+> const combine = (n, k) => {
+>   const out = [], path = [];
+>   const dfs = (start) => {
+>     if (path.length === k) {
+>       out.push([...path]);
+>       return;
+>     }
+>     for (let i = start; i <= n; i++) {
+>       path.push(i);
+>       dfs(i + 1);
+>       path.pop();
+>     }
+>   };
+>   dfs(1);
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -585,6 +674,28 @@ Find all combos summing to target. Each number can be reused.
 > ✅ Answer: [[2,2,3], [7]]
 > ```
 
+> [!success]- JS
+> ```js
+> const combinationSum = (candidates, target) => {
+>   candidates.sort((a, b) => a - b);
+>   const out = [], path = [];
+>   const dfs = (i, remain) => {
+>     if (remain === 0) {
+>       out.push([...path]);
+>       return;
+>     }
+>     for (let j = i; j < candidates.length; j++) {
+>       if (candidates[j] > remain) break;   // pruned by sort
+>       path.push(candidates[j]);
+>       dfs(j, remain - candidates[j]);       // j, not j+1
+>       path.pop();
+>     }
+>   };
+>   dfs(0, target);
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def combination_sum(candidates, target):
@@ -677,6 +788,29 @@ Find all combos summing to target. Each number can be reused.
 > ✅ Answer: [[1,1,6], [1,2,5], [1,7], [2,6]]
 > ```
 
+> [!success]- JS
+> ```js
+> const combinationSum2 = (candidates, target) => {
+>   candidates.sort((a, b) => a - b);
+>   const out = [], path = [];
+>   const dfs = (i, remain) => {
+>     if (remain === 0) {
+>       out.push([...path]);
+>       return;
+>     }
+>     for (let j = i; j < candidates.length; j++) {
+>       if (j > i && candidates[j] === candidates[j - 1]) continue;
+>       if (candidates[j] > remain) break;
+>       path.push(candidates[j]);
+>       dfs(j + 1, remain - candidates[j]);
+>       path.pop();
+>     }
+>   };
+>   dfs(0, target);
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def combination_sum2(candidates, target):
@@ -742,6 +876,28 @@ Find all combos summing to target. Each number can be reused.
 >     → "cd","ce","cf"
 > 
 > ✅ Answer: ["ad","ae","af","bd","be","bf","cd","ce","cf"]
+> ```
+
+> [!success]- JS
+> ```js
+> const letterCombinations = (digits) => {
+>   if (!digits) return [];
+>   const mp = { '2':'abc','3':'def','4':'ghi','5':'jkl','6':'mno','7':'pqrs','8':'tuv','9':'wxyz' };
+>   const out = [], path = [];
+>   const dfs = (i) => {
+>     if (i === digits.length) {
+>       out.push(path.join(''));
+>       return;
+>     }
+>     for (const c of mp[digits[i]]) {
+>       path.push(c);
+>       dfs(i + 1);
+>       path.pop();
+>     }
+>   };
+>   dfs(0);
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -835,6 +991,29 @@ For each starting cell, DFS through the word. Mark visited by temporarily mutati
 > ✅ Answer: true   (path: (0,0)→(0,1)→(0,2)→(1,2)→(2,2)→(2,1))
 > ```
 
+> [!success]- JS
+> ```js
+> const exist = (board, word) => {
+>   const R = board.length, C = board[0].length;
+>   const dfs = (r, c, i) => {
+>     if (i === word.length) return true;
+>     if (r < 0 || r >= R || c < 0 || c >= C || board[r][c] !== word[i]) return false;
+>     const saved = board[r][c];
+>     board[r][c] = '#';
+>     const found = dfs(r + 1, c, i + 1) || dfs(r - 1, c, i + 1)
+>                || dfs(r, c + 1, i + 1) || dfs(r, c - 1, i + 1);
+>     board[r][c] = saved;
+>     return found;
+>   };
+>   for (let r = 0; r < R; r++) {
+>     for (let c = 0; c < C; c++) {
+>       if (dfs(r, c, 0)) return true;
+>     }
+>   }
+>   return false;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def exist(board, word):
@@ -920,6 +1099,35 @@ For each cut point: if `s[i..j]` is a palindrome, include and recurse on `j+1`.
 >   j=2: s[0:3]="aab" pal? a!=b skip
 > 
 > ✅ Answer: [["a","a","b"], ["aa","b"]]
+> ```
+
+> [!success]- JS
+> ```js
+> const partition = (s) => {
+>   const out = [], path = [];
+>   const isPal = (l, r) => {
+>     while (l < r) {
+>       if (s[l] !== s[r]) return false;
+>       l++; r--;
+>     }
+>     return true;
+>   };
+>   const dfs = (i) => {
+>     if (i === s.length) {
+>       out.push([...path]);
+>       return;
+>     }
+>     for (let j = i; j < s.length; j++) {
+>       if (isPal(i, j)) {
+>         path.push(s.slice(i, j + 1));
+>         dfs(j + 1);
+>         path.pop();
+>       }
+>     }
+>   };
+>   dfs(0);
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -1047,6 +1255,31 @@ For each cut point: if `s[i..j]` is a palindrome, include and recurse on `j+1`.
 > ✅ Answer: 2 valid placements
 > ```
 
+> [!success]- JS
+> ```js
+> const solveNQueens = (n) => {
+>   const out = [];
+>   const cols = new Set(), diag1 = new Set(), diag2 = new Set();
+>   const board = Array.from({ length: n }, () => Array(n).fill('.'));
+>   const dfs = (r) => {
+>     if (r === n) {
+>       out.push(board.map((row) => row.join('')));
+>       return;
+>     }
+>     for (let c = 0; c < n; c++) {
+>       if (cols.has(c) || diag1.has(r + c) || diag2.has(r - c)) continue;
+>       cols.add(c); diag1.add(r + c); diag2.add(r - c);
+>       board[r][c] = 'Q';
+>       dfs(r + 1);
+>       cols.delete(c); diag1.delete(r + c); diag2.delete(r - c);
+>       board[r][c] = '.';
+>     }
+>   };
+>   dfs(0);
+>   return out;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def solve_n_queens(n):
@@ -1137,6 +1370,27 @@ Insert 3 dots into `s` so each segment is 0..255 (no leading zeros).
 >   "255.255.111.35"
 > 
 > ✅ Answer: ["255.255.11.135", "255.255.111.35"]
+> ```
+
+> [!success]- JS
+> ```js
+> const restoreIpAddresses = (s) => {
+>   const out = [];
+>   const dfs = (start, parts) => {
+>     if (parts.length === 4) {
+>       if (start === s.length) out.push(parts.join('.'));
+>       return;
+>     }
+>     for (const length of [1, 2, 3]) {
+>       if (start + length > s.length) break;
+>       const seg = s.slice(start, start + length);
+>       if ((seg.startsWith('0') && length > 1) || Number(seg) > 255) continue;
+>       dfs(start + length, [...parts, seg]);
+>     }
+>   };
+>   dfs(0, []);
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -1241,6 +1495,43 @@ Fill a 9×9 Sudoku grid in place. Standard rules (each row, col, 3×3 box has di
 > Example: starting from a near-complete board, only one digit fits at each remaining cell → linear; harder boards require deep backtracking but the algorithm is the same.
 > 
 > ✅ Final state: board is filled; sets are consistent.
+> ```
+
+> [!success]- JS
+> ```js
+> const solveSudoku = (board) => {
+>   const rows = Array.from({ length: 9 }, () => new Set());
+>   const cols = Array.from({ length: 9 }, () => new Set());
+>   const boxes = Array.from({ length: 9 }, () => new Set());
+>   const empties = [];
+>   for (let i = 0; i < 9; i++) {
+>     for (let j = 0; j < 9; j++) {
+>       const c = board[i][j];
+>       if (c === '.') {
+>         empties.push([i, j]);
+>       } else {
+>         rows[i].add(c);
+>         cols[j].add(c);
+>         boxes[Math.floor(i / 3) * 3 + Math.floor(j / 3)].add(c);
+>       }
+>     }
+>   }
+>   const dfs = (idx) => {
+>     if (idx === empties.length) return true;
+>     const [i, j] = empties[idx];
+>     const b = Math.floor(i / 3) * 3 + Math.floor(j / 3);
+>     for (const d of "123456789") {
+>       if (rows[i].has(d) || cols[j].has(d) || boxes[b].has(d)) continue;
+>       board[i][j] = d;
+>       rows[i].add(d); cols[j].add(d); boxes[b].add(d);
+>       if (dfs(idx + 1)) return true;
+>       rows[i].delete(d); cols[j].delete(d); boxes[b].delete(d);
+>       board[i][j] = '.';
+>     }
+>     return false;
+>   };
+>   dfs(0);
+> };
 > ```
 
 > [!success]- Python

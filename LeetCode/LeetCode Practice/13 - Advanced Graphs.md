@@ -132,6 +132,29 @@ Can you finish all courses given prerequisites?
 >   loop doesn't execute; done=0 ≠ 2 → return false
 > ```
 
+> [!success]- JS
+> ```js
+> const canFinish = (numCourses, prerequisites) => {
+>   const graph = Array.from({ length: numCourses }, () => []);
+>   const indeg = new Array(numCourses).fill(0);
+>   for (const [a, b] of prerequisites) {
+>     graph[b].push(a);
+>     indeg[a]++;
+>   }
+>   const q = [];
+>   for (let i = 0; i < numCourses; i++) if (indeg[i] === 0) q.push(i);
+>   let done = 0;
+>   while (q.length) {
+>     const u = q.shift();
+>     done++;
+>     for (const v of graph[u]) {
+>       if (--indeg[v] === 0) q.push(v);
+>     }
+>   }
+>   return done === numCourses;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import deque
@@ -218,6 +241,29 @@ Return one valid order (empty if impossible).
 > 
 > ✅ Answer: [0, 1, 2, 3]
 >   (Other valid orders exist; queue order determines which we get.)
+> ```
+
+> [!success]- JS
+> ```js
+> const findOrder = (numCourses, prerequisites) => {
+>   const graph = Array.from({ length: numCourses }, () => []);
+>   const indeg = new Array(numCourses).fill(0);
+>   for (const [a, b] of prerequisites) {
+>     graph[b].push(a);
+>     indeg[a]++;
+>   }
+>   const q = [];
+>   for (let i = 0; i < numCourses; i++) if (indeg[i] === 0) q.push(i);
+>   const out = [];
+>   while (q.length) {
+>     const u = q.shift();
+>     out.push(u);
+>     for (const v of graph[u]) {
+>       if (--indeg[v] === 0) q.push(v);
+>     }
+>   }
+>   return out.length === numCourses ? out : [];
+> };
 > ```
 
 > [!success]- Python
@@ -308,6 +354,46 @@ Return one valid order (empty if impossible).
 > ─────────────────────────────────────────
 > Edge case prefix anomaly: words=["abc","ab"]
 >   minlen=2, a[:2]="ab"==b[:2]="ab" AND len(a) > len(b) → return ""
+> ```
+
+> [!success]- JS
+> ```js
+> const alienOrder = (words) => {
+>   const graph = new Map();
+>   const indeg = new Map();
+>   for (const w of words) {
+>     for (const c of w) {
+>       if (!indeg.has(c)) indeg.set(c, 0);
+>       if (!graph.has(c)) graph.set(c, new Set());
+>     }
+>   }
+>   for (let i = 0; i + 1 < words.length; i++) {
+>     const a = words[i], b = words[i + 1];
+>     const minlen = Math.min(a.length, b.length);
+>     if (a.slice(0, minlen) === b.slice(0, minlen) && a.length > b.length) return "";
+>     for (let j = 0; j < minlen; j++) {
+>       if (a[j] !== b[j]) {
+>         if (!graph.get(a[j]).has(b[j])) {
+>           graph.get(a[j]).add(b[j]);
+>           indeg.set(b[j], indeg.get(b[j]) + 1);
+>         }
+>         break;
+>       }
+>     }
+>   }
+>   const q = [];
+>   for (const [c, d] of indeg) if (d === 0) q.push(c);
+>   const out = [];
+>   while (q.length) {
+>     const c = q.shift();
+>     out.push(c);
+>     for (const nb of graph.get(c)) {
+>       indeg.set(nb, indeg.get(nb) - 1);
+>       if (indeg.get(nb) === 0) q.push(nb);
+>     }
+>   }
+>   return out.length === indeg.size ? out.join('') : "";
+> };
 > ```
 
 > [!success]- Python
@@ -409,6 +495,33 @@ Return one valid order (empty if impossible).
 > ✅ Answer: [3, 4]
 > ```
 
+> [!success]- JS
+> ```js
+> const findMinHeightTrees = (n, edges) => {
+>   if (n === 1) return [0];
+>   const graph = Array.from({ length: n }, () => new Set());
+>   for (const [a, b] of edges) {
+>     graph[a].add(b);
+>     graph[b].add(a);
+>   }
+>   let leaves = [];
+>   for (let i = 0; i < n; i++) if (graph[i].size === 1) leaves.push(i);
+>   let remaining = n;
+>   while (remaining > 2) {
+>     remaining -= leaves.length;
+>     const next = [];
+>     for (const leaf of leaves) {
+>       const nb = graph[leaf].values().next().value;
+>       graph[leaf].delete(nb);
+>       graph[nb].delete(leaf);
+>       if (graph[nb].size === 1) next.push(nb);
+>     }
+>     leaves = next;
+>   }
+>   return leaves;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > from collections import deque, defaultdict
@@ -493,6 +606,62 @@ Return one valid order (empty if impossible).
 > Result = max(dist.values()) = 2
 > 
 > ✅ Answer: 2
+> ```
+
+> [!success]- JS
+> ```js
+> class MinHeap {
+>   constructor() { this.h = []; }
+>   push(x) { this.h.push(x); this._up(this.h.length - 1); }
+>   pop() {
+>     const top = this.h[0], last = this.h.pop();
+>     if (this.h.length) { this.h[0] = last; this._down(0); }
+>     return top;
+>   }
+>   get size() { return this.h.length; }
+>   _up(i) {
+>     while (i > 0) {
+>       const p = (i - 1) >> 1;
+>       if (this.h[p][0] <= this.h[i][0]) break;
+>       [this.h[p], this.h[i]] = [this.h[i], this.h[p]];
+>       i = p;
+>     }
+>   }
+>   _down(i) {
+>     const n = this.h.length;
+>     while (true) {
+>       const l = 2 * i + 1, r = 2 * i + 2;
+>       let s = i;
+>       if (l < n && this.h[l][0] < this.h[s][0]) s = l;
+>       if (r < n && this.h[r][0] < this.h[s][0]) s = r;
+>       if (s === i) break;
+>       [this.h[s], this.h[i]] = [this.h[i], this.h[s]];
+>       i = s;
+>     }
+>   }
+> }
+> const networkDelayTime = (times, n, k) => {
+>   const graph = new Map();
+>   for (const [u, v, w] of times) {
+>     if (!graph.has(u)) graph.set(u, []);
+>     graph.get(u).push([v, w]);
+>   }
+>   const dist = new Map();
+>   const h = new MinHeap();
+>   h.push([0, k]);
+>   while (h.size) {
+>     const [d, u] = h.pop();
+>     if (dist.has(u)) continue;
+>     dist.set(u, d);
+>     for (const [v, w] of graph.get(u) || []) {
+>       if (!dist.has(v)) h.push([d + w, v]);
+>     }
+>   }
+>   if (dist.size !== n) return -1;
+>   let max = 0;
+>   for (const d of dist.values()) if (d > max) max = d;
+>   return max;
+> };
 > ```
 
 > [!success]- Python
@@ -585,6 +754,65 @@ Return one valid order (empty if impossible).
 > ✅ Answer: 2
 > ```
 
+> [!success]- JS
+> ```js
+> class MinHeap {
+>   constructor() { this.h = []; }
+>   push(x) { this.h.push(x); this._up(this.h.length - 1); }
+>   pop() {
+>     const top = this.h[0], last = this.h.pop();
+>     if (this.h.length) { this.h[0] = last; this._down(0); }
+>     return top;
+>   }
+>   get size() { return this.h.length; }
+>   _up(i) {
+>     while (i > 0) {
+>       const p = (i - 1) >> 1;
+>       if (this.h[p][0] <= this.h[i][0]) break;
+>       [this.h[p], this.h[i]] = [this.h[i], this.h[p]];
+>       i = p;
+>     }
+>   }
+>   _down(i) {
+>     const n = this.h.length;
+>     while (true) {
+>       const l = 2 * i + 1, r = 2 * i + 2;
+>       let s = i;
+>       if (l < n && this.h[l][0] < this.h[s][0]) s = l;
+>       if (r < n && this.h[r][0] < this.h[s][0]) s = r;
+>       if (s === i) break;
+>       [this.h[s], this.h[i]] = [this.h[i], this.h[s]];
+>       i = s;
+>     }
+>   }
+> }
+> const minimumEffortPath = (heights) => {
+>   const R = heights.length, C = heights[0].length;
+>   const INF = Infinity;
+>   const dist = Array.from({ length: R }, () => new Array(C).fill(INF));
+>   dist[0][0] = 0;
+>   const h = new MinHeap();
+>   h.push([0, 0, 0]);
+>   const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+>   while (h.size) {
+>     const [d, r, c] = h.pop();
+>     if (r === R - 1 && c === C - 1) return d;
+>     if (d > dist[r][c]) continue;
+>     for (const [dr, dc] of dirs) {
+>       const nr = r + dr, nc = c + dc;
+>       if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+>         const nd = Math.max(d, Math.abs(heights[nr][nc] - heights[r][c]));
+>         if (nd < dist[nr][nc]) {
+>           dist[nr][nc] = nd;
+>           h.push([nd, nr, nc]);
+>         }
+>       }
+>     }
+>   }
+>   return 0;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > import heapq
@@ -670,6 +898,60 @@ Same as P6 — Dijkstra with `max` as the combiner.
 > ✅ Answer: 3
 > ```
 
+> [!success]- JS
+> ```js
+> class MinHeap {
+>   constructor() { this.h = []; }
+>   push(x) { this.h.push(x); this._up(this.h.length - 1); }
+>   pop() {
+>     const top = this.h[0], last = this.h.pop();
+>     if (this.h.length) { this.h[0] = last; this._down(0); }
+>     return top;
+>   }
+>   get size() { return this.h.length; }
+>   _up(i) {
+>     while (i > 0) {
+>       const p = (i - 1) >> 1;
+>       if (this.h[p][0] <= this.h[i][0]) break;
+>       [this.h[p], this.h[i]] = [this.h[i], this.h[p]];
+>       i = p;
+>     }
+>   }
+>   _down(i) {
+>     const n = this.h.length;
+>     while (true) {
+>       const l = 2 * i + 1, r = 2 * i + 2;
+>       let s = i;
+>       if (l < n && this.h[l][0] < this.h[s][0]) s = l;
+>       if (r < n && this.h[r][0] < this.h[s][0]) s = r;
+>       if (s === i) break;
+>       [this.h[s], this.h[i]] = [this.h[i], this.h[s]];
+>       i = s;
+>     }
+>   }
+> }
+> const swimInWater = (grid) => {
+>   const N = grid.length;
+>   const h = new MinHeap();
+>   h.push([grid[0][0], 0, 0]);
+>   const seen = new Set();
+>   seen.add(0);
+>   const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+>   while (h.size) {
+>     const [t, r, c] = h.pop();
+>     if (r === N - 1 && c === N - 1) return t;
+>     for (const [dr, dc] of dirs) {
+>       const nr = r + dr, nc = c + dc;
+>       const key = nr * N + nc;
+>       if (nr >= 0 && nr < N && nc >= 0 && nc < N && !seen.has(key)) {
+>         seen.add(key);
+>         h.push([Math.max(t, grid[nr][nc]), nr, nc]);
+>       }
+>     }
+>   }
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > import heapq
@@ -752,6 +1034,24 @@ Same as P6 — Dijkstra with `max` as the combiner.
 > Return prices[dst=2] = 200
 > 
 > ✅ Answer: 200
+> ```
+
+> [!success]- JS
+> ```js
+> const findCheapestPrice = (n, flights, src, dst, k) => {
+>   const INF = Infinity;
+>   const prices = new Array(n).fill(INF);
+>   prices[src] = 0;
+>   for (let i = 0; i < k + 1; i++) {
+>     const snapshot = [...prices];
+>     for (const [u, v, w] of flights) {
+>       if (snapshot[u] + w < prices[v]) {
+>         prices[v] = snapshot[u] + w;
+>       }
+>     }
+>   }
+>   return prices[dst] === INF ? -1 : prices[dst];
+> };
 > ```
 
 > [!success]- Python
@@ -841,6 +1141,31 @@ Same as P6 — Dijkstra with `max` as the combiner.
 > ✅ Answer: 2
 > ```
 
+> [!success]- JS
+> ```js
+> const countComponents = (n, edges) => {
+>   const parent = Array.from({ length: n }, (_, i) => i);
+>   const find = (x) => {
+>     while (parent[x] !== x) {
+>       parent[x] = parent[parent[x]];
+>       x = parent[x];
+>     }
+>     return x;
+>   };
+>   const union = (a, b) => {
+>     const ra = find(a), rb = find(b);
+>     if (ra === rb) return false;
+>     parent[ra] = rb;
+>     return true;
+>   };
+>   let count = n;
+>   for (const [a, b] of edges) {
+>     if (union(a, b)) count--;
+>   }
+>   return count;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def count_components(n, edges):
@@ -923,6 +1248,27 @@ Same as P6 — Dijkstra with `max` as the combiner.
 >   len(edges)=5, n-1=4 → 5 != 4 → return false immediately
 > ```
 
+> [!success]- JS
+> ```js
+> const validTree = (n, edges) => {
+>   if (edges.length !== n - 1) return false;
+>   const parent = Array.from({ length: n }, (_, i) => i);
+>   const find = (x) => {
+>     while (parent[x] !== x) {
+>       parent[x] = parent[parent[x]];
+>       x = parent[x];
+>     }
+>     return x;
+>   };
+>   for (const [a, b] of edges) {
+>     const ra = find(a), rb = find(b);
+>     if (ra === rb) return false;
+>     parent[ra] = rb;
+>   }
+>   return true;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def valid_tree(n, edges):
@@ -983,6 +1329,26 @@ Same as P6 — Dijkstra with `max` as the combiner.
 > edge (2,3): find(2)=3; find(3)=3; SAME → cycle detected → return [2,3]
 > 
 > ✅ Answer: [2, 3]   (the edge that closes the cycle)
+> ```
+
+> [!success]- JS
+> ```js
+> const findRedundantConnection = (edges) => {
+>   const n = edges.length;
+>   const parent = Array.from({ length: n + 1 }, (_, i) => i);
+>   const find = (x) => {
+>     while (parent[x] !== x) {
+>       parent[x] = parent[parent[x]];
+>       x = parent[x];
+>     }
+>     return x;
+>   };
+>   for (const [a, b] of edges) {
+>     const ra = find(a), rb = find(b);
+>     if (ra === rb) return [a, b];
+>     parent[ra] = rb;
+>   }
+> };
 > ```
 
 > [!success]- Python
@@ -1082,6 +1448,62 @@ Same as P6 — Dijkstra with `max` as the combiner.
 > Pop (9, 2): not in_mst → add. total=20, count=5
 > 
 > ✅ Answer: 20
+> ```
+
+> [!success]- JS (Prim)
+> ```js
+> class MinHeap {
+>   constructor() { this.h = []; }
+>   push(x) { this.h.push(x); this._up(this.h.length - 1); }
+>   pop() {
+>     const top = this.h[0], last = this.h.pop();
+>     if (this.h.length) { this.h[0] = last; this._down(0); }
+>     return top;
+>   }
+>   get size() { return this.h.length; }
+>   _up(i) {
+>     while (i > 0) {
+>       const p = (i - 1) >> 1;
+>       if (this.h[p][0] <= this.h[i][0]) break;
+>       [this.h[p], this.h[i]] = [this.h[i], this.h[p]];
+>       i = p;
+>     }
+>   }
+>   _down(i) {
+>     const n = this.h.length;
+>     while (true) {
+>       const l = 2 * i + 1, r = 2 * i + 2;
+>       let s = i;
+>       if (l < n && this.h[l][0] < this.h[s][0]) s = l;
+>       if (r < n && this.h[r][0] < this.h[s][0]) s = r;
+>       if (s === i) break;
+>       [this.h[s], this.h[i]] = [this.h[i], this.h[s]];
+>       i = s;
+>     }
+>   }
+> }
+> const minCostConnectPoints = (points) => {
+>   const n = points.length;
+>   const inMst = new Array(n).fill(false);
+>   const h = new MinHeap();
+>   h.push([0, 0]);
+>   let total = 0, count = 0;
+>   while (count < n) {
+>     const [d, u] = h.pop();
+>     if (inMst[u]) continue;
+>     inMst[u] = true;
+>     total += d;
+>     count++;
+>     const [x1, y1] = points[u];
+>     for (let v = 0; v < n; v++) {
+>       if (!inMst[v]) {
+>         const [x2, y2] = points[v];
+>         h.push([Math.abs(x1 - x2) + Math.abs(y1 - y2), v]);
+>       }
+>     }
+>   }
+>   return total;
+> };
 > ```
 
 > [!success]- Python (Prim)

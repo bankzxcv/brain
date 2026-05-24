@@ -91,6 +91,19 @@ status: in-progress
 > ✅ Answer: matrix rotated 90° clockwise.
 > ```
 
+> [!success]- JS
+> ```js
+> const rotate = (M) => {
+>   const n = M.length;
+>   for (let i = 0; i < n; i++) {
+>     for (let j = i + 1; j < n; j++) {
+>       [M[i][j], M[j][i]] = [M[j][i], M[i][j]];
+>     }
+>   }
+>   for (const row of M) row.reverse();
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def rotate(M):
@@ -162,6 +175,30 @@ status: in-progress
 >   loop check: top(2) > bottom(1) → exit
 > 
 > ✅ Answer: [1, 2, 3, 6, 9, 8, 7, 4, 5]
+> ```
+
+> [!success]- JS
+> ```js
+> const spiralOrder = (M) => {
+>   const out = [];
+>   let top = 0, bottom = M.length - 1;
+>   let left = 0, right = M[0].length - 1;
+>   while (top <= bottom && left <= right) {
+>     for (let c = left; c <= right; c++) out.push(M[top][c]);
+>     top++;
+>     for (let r = top; r <= bottom; r++) out.push(M[r][right]);
+>     right--;
+>     if (top <= bottom) {
+>       for (let c = right; c >= left; c--) out.push(M[bottom][c]);
+>       bottom--;
+>     }
+>     if (left <= right) {
+>       for (let r = bottom; r >= top; r--) out.push(M[r][left]);
+>       left++;
+>     }
+>   }
+>   return out;
+> };
 > ```
 
 > [!success]- Python
@@ -256,6 +293,31 @@ status: in-progress
 >   1 0 1
 > ```
 
+> [!success]- JS
+> ```js
+> const setZeroes = (M) => {
+>   const R = M.length, C = M[0].length;
+>   const firstRow = M[0].some((v) => v === 0);
+>   let firstCol = false;
+>   for (let r = 0; r < R; r++) if (M[r][0] === 0) firstCol = true;
+>   for (let r = 1; r < R; r++) {
+>     for (let c = 1; c < C; c++) {
+>       if (M[r][c] === 0) {
+>         M[r][0] = 0;
+>         M[0][c] = 0;
+>       }
+>     }
+>   }
+>   for (let r = 1; r < R; r++) {
+>     for (let c = 1; c < C; c++) {
+>       if (M[r][0] === 0 || M[0][c] === 0) M[r][c] = 0;
+>     }
+>   }
+>   if (firstRow) for (let c = 0; c < C; c++) M[0][c] = 0;
+>   if (firstCol) for (let r = 0; r < R; r++) M[r][0] = 0;
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def set_zeroes(M):
@@ -341,6 +403,27 @@ status: in-progress
 >   2 → 4 → 16 → 37 → 58 → 89 → 145 → 42 → 20 → 4 (cycle!)
 >   Floyd will detect: at some point slow == fast inside the cycle.
 >   Return false.
+> ```
+
+> [!success]- JS
+> ```js
+> const isHappy = (n) => {
+>   const nextN = (x) => {
+>     let s = 0;
+>     while (x) {
+>       const d = x % 10;
+>       s += d * d;
+>       x = Math.floor(x / 10);
+>     }
+>     return s;
+>   };
+>   let slow = n, fast = nextN(n);
+>   while (fast !== 1 && slow !== fast) {
+>     slow = nextN(slow);
+>     fast = nextN(nextN(fast));
+>   }
+>   return fast === 1;
+> };
 > ```
 
 > [!success]- Python
@@ -429,6 +512,23 @@ status: in-progress
 > ─────────────────────────────────────────
 > Negative n: pow(2.0, -2) = 1 / pow(2, 2) = 1/4 = 0.25
 >   We flip: x = 1/x, n = -n at the start, then proceed as above.
+> ```
+
+> [!success]- JS
+> ```js
+> const myPow = (x, n) => {
+>   if (n < 0) {
+>     x = 1 / x;
+>     n = -n;
+>   }
+>   let result = 1;
+>   while (n) {
+>     if (n & 1) result *= x;
+>     x *= x;
+>     n = Math.floor(n / 2);
+>   }
+>   return result;
+> };
 > ```
 
 > [!success]- Python
@@ -546,6 +646,26 @@ status: in-progress
 >   Check: 123 * 45 = 5535 ✓
 > ```
 
+> [!success]- JS
+> ```js
+> const multiply = (num1, num2) => {
+>   if (num1 === "0" || num2 === "0") return "0";
+>   const m = num1.length, n = num2.length;
+>   const res = new Array(m + n).fill(0);
+>   for (let i = m - 1; i >= 0; i--) {
+>     for (let j = n - 1; j >= 0; j--) {
+>       const mul = (num1.charCodeAt(i) - 48) * (num2.charCodeAt(j) - 48);
+>       const p1 = i + j, p2 = i + j + 1;
+>       const total = mul + res[p2];
+>       res[p2] = total % 10;
+>       res[p1] += Math.floor(total / 10);
+>     }
+>   }
+>   const s = res.join("").replace(/^0+/, "");
+>   return s || "0";
+> };
+> ```
+
 > [!success]- Python
 > ```python
 > def multiply(num1, num2):
@@ -612,6 +732,20 @@ status: in-progress
 >   i=0: 9 → set to 0; continue (loop ends)
 >   digits = [0, 0, 0]
 >   prepend 1 → [1, 0, 0, 0]
+> ```
+
+> [!success]- JS
+> ```js
+> const plusOne = (digits) => {
+>   for (let i = digits.length - 1; i >= 0; i--) {
+>     if (digits[i] < 9) {
+>       digits[i] += 1;
+>       return digits;
+>     }
+>     digits[i] = 0;
+>   }
+>   return [1, ...digits];
+> };
 > ```
 
 > [!success]- Python
@@ -689,6 +823,32 @@ status: in-progress
 >   return 1
 > 
 > Over many calls, frequency ratio ≈ weights ratio 1:3:2:4
+> ```
+
+> [!success]- JS
+> ```js
+> class Solution {
+>   constructor(w) {
+>     this.prefix = [];
+>     let s = 0;
+>     for (const x of w) {
+>       s += x;
+>       this.prefix.push(s);
+>     }
+>     this.total = s;
+>   }
+>   pickIndex() {
+>     const r = Math.random() * this.total;
+>     // bisect_left
+>     let lo = 0, hi = this.prefix.length;
+>     while (lo < hi) {
+>       const mid = (lo + hi) >> 1;
+>       if (this.prefix[mid] < r) lo = mid + 1;
+>       else hi = mid;
+>     }
+>     return lo;
+>   }
+> }
 > ```
 
 > [!success]- Python
@@ -803,6 +963,28 @@ Count pairs `(i, j)` with `i < j` and `nums[i] > 2 * nums[j]`.
 > Total reverse pairs = 0 (left subtree) + 1 (right subtree) + 1 (cross) = 2
 > 
 > ✅ Answer: 2
+> ```
+
+> [!success]- JS
+> ```js
+> const reversePairs = (nums) => {
+>   const mergeSort = (lo, hi) => {
+>     if (lo >= hi) return 0;
+>     const mid = Math.floor((lo + hi) / 2);
+>     let count = mergeSort(lo, mid) + mergeSort(mid + 1, hi);
+>     // count cross pairs (i in left, j in right)
+>     let j = mid + 1;
+>     for (let i = lo; i <= mid; i++) {
+>       while (j <= hi && nums[i] > 2 * nums[j]) j++;
+>       count += j - (mid + 1);
+>     }
+>     // merge two sorted halves
+>     const sorted = nums.slice(lo, hi + 1).sort((a, b) => a - b);
+>     for (let k = 0; k < sorted.length; k++) nums[lo + k] = sorted[k];
+>     return count;
+>   };
+>   return mergeSort(0, nums.length - 1);
+> };
 > ```
 
 > [!success]- Python
