@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
+                "file": "LeetCode/LeetCode Practice/05 - Monotonic Stack.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01 - Arrays and Hashing"
+              "title": "05 - Monotonic Stack"
             }
           }
         ]
@@ -173,6 +173,7 @@
   "active": "55d5b48a88f59c7b",
   "lastOpenFiles": [
     "LeetCode/LeetCode Study.md",
+    "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
     "/LeetCode/LeetCode Study.md",
     "/LeetCode/LeetCode Practice/19 - Bit Manipulation.md",
     "/LeetCode/LeetCode Practice/18 - Math and Geometry.md",
@@ -198,7 +199,6 @@
     "LeetCode/LeetCode Practice/08 - Trees.md",
     "LeetCode/LeetCode Practice/03 - Sliding Window.md",
     "LeetCode/LeetCode Practice/02 - Two Pointers.md",
-    "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
     "LeetCode/LeetCode Practice/12 - Graphs.md",
     "LeetCode/LeetCode Practice",
     "LeetCode/LeetCode Workflows",
