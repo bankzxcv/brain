@@ -624,6 +624,13 @@ Progressive drills — do them in order, write answers by hand before opening so
 4. [[Workflow 4 - CQRS and Event Sourcing Service]] — build a CQRS/ES order service
 5. [[Workflow 5 - Solution Architecture Case Study with Trade-offs]] — full SA engagement with weighted trade-off analysis
 
+**Famous system-design cases** (interview classics, each built on the patterns above):
+
+6. [[Workflow 6 - Design a News Feed (Twitter-style)]] — fan-out on write vs read, the celebrity problem, CQRS at planetary scale
+7. [[Workflow 7 - Design a Chat System (WhatsApp-style)]] — stateful connections, delivery guarantees, ordering, presence
+8. [[Workflow 8 - Design Video Streaming (YouTube-style)]] — transcoding pipelines, CDN-first serving, adaptive bitrate
+9. [[Workflow 9 - Design Ride-Hailing (Uber-style)]] — geospatial indexing, matching under contention, trip state machines
+
 ## Suggested Study Plan
 
 | Week | Focus |
@@ -636,6 +643,7 @@ Progressive drills — do them in order, write answers by hand before opening so
 | 6 | §10 + Workflow 1 |
 | 7 | §11 + Workflows 2–3 |
 | 8 | §12 + drills 06 + Workflows 4–5 |
+| 9–10 | Famous cases: Workflows 6–9 (one per half-week, timed, from memory first) |
 
 ## Further Reading
 
