@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "LeetCode/LeetCode Practice/10 - Heap and Priority Queue.md",
+                "file": "LeetCode/LeetCode Practice/06 - Binary Search.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "10 - Heap and Priority Queue"
+              "title": "06 - Binary Search"
             }
           }
         ]
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "LeetCode/LeetCode Practice/10 - Heap and Priority Queue.md",
+                "file": "LeetCode/LeetCode Practice/06 - Binary Search.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 10 - Heap and Priority Queue"
+              "title": "Outline of 06 - Binary Search"
             }
           }
         ],
@@ -182,19 +182,22 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-git:Open Git source control": false,
-      "obsidian-excalidraw-plugin:New drawing": false
+      "obsidian-git:Open Git source control": false
     }
   },
   "active": "c37c1f1707b59194",
   "lastOpenFiles": [
-    "LeetCode/LeetCode Study.md",
+    "LeetCode/LeetCode Practice/10 - Heap and Priority Queue.md",
     "LeetCode/LeetCode Practice/01 - Arrays and Hashing.md",
+    "LeetCode/LeetCode Practice/15 - 2D Dynamic Programming.md",
+    "LeetCode/LeetCode Practice/14 - 1D Dynamic Programming.md",
+    "LeetCode/LeetCode Practice/12 - Graphs.md",
+    "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
+    "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
+    "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
+    "LeetCode/LeetCode Study.md",
     "LeetCode/LeetCode Practice/02 - Two Pointers.md",
     "LeetCode/LeetCode Practice/13 - Advanced Graphs.md",
-    "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
-    "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
-    "LeetCode/LeetCode Workflows/03 - Onsite Round - Trees and Graphs.md",
     "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
     "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
     "Kubernetes/Kubernetes Study.md",
@@ -202,11 +205,7 @@
     "LeetCode/LeetCode Practice/18 - Math and Geometry.md",
     "LeetCode/LeetCode Practice/17 - Intervals.md",
     "LeetCode/LeetCode Practice/16 - Greedy.md",
-    "LeetCode/LeetCode Practice/15 - 2D Dynamic Programming.md",
-    "LeetCode/LeetCode Practice/14 - 1D Dynamic Programming.md",
-    "LeetCode/LeetCode Practice/12 - Graphs.md",
     "LeetCode/LeetCode Practice/11 - Backtracking.md",
-    "LeetCode/LeetCode Practice/10 - Heap and Priority Queue.md",
     "LeetCode/LeetCode Practice/09 - Tries.md",
     "LeetCode/LeetCode Practice/08 - Trees.md",
     "LeetCode/LeetCode Practice/07 - Linked List.md",
