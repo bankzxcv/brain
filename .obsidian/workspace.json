@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Architecture/Software Architecture Workflows/Workflow 3 - Microservices and Event-Driven on Cloud.md",
+                "file": "Software Architecture/Software Architecture Study.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Workflow 3 - Microservices and Event-Driven on Cloud"
+              "title": "Software Architecture Study"
             }
           }
         ]
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Architecture/Software Architecture Workflows/Workflow 3 - Microservices and Event-Driven on Cloud.md",
+                "file": "Software Architecture/Software Architecture Study.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Workflow 3 - Microservices and Event-Driven on Cloud"
+              "title": "Outline of Software Architecture Study"
             }
           }
         ],
@@ -187,12 +187,15 @@
   },
   "active": "c37c1f1707b59194",
   "lastOpenFiles": [
+    "Software Architecture/Software Architecture Workflows/Workflow 6 - Design a News Feed (Twitter-style).md",
+    "Software Architecture/Software Architecture Workflows/Workflow 5 - Solution Architecture Case Study with Trade-offs.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 4 - CQRS and Event Sourcing Service.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 3 - Microservices and Event-Driven on Cloud.md",
     "Software Architecture/Software Architecture Workflows/Workflow 1 - Design Phase of a Real Product.md",
     "Software Architecture/Software Architecture Workflows/Workflow 2 - Modular Monolith on a Cloud VM.md",
     "Software Architecture/Software Architecture Practice/05 - Communication and Data Drills.md",
     "Software Architecture/Software Architecture Practice/04 - Distributed Styles Drills.md",
     "Software Architecture/Software Architecture Practice/03 - Monolith Styles Drills.md",
-    "Software Architecture/Software Architecture Workflows/Workflow 5 - Solution Architecture Case Study with Trade-offs.md",
     "Software Architecture/Software Architecture Practice/02 - Quality Attributes Drills.md",
     "Software Architecture/Software Architecture Practice/01 - Architectural Thinking Drills.md",
     "LeetCode/LeetCode Practice/06 - Binary Search.md",
@@ -210,9 +213,6 @@
     "LeetCode/LeetCode Workflows/04 - Onsite Round - DP and Backtracking.md",
     "LeetCode/LeetCode Workflows/05 - Onsite Round - System-Adjacent.md",
     "Kubernetes/Kubernetes Study.md",
-    "LeetCode/LeetCode Practice/19 - Bit Manipulation.md",
-    "LeetCode/LeetCode Practice/18 - Math and Geometry.md",
-    "LeetCode/LeetCode Practice/17 - Intervals.md",
     "LeetCode/LeetCode Workflows",
     "LeetCode/LeetCode Practice",
     "LeetCode",
