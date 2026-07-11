@@ -512,7 +512,7 @@ graph TB
 
 ## 11. Deploying Architectures on Cloud & VMs
 
-*(added)* Full worked projects: [[Workflow 2 - Modular Monolith on a Cloud VM]], [[Workflow 3 - Microservices & Event-Driven on Cloud]].
+*(added)* Full worked projects: [[Workflow 2 - Modular Monolith on a Cloud VM]], [[Workflow 3 - Microservices and Event-Driven on Cloud]].
 
 ### 11.1 The compute spectrum
 
@@ -620,7 +620,7 @@ Progressive drills — do them in order, write answers by hand before opening so
 
 1. [[Workflow 1 - Design Phase of a Real Product]] — requirements → characteristics → C4 → ADRs for a food-delivery product
 2. [[Workflow 2 - Modular Monolith on a Cloud VM]] — design & deploy a monolith on VMs (3-tier, multi-AZ)
-3. [[Workflow 3 - Microservices & Event-Driven on Cloud]] — decompose, build, and run on Kubernetes + broker
+3. [[Workflow 3 - Microservices and Event-Driven on Cloud]] — decompose, build, and run on Kubernetes + broker
 4. [[Workflow 4 - CQRS and Event Sourcing Service]] — build a CQRS/ES order service
 5. [[Workflow 5 - Solution Architecture Case Study with Trade-offs]] — full SA engagement with weighted trade-off analysis
 
