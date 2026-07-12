@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Architecture/Software Architecture Study.md",
+                "file": "Software Architecture/Software Architecture Workflows/Workflow 6 - Design a News Feed (Twitter-style).md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Software Architecture Study"
+              "title": "Workflow 6 - Design a News Feed (Twitter-style)"
             }
           }
         ]
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Architecture/Software Architecture Study.md",
+                "file": "Software Architecture/Software Architecture Workflows/Workflow 6 - Design a News Feed (Twitter-style).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Software Architecture Study"
+              "title": "Outline of Workflow 6 - Design a News Feed (Twitter-style)"
             }
           }
         ],
@@ -187,15 +187,17 @@
   },
   "active": "c37c1f1707b59194",
   "lastOpenFiles": [
+    "Software Architecture/Software Architecture Workflows/Workflow 10 - Saga Patterns Deep Dive.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 5 - Solution Architecture Case Study with Trade-offs.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 4 - CQRS and Event Sourcing Service.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 3 - Microservices and Event-Driven on Cloud.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 2 - Modular Monolith on a Cloud VM.md",
+    "Software Architecture/Software Architecture Workflows/Workflow 1 - Design Phase of a Real Product.md",
+    "Software Architecture/Software Architecture Study.md",
     "Software Architecture/Software Architecture Workflows/Workflow 9 - Design Ride-Hailing (Uber-style).md",
     "Software Architecture/Software Architecture Workflows/Workflow 8 - Design Video Streaming (YouTube-style).md",
     "Software Architecture/Software Architecture Workflows/Workflow 7 - Design a Chat System (WhatsApp-style).md",
     "Software Architecture/Software Architecture Workflows/Workflow 6 - Design a News Feed (Twitter-style).md",
-    "Software Architecture/Software Architecture Workflows/Workflow 5 - Solution Architecture Case Study with Trade-offs.md",
-    "Software Architecture/Software Architecture Workflows/Workflow 4 - CQRS and Event Sourcing Service.md",
-    "Software Architecture/Software Architecture Workflows/Workflow 3 - Microservices and Event-Driven on Cloud.md",
-    "Software Architecture/Software Architecture Workflows/Workflow 1 - Design Phase of a Real Product.md",
-    "Software Architecture/Software Architecture Workflows/Workflow 2 - Modular Monolith on a Cloud VM.md",
     "Software Architecture/Software Architecture Practice/05 - Communication and Data Drills.md",
     "Software Architecture/Software Architecture Practice/04 - Distributed Styles Drills.md",
     "Software Architecture/Software Architecture Practice/03 - Monolith Styles Drills.md",
@@ -211,8 +213,6 @@
     "LeetCode/LeetCode Workflows/02 - Onsite Round - Arrays and Strings.md",
     "LeetCode/LeetCode Workflows/01 - Google Phone Screen Set.md",
     "LeetCode/LeetCode Study.md",
-    "LeetCode/LeetCode Practice/02 - Two Pointers.md",
-    "LeetCode/LeetCode Practice/13 - Advanced Graphs.md",
     "LeetCode/LeetCode Workflows",
     "LeetCode/LeetCode Practice",
     "LeetCode",
