@@ -130,7 +130,7 @@ Architecture characteristics are the non-domain requirements the structure must 
 | | Performance | Latency & throughput under load |
 | | Reliability / Fault tolerance | Does one failure take everything down? |
 | | Recoverability | RTO/RPO — how fast and how much data loss on disaster? |
-| | Observability | Can you tell what it's doing in production? |
+| | Observability | Can you tell what it's doing in production? (see [[Workflow 11 - OpenTelemetry - Logs Traces Metrics]]) |
 | **Structural** | Maintainability | How easy to change? |
 | | Extensibility | How easy to add features? |
 | | Testability | How easy to verify? |
@@ -424,7 +424,7 @@ How multi-service workflows are coordinated:
 
 ### 9.2 Saga Pattern
 
-*(not in the video — added)* Distributed transactions without 2PC: a saga = sequence of local transactions, each publishing an event/triggering the next; failures trigger **compensating transactions** to undo prior steps (semantic rollback: `CancelReservation`, `RefundPayment`). Orchestrated sagas (state machine drives it) vs choreographed sagas (event chain). Gotchas: compensations can fail too; design for **idempotency + retries**; some actions aren't compensatable (sent email) — order steps so risky ones go last.
+*(not in the video — added; full deep-dive: [[Workflow 10 - Saga Patterns Deep Dive]])* Distributed transactions without 2PC: a saga = sequence of local transactions, each publishing an event/triggering the next; failures trigger **compensating transactions** to undo prior steps (semantic rollback: `CancelReservation`, `RefundPayment`). Orchestrated sagas (state machine drives it) vs choreographed sagas (event chain). Gotchas: compensations can fail too; design for **idempotency + retries**; some actions aren't compensatable (sent email) — order steps so risky ones go last.
 
 ### 9.3 CQRS — Command Query Responsibility Segregation
 
@@ -631,6 +631,11 @@ Progressive drills — do them in order, write answers by hand before opening so
 8. [[Workflow 8 - Design Video Streaming (YouTube-style)]] — transcoding pipelines, CDN-first serving, adaptive bitrate
 9. [[Workflow 9 - Design Ride-Hailing (Uber-style)]] — geospatial indexing, matching under contention, trip state machines
 
+**Pattern deep-dives:**
+
+10. [[Workflow 10 - Saga Patterns Deep Dive]] — 2PC vs saga, choreography vs orchestration built side by side, compensation zones, idempotency plumbing
+11. [[Workflow 11 - OpenTelemetry - Logs Traces Metrics]] — the three signals clarified, context propagation, the Collector, two production mysteries solved metric→trace→log
+
 ## Suggested Study Plan
 
 | Week | Focus |
@@ -644,6 +649,7 @@ Progressive drills — do them in order, write answers by hand before opening so
 | 7 | §11 + Workflows 2–3 |
 | 8 | §12 + drills 06 + Workflows 4–5 |
 | 9–10 | Famous cases: Workflows 6–9 (one per half-week, timed, from memory first) |
+| 11 | Pattern deep-dives: Workflows 10–11 (saga, observability) |
 
 ## Further Reading
 
